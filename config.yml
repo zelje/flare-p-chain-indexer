@@ -1,0 +1,8 @@
+db:
+    host: "localhost"
+    port: 3306
+    database: "flare_indexer"
+    username: "indexeruser"
+    password: "P.a.s.s.W.O.R.D"
+chain:
+    indexer_url: "http://localhost:9650/"
