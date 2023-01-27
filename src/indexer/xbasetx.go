@@ -63,9 +63,12 @@ func (i *baseTxIndexer) UpdateIns(db *gorm.DB, client indexer.Client) error {
 
 	updateOutsMapFromOuts(outsMap, i.NewOuts, missingTxIds)
 
-	updateOutsMapFromDB(db, outsMap, missingTxIds)
+	err := updateOutsMapFromDB(db, outsMap, missingTxIds)
+	if err != nil {
+		return err
+	}
 
-	err := updateOutsMapFromChain(client, outsMap, missingTxIds)
+	err = updateOutsMapFromChain(client, outsMap, missingTxIds)
 	if err != nil {
 		return err
 	}
@@ -109,12 +112,16 @@ func updateOutsMapFromDB(
 	db *gorm.DB,
 	outsMap map[keyType]*dbmodel.XChainTxOutput,
 	missingTxIds mapset.Set[string],
-) {
-	outs := dbmodel.FetchXChainTxOutputs(db, missingTxIds.ToSlice())
+) error {
+	outs, err := dbmodel.FetchXChainTxOutputs(db, missingTxIds.ToSlice())
+	if err != nil {
+		return err
+	}
 	for _, out := range outs {
 		outsMap[keyType{out.TxID, out.Idx}] = &out
 		missingTxIds.Remove(out.TxID)
 	}
+	return nil
 }
 
 // Update outsMap for missing transaction idxs by fetching transactions from the chain.

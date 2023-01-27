@@ -8,6 +8,14 @@ type BaseEntity struct {
 	ID uint64 `gorm:"primaryKey"`
 }
 
+type Migration struct {
+	Version     string `gorm:"type:varchar(50);unique;not null"`
+	Description string `gorm:"type:varchar(256)"`
+	ExecutedAt  time.Time
+	Duration    int
+	Status      MigrationStatus `gorm:"type:varchar(20)"`
+}
+
 type State struct {
 	BaseEntity
 	Name           string `gorm:"type:varchar(50);index"`

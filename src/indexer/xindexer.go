@@ -38,7 +38,10 @@ func CreateXChainIndexer(ctx IndexerContext) XChainIndexer {
 func (xi *xChainIndexer) Run() error {
 
 	// Get current state of tx indexer from db
-	currentState := dbmodel.FetchState(xi.db, StateName)
+	currentState, err := dbmodel.FetchState(xi.db, StateName)
+	if err != nil {
+		return err
+	}
 
 	// Get MaxBatch containers from the chain
 	containers, err := fetchContainerRangeFromIndexer(xi.client, currentState.NextDBIndex, MaxBatch)
@@ -78,6 +81,8 @@ func (xi *xChainIndexer) Run() error {
 	if err != nil {
 		return err
 	}
+
+	// baseTxIndexer.PersistEntities(xi.db)
 
 	// currentState.NextDBIndex += uint64(len(containers))
 	// baseTxIndexer.UpdateIns(xi.db, xi.client)
