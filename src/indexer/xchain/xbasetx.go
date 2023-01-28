@@ -1,4 +1,4 @@
-package indexer
+package xchain
 
 import (
 	"flare-indexer/src/chain"
@@ -6,7 +6,7 @@ import (
 	"flare-indexer/src/logger"
 	"fmt"
 
-	"github.com/ava-labs/avalanchego/indexer"
+	avaIndexer "github.com/ava-labs/avalanchego/indexer"
 	"github.com/ava-labs/avalanchego/vms/avm/txs"
 	"github.com/ava-labs/avalanchego/wallet/chain/x"
 	mapset "github.com/deckarep/golang-set/v2"
@@ -51,7 +51,7 @@ func (i *baseTxIndexer) AddTx(data *chain.XChainTxData) {
 }
 
 // Persist new entities
-func (i *baseTxIndexer) UpdateIns(db *gorm.DB, client indexer.Client) error {
+func (i *baseTxIndexer) UpdateIns(db *gorm.DB, client avaIndexer.Client) error {
 	// Map of outs needed for ins; key is (txId, output index)
 	outsMap := make(map[keyType]*dbmodel.XChainTxOutput)
 
@@ -127,12 +127,12 @@ func updateOutsMapFromDB(
 // Update outsMap for missing transaction idxs by fetching transactions from the chain.
 // Also updates missingTxIds set.
 func updateOutsMapFromChain(
-	client indexer.Client,
+	client avaIndexer.Client,
 	outsMap map[keyType]*dbmodel.XChainTxOutput,
 	missingTxIds mapset.Set[string],
 ) error {
 	for _, txId := range missingTxIds.ToSlice() {
-		container, err := fetchContainerFromIndexer(client, txId)
+		container, err := chain.FetchContainerFromIndexer(client, txId)
 		if err != nil {
 			return err
 		}

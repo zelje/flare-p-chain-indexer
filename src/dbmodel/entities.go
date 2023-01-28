@@ -9,6 +9,7 @@ type BaseEntity struct {
 }
 
 type Migration struct {
+	BaseEntity
 	Version     string `gorm:"type:varchar(50);unique;not null"`
 	Description string `gorm:"type:varchar(256)"`
 	ExecutedAt  time.Time

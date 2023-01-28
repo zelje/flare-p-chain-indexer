@@ -2,11 +2,18 @@ package main
 
 import (
 	"flare-indexer/src/indexer"
+	"flare-indexer/src/indexer/ctx"
+	"flare-indexer/src/migrations"
 	"fmt"
 )
 
 func main() {
-	ctx, err := indexer.BuildContext()
+	ctx, err := ctx.BuildContext()
+	if err != nil {
+		fmt.Printf("%v\n", err)
+		return
+	}
+	err = migrations.Container.ExecuteAll(ctx)
 	if err != nil {
 		fmt.Printf("%v\n", err)
 		return

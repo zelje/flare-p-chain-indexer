@@ -1,4 +1,4 @@
-package indexer
+package ctx
 
 import (
 	"flare-indexer/src/chain"

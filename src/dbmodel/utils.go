@@ -12,8 +12,9 @@ import (
 var (
 	// List entities to auto-migrate
 	entities []interface{} = []interface{}{
-		XChainTx{},
+		Migration{},
 		State{},
+		XChainTx{},
 		XChainTxInput{},
 		XChainTxOutput{},
 	}

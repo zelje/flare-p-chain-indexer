@@ -2,6 +2,7 @@ package migrations
 
 import (
 	"flare-indexer/src/dbmodel"
+	"flare-indexer/src/indexer/ctx"
 	"flare-indexer/src/logger"
 	"fmt"
 	"sort"
@@ -15,7 +16,7 @@ var Container MigrationContainer = NewMigrationContainer()
 
 type MigrationContainer interface {
 	Add(version string, description string, code func(*gorm.DB) error)
-	ExecuteAll(db *gorm.DB) error
+	ExecuteAll(ctx ctx.IndexerContext) error
 }
 
 type migration struct {
@@ -80,7 +81,8 @@ func (mc *migrationContainer) Add(version string, description string, code func(
 	})
 }
 
-func (mc *migrationContainer) ExecuteAll(db *gorm.DB) error {
+func (mc *migrationContainer) ExecuteAll(ctx ctx.IndexerContext) error {
+	db := ctx.DB()
 	dbMigrations, err := dbmodel.FetchMigrations(db)
 	if err != nil {
 		return err

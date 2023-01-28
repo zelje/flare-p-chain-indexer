@@ -28,6 +28,10 @@ func UpdateMigration(db *gorm.DB, m *Migration) error {
 	return db.Save(m).Error
 }
 
-func CreateState(db *gorm.DB, s State) error {
-	return nil
+func CreateState(db *gorm.DB, s *State) error {
+	return db.Create(s).Error
+}
+
+func UpdateState(db *gorm.DB, s *State) error {
+	return db.Save(s).Error
 }

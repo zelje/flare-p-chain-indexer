@@ -1,10 +1,10 @@
-package indexer
+package xchain
 
 import (
 	"flare-indexer/src/chain"
 	"flare-indexer/src/dbmodel"
+	"flare-indexer/src/indexer/ctx"
 	"flare-indexer/src/logger"
-	"time"
 
 	"github.com/ava-labs/avalanchego/indexer"
 	"github.com/ava-labs/avalanchego/vms/avm/txs"
@@ -13,9 +13,8 @@ import (
 )
 
 const (
-	StateName      string        = "x_chain_tx"
-	MaxBatch       int           = 100
-	IndexerTimeout time.Duration = 3 * time.Minute
+	StateName string = "x_chain_tx"
+	MaxBatch  int    = 100
 )
 
 type XChainIndexer interface {
@@ -27,7 +26,7 @@ type xChainIndexer struct {
 	client indexer.Client
 }
 
-func CreateXChainIndexer(ctx IndexerContext) XChainIndexer {
+func CreateXChainIndexer(ctx ctx.IndexerContext) XChainIndexer {
 	idxr := xChainIndexer{}
 
 	idxr.client = ctx.Clients().XChainTxClient()
@@ -44,7 +43,7 @@ func (xi *xChainIndexer) Run() error {
 	}
 
 	// Get MaxBatch containers from the chain
-	containers, err := fetchContainerRangeFromIndexer(xi.client, currentState.NextDBIndex, MaxBatch)
+	containers, err := chain.FetchContainerRangeFromIndexer(xi.client, currentState.NextDBIndex, MaxBatch)
 	if err != nil {
 		return err
 	}

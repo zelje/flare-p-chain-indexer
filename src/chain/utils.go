@@ -1,16 +1,21 @@
-package indexer
+package chain
 
 import (
 	"context"
 	"flare-indexer/src/logger"
 	"fmt"
+	"time"
 
 	"github.com/ava-labs/avalanchego/ids"
 	"github.com/ava-labs/avalanchego/indexer"
 )
 
+const (
+	IndexerTimeout time.Duration = 3 * time.Minute
+)
+
 // Get range of indexed objects by calling "index.getContainerRange"
-func fetchContainerRangeFromIndexer(client indexer.Client, from uint64, to int) ([]indexer.Container, error) {
+func FetchContainerRangeFromIndexer(client indexer.Client, from uint64, to int) ([]indexer.Container, error) {
 	ctx, cancelCtx := context.WithTimeout(context.Background(), IndexerTimeout)
 	defer cancelCtx()
 
@@ -19,7 +24,7 @@ func fetchContainerRangeFromIndexer(client indexer.Client, from uint64, to int) 
 
 // Get object by its id by calling "index.getIndex" and "index.getContainerByIndex" successively.
 // Returns nil, nil if getIndex failed with an error.
-func fetchContainerFromIndexer(client indexer.Client, id string) (*indexer.Container, error) {
+func FetchContainerFromIndexer(client indexer.Client, id string) (*indexer.Container, error) {
 	ctx, cancelCtx := context.WithTimeout(context.Background(), IndexerTimeout)
 	defer cancelCtx()
 
