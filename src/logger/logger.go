@@ -10,7 +10,10 @@ var (
 )
 
 func init() {
-	logger, _ = zap.NewDevelopment()
+	logger, _ = zap.NewDevelopment(
+		zap.AddStacktrace(zap.ErrorLevel),
+		zap.AddCallerSkip(1),
+	)
 	sugar = logger.Sugar()
 }
 

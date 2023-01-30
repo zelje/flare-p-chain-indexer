@@ -80,7 +80,7 @@ func (i *baseTxIndexer) UpdateIns(db *gorm.DB, client avaIndexer.Client) error {
 	for _, in := range i.newInsBase {
 		out, ok := outsMap[keyType{in.TxID, in.OutputIndex}]
 		if !ok {
-			logger.Warn("unable to find output (%s, %d)", in.TxID, in.OutputIndex)
+			logger.Warn("Unable to find output (%s, %d)", in.TxID, in.OutputIndex)
 		} else {
 			i.NewIns = append(i.NewIns, &dbmodel.XChainTxInput{
 				TxID:    in.TxID,
@@ -90,6 +90,11 @@ func (i *baseTxIndexer) UpdateIns(db *gorm.DB, client avaIndexer.Client) error {
 	}
 
 	return nil
+}
+
+// Persist all entities
+func (i *baseTxIndexer) PersistEntities(db *gorm.DB) error {
+	return dbmodel.CreateXChainEntities(db, i.NewTxs, i.NewIns, i.NewOuts)
 }
 
 // Update outsMap for missing transaction idxs from transactions fetched in this batch.

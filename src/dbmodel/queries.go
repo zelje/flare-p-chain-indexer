@@ -1,6 +1,8 @@
 package dbmodel
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+)
 
 func FetchState(db *gorm.DB, name string) (State, error) {
 	var currentState State
@@ -34,4 +36,26 @@ func CreateState(db *gorm.DB, s *State) error {
 
 func UpdateState(db *gorm.DB, s *State) error {
 	return db.Save(s).Error
+}
+
+func CreateXChainEntities(db *gorm.DB, txs []*XChainTx, ins []*XChainTxInput, outs []*XChainTxOutput) error {
+	var err error
+
+	err = db.Create(&txs).Error
+	if err != nil {
+		return err
+	}
+	err = db.Create(&ins).Error
+	if err != nil {
+		return err
+	}
+
+	// if db != nil {
+	// 	return fmt.Errorf("rollback test error")
+	// }
+	err = db.Create(&outs).Error
+	if err != nil {
+		return err
+	}
+	return nil
 }

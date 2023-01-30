@@ -6,3 +6,5 @@ db:
     password: "P.a.s.s.W.O.R.D"
 chain:
     indexer_url: "http://localhost:9650/"
+indexer:
+    timeout_millis: 1000

@@ -4,17 +4,17 @@ import (
 	"flare-indexer/src/indexer/ctx"
 	"flare-indexer/src/indexer/xchain"
 	"flare-indexer/src/logger"
+	"time"
 )
 
 func Start(ctx ctx.IndexerContext) {
 	xIndexer := xchain.CreateXChainIndexer(ctx)
 
-	err := xIndexer.Run()
-	if err != nil {
-		logger.Error("Indexer error %v", err)
+	for {
+		err := xIndexer.Run()
+		if err != nil {
+			logger.Error("Indexer error %v", err)
+		}
+		time.Sleep(time.Duration(ctx.Config().Indexer.TimeoutMillis) * time.Millisecond)
 	}
-	// for {
-	// 	ind
-	// 	time.Sleep(1 * time.Second)
-	// }
 }

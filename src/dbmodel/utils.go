@@ -31,7 +31,10 @@ func ConnectAndInitialize(cfg *config.Config) (*gorm.DB, error) {
 		AllowNativePasswords: true,
 		ParseTime:            true,
 	}
-	db, err := gorm.Open(gormMysql.Open(dbConfig.FormatDSN()), &gorm.Config{})
+	gormConfig := gorm.Config{
+		// Logger: logger.Default.LogMode(logger.Info),
+	}
+	db, err := gorm.Open(gormMysql.Open(dbConfig.FormatDSN()), &gormConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -43,4 +46,21 @@ func ConnectAndInitialize(cfg *config.Config) (*gorm.DB, error) {
 	}
 
 	return db, nil
+}
+
+func DoInTransaction(db *gorm.DB, operations ...func(db *gorm.DB) error) error {
+	tx := db.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	for _, f := range operations {
+		if err := f(tx); err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+	return tx.Commit().Error
 }
