@@ -1,8 +1,8 @@
 package migrations
 
 import (
-	"flare-indexer/src/dbmodel"
-	"flare-indexer/src/indexer/xchain"
+	"flare-indexer/database"
+	"flare-indexer/indexer/xchain"
 
 	"gorm.io/gorm"
 )
@@ -12,7 +12,7 @@ func init() {
 }
 
 func createXChainTxState(db *gorm.DB) error {
-	return dbmodel.CreateState(db, &dbmodel.State{
+	return database.CreateState(db, &database.State{
 		Name:           xchain.StateName,
 		NextDBIndex:    0,
 		LastChainIndex: 0,

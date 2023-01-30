@@ -1,9 +1,9 @@
 package xchain
 
 import (
-	"flare-indexer/src/chain"
-	"flare-indexer/src/dbmodel"
-	"flare-indexer/src/logger"
+	"flare-indexer/database"
+	"flare-indexer/logger"
+	"flare-indexer/utils/chain"
 	"fmt"
 
 	avaIndexer "github.com/ava-labs/avalanchego/indexer"
@@ -21,25 +21,25 @@ type keyType struct {
 }
 
 type baseTxIndexer struct {
-	NewTxs  []*dbmodel.XChainTx
-	NewOuts []*dbmodel.XChainTxOutput
-	NewIns  []*dbmodel.XChainTxInput
+	NewTxs  []*database.XChainTx
+	NewOuts []*database.XChainTxOutput
+	NewIns  []*database.XChainTxInput
 
-	newInsBase []*chain.XChainTxInputBase
+	newInsBase []*XChainTxInputBase
 }
 
 // Return new indexer; batch size is approximate and is used for
 // the initialization of arrays
 func NewBaseTxIndexer(batchSize int) baseTxIndexer {
 	return baseTxIndexer{
-		NewTxs:     make([]*dbmodel.XChainTx, 0, batchSize),
-		NewOuts:    make([]*dbmodel.XChainTxOutput, 0, 4*batchSize),
-		NewIns:     make([]*dbmodel.XChainTxInput, 0, 4*batchSize),
-		newInsBase: make([]*chain.XChainTxInputBase, 0, 4*batchSize),
+		NewTxs:     make([]*database.XChainTx, 0, batchSize),
+		NewOuts:    make([]*database.XChainTxOutput, 0, 4*batchSize),
+		NewIns:     make([]*database.XChainTxInput, 0, 4*batchSize),
+		newInsBase: make([]*XChainTxInputBase, 0, 4*batchSize),
 	}
 }
 
-func (i *baseTxIndexer) AddTx(data *chain.XChainTxData) {
+func (i *baseTxIndexer) AddTx(data *XChainTxData) {
 	// New transaction goes db
 	i.NewTxs = append(i.NewTxs, data.Tx)
 
@@ -53,7 +53,7 @@ func (i *baseTxIndexer) AddTx(data *chain.XChainTxData) {
 // Persist new entities
 func (i *baseTxIndexer) UpdateIns(db *gorm.DB, client avaIndexer.Client) error {
 	// Map of outs needed for ins; key is (txId, output index)
-	outsMap := make(map[keyType]*dbmodel.XChainTxOutput)
+	outsMap := make(map[keyType]*database.XChainTxOutput)
 
 	// First find all needed transactions for inputs
 	missingTxIds := mapset.NewSet[string]()
@@ -82,7 +82,7 @@ func (i *baseTxIndexer) UpdateIns(db *gorm.DB, client avaIndexer.Client) error {
 		if !ok {
 			logger.Warn("Unable to find output (%s, %d)", in.TxID, in.OutputIndex)
 		} else {
-			i.NewIns = append(i.NewIns, &dbmodel.XChainTxInput{
+			i.NewIns = append(i.NewIns, &database.XChainTxInput{
 				TxID:    in.TxID,
 				Address: out.Address,
 			})
@@ -94,14 +94,14 @@ func (i *baseTxIndexer) UpdateIns(db *gorm.DB, client avaIndexer.Client) error {
 
 // Persist all entities
 func (i *baseTxIndexer) PersistEntities(db *gorm.DB) error {
-	return dbmodel.CreateXChainEntities(db, i.NewTxs, i.NewIns, i.NewOuts)
+	return database.CreateXChainEntities(db, i.NewTxs, i.NewIns, i.NewOuts)
 }
 
 // Update outsMap for missing transaction idxs from transactions fetched in this batch.
 // Also updates missingTxIds set.
 func updateOutsMapFromOuts(
-	outsMap map[keyType]*dbmodel.XChainTxOutput,
-	newOuts []*dbmodel.XChainTxOutput,
+	outsMap map[keyType]*database.XChainTxOutput,
+	newOuts []*database.XChainTxOutput,
 	missingTxIds mapset.Set[string],
 ) {
 	for _, out := range newOuts {
@@ -115,10 +115,10 @@ func updateOutsMapFromOuts(
 // Update outsMap for missing transaction idxs. Also updates missingTxIds set.
 func updateOutsMapFromDB(
 	db *gorm.DB,
-	outsMap map[keyType]*dbmodel.XChainTxOutput,
+	outsMap map[keyType]*database.XChainTxOutput,
 	missingTxIds mapset.Set[string],
 ) error {
-	outs, err := dbmodel.FetchXChainTxOutputs(db, missingTxIds.ToSlice())
+	outs, err := database.FetchXChainTxOutputs(db, missingTxIds.ToSlice())
 	if err != nil {
 		return err
 	}
@@ -133,7 +133,7 @@ func updateOutsMapFromDB(
 // Also updates missingTxIds set.
 func updateOutsMapFromChain(
 	client avaIndexer.Client,
-	outsMap map[keyType]*dbmodel.XChainTxOutput,
+	outsMap map[keyType]*database.XChainTxOutput,
 	missingTxIds mapset.Set[string],
 ) error {
 	for _, txId := range missingTxIds.ToSlice() {
@@ -151,12 +151,12 @@ func updateOutsMapFromChain(
 			return err
 		}
 
-		var outs []*dbmodel.XChainTxOutput
+		var outs []*database.XChainTxOutput
 		switch unsignedTx := tx.Unsigned.(type) {
 		case *txs.BaseTx:
-			outs, err = chain.XChainTxOutputsFromBaseTx(txId, unsignedTx)
+			outs, err = XChainTxOutputsFromBaseTx(txId, unsignedTx)
 		case *txs.ImportTx:
-			outs, err = chain.XChainTxOutputsFromBaseTx(txId, &unsignedTx.BaseTx)
+			outs, err = XChainTxOutputsFromBaseTx(txId, &unsignedTx.BaseTx)
 		default:
 			return fmt.Errorf("transaction with id %s has unsupported type %T", container.ID.String(), unsignedTx)
 		}

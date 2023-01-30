@@ -1,13 +1,13 @@
-package indexer
+package runner
 
 import (
-	"flare-indexer/src/indexer/ctx"
-	"flare-indexer/src/indexer/xchain"
-	"flare-indexer/src/logger"
+	"flare-indexer/indexer/context"
+	"flare-indexer/indexer/xchain"
+	"flare-indexer/logger"
 	"time"
 )
 
-func Start(ctx ctx.IndexerContext) {
+func Start(ctx context.IndexerContext) {
 	xIndexer := xchain.CreateXChainIndexer(ctx)
 
 	for {

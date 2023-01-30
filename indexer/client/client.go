@@ -1,7 +1,7 @@
-package chain
+package client
 
 import (
-	"flare-indexer/src/config"
+	"flare-indexer/config"
 
 	"github.com/ava-labs/avalanchego/indexer"
 )

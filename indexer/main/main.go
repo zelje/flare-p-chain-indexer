@@ -1,14 +1,14 @@
 package main
 
 import (
-	"flare-indexer/src/indexer"
-	"flare-indexer/src/indexer/ctx"
-	"flare-indexer/src/migrations"
+	"flare-indexer/indexer/context"
+	"flare-indexer/indexer/migrations"
+	"flare-indexer/indexer/runner"
 	"fmt"
 )
 
 func main() {
-	ctx, err := ctx.BuildContext()
+	ctx, err := context.BuildContext()
 	if err != nil {
 		fmt.Printf("%v\n", err)
 		return
@@ -18,5 +18,5 @@ func main() {
 		fmt.Printf("%v\n", err)
 		return
 	}
-	indexer.Start(ctx)
+	runner.Start(ctx)
 }

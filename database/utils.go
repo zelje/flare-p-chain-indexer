@@ -1,7 +1,7 @@
-package dbmodel
+package database
 
 import (
-	"flare-indexer/src/config"
+	"flare-indexer/config"
 	"fmt"
 
 	"github.com/go-sql-driver/mysql"
@@ -20,14 +20,14 @@ var (
 	}
 )
 
-func ConnectAndInitialize(cfg *config.Config) (*gorm.DB, error) {
+func ConnectAndInitialize(cfg *config.DBConfig) (*gorm.DB, error) {
 	// Connect to the database
 	dbConfig := mysql.Config{
-		User:                 cfg.DB.Username,
-		Passwd:               cfg.DB.Password,
+		User:                 cfg.Username,
+		Passwd:               cfg.Password,
 		Net:                  "tcp",
-		Addr:                 fmt.Sprintf("%s:%d", cfg.DB.Host, cfg.DB.Port),
-		DBName:               cfg.DB.Database,
+		Addr:                 fmt.Sprintf("%s:%d", cfg.Host, cfg.Port),
+		DBName:               cfg.Database,
 		AllowNativePasswords: true,
 		ParseTime:            true,
 	}

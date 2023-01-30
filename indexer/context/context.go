@@ -1,9 +1,9 @@
-package ctx
+package context
 
 import (
-	"flare-indexer/src/chain"
-	"flare-indexer/src/config"
-	"flare-indexer/src/dbmodel"
+	"flare-indexer/config"
+	"flare-indexer/database"
+	"flare-indexer/indexer/client"
 
 	"gorm.io/gorm"
 )
@@ -11,13 +11,13 @@ import (
 type IndexerContext interface {
 	Config() *config.Config
 	DB() *gorm.DB
-	Clients() chain.Clients
+	Clients() client.Clients
 }
 
 type indexerContext struct {
 	config  *config.Config
 	db      *gorm.DB
-	clients chain.Clients
+	clients client.Clients
 }
 
 func BuildContext() (IndexerContext, error) {
@@ -29,11 +29,11 @@ func BuildContext() (IndexerContext, error) {
 	}
 	ctx.config = cfg
 
-	ctx.db, err = dbmodel.ConnectAndInitialize(cfg)
+	ctx.db, err = database.ConnectAndInitialize(&cfg.DB)
 	if err != nil {
 		return nil, err
 	}
-	ctx.clients = chain.NewClients(cfg)
+	ctx.clients = client.NewClients(cfg)
 
 	return &ctx, nil
 }
@@ -42,4 +42,4 @@ func (c *indexerContext) Config() *config.Config { return c.config }
 
 func (c *indexerContext) DB() *gorm.DB { return c.db }
 
-func (c *indexerContext) Clients() chain.Clients { return c.clients }
+func (c *indexerContext) Clients() client.Clients { return c.clients }

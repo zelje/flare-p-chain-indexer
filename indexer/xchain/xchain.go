@@ -1,8 +1,8 @@
-package chain
+package xchain
 
 import (
-	"flare-indexer/src/dbmodel"
-	"flare-indexer/src/utils"
+	"flare-indexer/database"
+	"flare-indexer/utils"
 	"fmt"
 	"time"
 
@@ -17,15 +17,15 @@ type XChainTxInputBase struct {
 }
 
 type XChainTxData struct {
-	Tx     *dbmodel.XChainTx         // db entity for transaction
-	TxIns  []*XChainTxInputBase      // non-db entities for input (should be filled with additional indexer call or from db)
-	TxOuts []*dbmodel.XChainTxOutput // db entities for outputs
+	Tx     *database.XChainTx         // db entity for transaction
+	TxIns  []*XChainTxInputBase       // non-db entities for input (should be filled with additional indexer call or from db)
+	TxOuts []*database.XChainTxOutput // db entities for outputs
 }
 
 // Fetch all outputs of transaction, provided their type is *secp256k1fx.TransferOutput and the
 // number of addresses for each output is 1
-func XChainTxOutputsFromBaseTx(txID string, baseTx *txs.BaseTx) ([]*dbmodel.XChainTxOutput, error) {
-	txOuts := make([]*dbmodel.XChainTxOutput, len(baseTx.Outs))
+func XChainTxOutputsFromBaseTx(txID string, baseTx *txs.BaseTx) ([]*database.XChainTxOutput, error) {
+	txOuts := make([]*database.XChainTxOutput, len(baseTx.Outs))
 	for outi, cout := range baseTx.Outs {
 		to, ok := cout.Out.(*secp256k1fx.TransferOutput)
 		if !ok {
@@ -39,7 +39,7 @@ func XChainTxOutputsFromBaseTx(txID string, baseTx *txs.BaseTx) ([]*dbmodel.XCha
 		if err != nil {
 			return nil, err
 		}
-		txOuts[outi] = &dbmodel.XChainTxOutput{
+		txOuts[outi] = &database.XChainTxOutput{
 			TxID:    txID,
 			Amount:  to.Amt,
 			Address: addr,
@@ -52,10 +52,10 @@ func XChainTxOutputsFromBaseTx(txID string, baseTx *txs.BaseTx) ([]*dbmodel.XCha
 // Return xChainTxData from from BaseTx, Container, index
 // We expect that outputs are of type *secp256k1fx.TransferOutput and the number of addresses for each output is 1
 // Note that inputs are not db entities but "placehorders"
-func XChainTxDataFromBaseTx(container *indexer.Container, baseTx *txs.BaseTx, txType dbmodel.TransactionType, index uint64) (*XChainTxData, error) {
+func XChainTxDataFromBaseTx(container *indexer.Container, baseTx *txs.BaseTx, txType database.TransactionType, index uint64) (*XChainTxData, error) {
 	// TODO: check for asset?
 
-	tx := &dbmodel.XChainTx{}
+	tx := &database.XChainTx{}
 	tx.TxID = container.ID.String()
 	tx.TxIndex = index
 	tx.Timestamp = time.Unix(container.Timestamp/1e9, container.Timestamp%1e9)

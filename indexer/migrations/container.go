@@ -1,9 +1,9 @@
 package migrations
 
 import (
-	"flare-indexer/src/dbmodel"
-	"flare-indexer/src/indexer/ctx"
-	"flare-indexer/src/logger"
+	"flare-indexer/database"
+	"flare-indexer/indexer/context"
+	"flare-indexer/logger"
 	"fmt"
 	"sort"
 	"time"
@@ -16,7 +16,7 @@ var Container MigrationContainer = NewMigrationContainer()
 
 type MigrationContainer interface {
 	Add(version string, description string, code func(*gorm.DB) error)
-	ExecuteAll(ctx ctx.IndexerContext) error
+	ExecuteAll(ctx context.IndexerContext) error
 }
 
 type migration struct {
@@ -26,12 +26,12 @@ type migration struct {
 }
 
 func executeMigration(db *gorm.DB, m migration) error {
-	dbMigration := dbmodel.Migration{
+	dbMigration := database.Migration{
 		Version:     m.version,
 		Description: m.description,
-		Status:      dbmodel.Pending,
+		Status:      database.Pending,
 	}
-	err := dbmodel.CreateMigration(db, &dbMigration)
+	err := database.CreateMigration(db, &dbMigration)
 	if err != nil {
 		return err
 	}
@@ -41,15 +41,15 @@ func executeMigration(db *gorm.DB, m migration) error {
 	execErr := m.code(db)
 	end := time.Now()
 
-	var status dbmodel.MigrationStatus
+	var status database.MigrationStatus
 	if execErr != nil {
-		status = dbmodel.Failed
+		status = database.Failed
 	} else {
-		status = dbmodel.Completed
+		status = database.Completed
 	}
 	dbMigration.Status = status
 	dbMigration.Duration = int((end.Sub(start)).Milliseconds())
-	err = dbmodel.UpdateMigration(db, &dbMigration)
+	err = database.UpdateMigration(db, &dbMigration)
 	if err != nil {
 		return fmt.Errorf("error updating migration %s with status %s, error is %w", m.version, status, err)
 	}
@@ -81,16 +81,16 @@ func (mc *migrationContainer) Add(version string, description string, code func(
 	})
 }
 
-func (mc *migrationContainer) ExecuteAll(ctx ctx.IndexerContext) error {
+func (mc *migrationContainer) ExecuteAll(ctx context.IndexerContext) error {
 	db := ctx.DB()
-	dbMigrations, err := dbmodel.FetchMigrations(db)
+	dbMigrations, err := database.FetchMigrations(db)
 	if err != nil {
 		return err
 	}
 
 	executedVersions := mapset.NewSet[string]()
 	for _, m := range dbMigrations {
-		if m.Status != dbmodel.Completed {
+		if m.Status != database.Completed {
 			return fmt.Errorf("there is a PENDING or FAILED migration with version: '%s'. Aborting execution of migrations. Problem should be resolved manually", m.Version)
 		}
 		executedVersions.Add(m.Version)

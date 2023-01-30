@@ -1,11 +1,11 @@
 package xchain
 
 import (
-	"flare-indexer/src/chain"
-	"flare-indexer/src/config"
-	"flare-indexer/src/dbmodel"
-	"flare-indexer/src/indexer/ctx"
-	"flare-indexer/src/logger"
+	"flare-indexer/config"
+	"flare-indexer/database"
+	"flare-indexer/indexer/context"
+	"flare-indexer/logger"
+	"flare-indexer/utils/chain"
 	"time"
 
 	"github.com/ava-labs/avalanchego/indexer"
@@ -28,7 +28,7 @@ type xChainIndexer struct {
 	config config.IndexerConfig
 }
 
-func CreateXChainIndexer(ctx ctx.IndexerContext) XChainIndexer {
+func CreateXChainIndexer(ctx context.IndexerContext) XChainIndexer {
 	idxr := xChainIndexer{}
 
 	idxr.client = ctx.Clients().XChainTxClient()
@@ -41,7 +41,7 @@ func (xi *xChainIndexer) Run() error {
 	startTime := time.Now()
 
 	// Get current state of tx indexer from db
-	currentState, err := dbmodel.FetchState(xi.db, StateName)
+	currentState, err := database.FetchState(xi.db, StateName)
 	if err != nil {
 		return err
 	}
@@ -76,13 +76,13 @@ func (xi *xChainIndexer) Run() error {
 
 		switch unsignedTx := tx.Unsigned.(type) {
 		case *txs.BaseTx:
-			data, err := chain.XChainTxDataFromBaseTx(&container, unsignedTx, dbmodel.BaseTx, index)
+			data, err := XChainTxDataFromBaseTx(&container, unsignedTx, database.BaseTx, index)
 			if err != nil {
 				return nil
 			}
 			baseTxIndexer.AddTx(data)
 		case *txs.ImportTx:
-			data, err := chain.XChainTxDataFromBaseTx(&container, &unsignedTx.BaseTx, dbmodel.ImportTx, index)
+			data, err := XChainTxDataFromBaseTx(&container, &unsignedTx.BaseTx, database.ImportTx, index)
 			if err != nil {
 				return nil
 			}
@@ -97,11 +97,11 @@ func (xi *xChainIndexer) Run() error {
 		return err
 	}
 
-	err = dbmodel.DoInTransaction(xi.db,
+	err = database.DoInTransaction(xi.db,
 		func(db *gorm.DB) error { return baseTxIndexer.PersistEntities(db) },
 		func(db *gorm.DB) error {
 			currentState.Update(index+1, lastIndex)
-			return dbmodel.UpdateState(db, &currentState)
+			return database.UpdateState(db, &currentState)
 		},
 	)
 	if err != nil {

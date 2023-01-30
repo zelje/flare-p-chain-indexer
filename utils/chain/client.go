@@ -2,7 +2,7 @@ package chain
 
 import (
 	"context"
-	"flare-indexer/src/logger"
+	"flare-indexer/logger"
 	"fmt"
 	"time"
 
@@ -41,7 +41,7 @@ func FetchContainerFromIndexer(client indexer.Client, id string) (*indexer.Conta
 	if err != nil {
 		// This can happen since some transactions (genesis) are not indexed
 		// so we don't panic here with an error
-		logger.Warn("Cannot fetch a transaction with id %s", id)
+		logger.Warn("Cannot fetch a container with id %s", id)
 		return nil, nil
 	}
 	fmt.Printf("index is %d\n", index)

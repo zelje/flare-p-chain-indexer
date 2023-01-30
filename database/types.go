@@ -1,4 +1,4 @@
-package dbmodel
+package database
 
 type TransactionType string
 
