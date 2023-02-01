@@ -6,7 +6,7 @@ import (
 	"flare-indexer/utils/chain"
 	"fmt"
 
-	avaIndexer "github.com/ava-labs/avalanchego/indexer"
+	"github.com/ava-labs/avalanchego/indexer"
 	"github.com/ava-labs/avalanchego/vms/avm/txs"
 	"github.com/ava-labs/avalanchego/wallet/chain/x"
 	mapset "github.com/deckarep/golang-set/v2"
@@ -14,44 +14,55 @@ import (
 )
 
 // Indexer for X-chain transactions of "type" baseTx
+// Implements ContainerBatchIndexer
+
+type txBatchIndexer struct {
+	db     *gorm.DB
+	client indexer.Client
+
+	newTxs  []*database.XChainTx
+	newOuts []*database.XChainTxOutput
+	newIns  []*database.XChainTxInput
+
+	newInsBase []*XChainTxInputBase
+}
 
 type keyType struct {
 	string
 	uint32
 }
 
-type baseTxIndexer struct {
-	NewTxs  []*database.XChainTx
-	NewOuts []*database.XChainTxOutput
-	NewIns  []*database.XChainTxInput
-
-	newInsBase []*XChainTxInputBase
-}
-
 // Return new indexer; batch size is approximate and is used for
 // the initialization of arrays
-func NewBaseTxIndexer(batchSize int) baseTxIndexer {
-	return baseTxIndexer{
-		NewTxs:     make([]*database.XChainTx, 0, batchSize),
-		NewOuts:    make([]*database.XChainTxOutput, 0, 4*batchSize),
-		NewIns:     make([]*database.XChainTxInput, 0, 4*batchSize),
+func NewTxBatchIndexer(
+	db *gorm.DB,
+	client indexer.Client,
+	batchSize int,
+) *txBatchIndexer {
+	return &txBatchIndexer{
+		db:     db,
+		client: client,
+
+		newTxs:     make([]*database.XChainTx, 0, batchSize),
+		newOuts:    make([]*database.XChainTxOutput, 0, 4*batchSize),
+		newIns:     make([]*database.XChainTxInput, 0, 4*batchSize),
 		newInsBase: make([]*XChainTxInputBase, 0, 4*batchSize),
 	}
 }
 
-func (i *baseTxIndexer) AddTx(data *XChainTxData) {
+func (i *txBatchIndexer) addTx(data *XChainTxData) {
 	// New transaction goes db
-	i.NewTxs = append(i.NewTxs, data.Tx)
+	i.newTxs = append(i.newTxs, data.Tx)
 
 	// New outs get saved to db
-	i.NewOuts = append(i.NewOuts, data.TxOuts...)
+	i.newOuts = append(i.newOuts, data.TxOuts...)
 
 	// New ins (not db objects)
 	i.newInsBase = append(i.newInsBase, data.TxIns...)
 }
 
 // Persist new entities
-func (i *baseTxIndexer) UpdateIns(db *gorm.DB, client avaIndexer.Client) error {
+func (i *txBatchIndexer) updateIns() error {
 	// Map of outs needed for ins; key is (txId, output index)
 	outsMap := make(map[keyType]*database.XChainTxOutput)
 
@@ -61,14 +72,14 @@ func (i *baseTxIndexer) UpdateIns(db *gorm.DB, client avaIndexer.Client) error {
 		missingTxIds.Add(in.TxID)
 	}
 
-	updateOutsMapFromOuts(outsMap, i.NewOuts, missingTxIds)
+	updateOutsMapFromOuts(outsMap, i.newOuts, missingTxIds)
 
-	err := updateOutsMapFromDB(db, outsMap, missingTxIds)
+	err := updateOutsMapFromDB(i.db, outsMap, missingTxIds)
 	if err != nil {
 		return err
 	}
 
-	err = updateOutsMapFromChain(client, outsMap, missingTxIds)
+	err = updateOutsMapFromChain(i.client, outsMap, missingTxIds)
 	if err != nil {
 		return err
 	}
@@ -82,7 +93,7 @@ func (i *baseTxIndexer) UpdateIns(db *gorm.DB, client avaIndexer.Client) error {
 		if !ok {
 			logger.Warn("Unable to find output (%s, %d)", in.TxID, in.OutputIndex)
 		} else {
-			i.NewIns = append(i.NewIns, &database.XChainTxInput{
+			i.newIns = append(i.newIns, &database.XChainTxInput{
 				TxID:    in.TxID,
 				Address: out.Address,
 			})
@@ -92,9 +103,46 @@ func (i *baseTxIndexer) UpdateIns(db *gorm.DB, client avaIndexer.Client) error {
 	return nil
 }
 
+func (xi *txBatchIndexer) ProcessContainers(nextIndex uint64, containers []indexer.Container) (uint64, error) {
+
+	var index uint64
+	for i, container := range containers {
+		index = nextIndex + uint64(i)
+
+		tx, err := x.Parser.ParseGenesisTx(container.Bytes)
+		if err != nil {
+			return 0, err
+		}
+
+		switch unsignedTx := tx.Unsigned.(type) {
+		case *txs.BaseTx:
+			data, err := XChainTxDataFromBaseTx(&container, unsignedTx, database.BaseTx, index)
+			if err != nil {
+				return 0, nil
+			}
+			xi.addTx(data)
+		case *txs.ImportTx:
+			data, err := XChainTxDataFromBaseTx(&container, &unsignedTx.BaseTx, database.ImportTx, index)
+			if err != nil {
+				return 0, nil
+			}
+			xi.addTx(data)
+		default:
+			logger.Warn("Transaction with id '%s' is NOT indexed, type is %T", container.ID, unsignedTx)
+		}
+	}
+
+	err := xi.updateIns()
+	if err != nil {
+		return 0, err
+	}
+
+	return index, nil
+}
+
 // Persist all entities
-func (i *baseTxIndexer) PersistEntities(db *gorm.DB) error {
-	return database.CreateXChainEntities(db, i.NewTxs, i.NewIns, i.NewOuts)
+func (i *txBatchIndexer) PersistEntities(db *gorm.DB) error {
+	return database.CreateXChainEntities(db, i.newTxs, i.newIns, i.newOuts)
 }
 
 // Update outsMap for missing transaction idxs from transactions fetched in this batch.
@@ -132,7 +180,7 @@ func updateOutsMapFromDB(
 // Update outsMap for missing transaction idxs by fetching transactions from the chain.
 // Also updates missingTxIds set.
 func updateOutsMapFromChain(
-	client avaIndexer.Client,
+	client indexer.Client,
 	outsMap map[keyType]*database.XChainTxOutput,
 	missingTxIds mapset.Set[string],
 ) error {

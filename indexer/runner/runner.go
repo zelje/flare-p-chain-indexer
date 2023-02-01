@@ -8,7 +8,7 @@ import (
 )
 
 func Start(ctx context.IndexerContext) {
-	xIndexer := xchain.CreateXChainIndexer(ctx)
+	xIndexer := xchain.CreateXChainTxIndexer(ctx)
 
 	for {
 		err := xIndexer.Run()
