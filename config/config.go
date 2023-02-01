@@ -8,6 +8,11 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+const (
+	LOCAL_CONFIG_FILE string = "config.local.yml"
+	CONFIG_FILE       string = "config.yml"
+)
+
 type Config struct {
 	DB      DBConfig      `yaml:"db"`
 	Chain   ChainConfig   `yaml:"chain"`
@@ -23,8 +28,9 @@ type DBConfig struct {
 }
 
 type IndexerConfig struct {
-	TimeoutMillis int `yaml:"timeout_millis"`
-	BatchSize     int `yaml:"batch_size"`
+	TimeoutMillis int    `yaml:"timeout_millis"`
+	BatchSize     int    `yaml:"batch_size"`
+	StartIndex    uint64 `yaml:"start_index"`
 }
 
 type ChainConfig struct {
@@ -36,13 +42,21 @@ func newConfig() *Config {
 		Indexer: IndexerConfig{
 			TimeoutMillis: 3000,
 			BatchSize:     10,
+			StartIndex:    0,
+		},
+		Chain: ChainConfig{
+			IndexerURL: "http://localhost:9650/",
 		},
 	}
 }
 
 func BuildConfig() (*Config, error) {
 	cfg := newConfig()
-	err := parseConfigFile(cfg)
+	err := parseConfigFile(cfg, CONFIG_FILE)
+	if err != nil {
+		return nil, err
+	}
+	err = parseConfigFile(cfg, LOCAL_CONFIG_FILE)
 	if err != nil {
 		return nil, err
 	}
@@ -53,8 +67,8 @@ func BuildConfig() (*Config, error) {
 	return cfg, nil
 }
 
-func parseConfigFile(cfg *Config) error {
-	f, err := os.Open("config.yml")
+func parseConfigFile(cfg *Config, fileName string) error {
+	f, err := os.Open(fileName)
 	if err != nil {
 		return fmt.Errorf("error opening config file: %w", err)
 	}
@@ -71,7 +85,7 @@ func parseConfigFile(cfg *Config) error {
 func readEnv(cfg *Config) error {
 	err := envconfig.Process("", cfg)
 	if err != nil {
-		return fmt.Errorf("error reding env config: %w", err)
+		return fmt.Errorf("error reading env config: %w", err)
 	}
 	return nil
 }

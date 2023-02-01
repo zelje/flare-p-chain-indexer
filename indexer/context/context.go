@@ -33,7 +33,7 @@ func BuildContext() (IndexerContext, error) {
 	if err != nil {
 		return nil, err
 	}
-	ctx.clients = client.NewClients(cfg)
+	ctx.clients = client.NewClients(&cfg.Chain)
 
 	return &ctx, nil
 }

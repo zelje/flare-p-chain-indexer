@@ -2,6 +2,7 @@ package client
 
 import (
 	"flare-indexer/config"
+	"flare-indexer/utils"
 
 	"github.com/ava-labs/avalanchego/indexer"
 )
@@ -14,9 +15,9 @@ type clients struct {
 	xChainTxClient indexer.Client
 }
 
-func NewClients(cfg *config.Config) Clients {
+func NewClients(cfg *config.ChainConfig) Clients {
 	cs := clients{}
-	cs.xChainTxClient = indexer.NewClient("http://localhost:9650/ext/index/X/tx")
+	cs.xChainTxClient = indexer.NewClient(utils.JoinPaths(cfg.IndexerURL, "ext/index/X/tx"))
 	return &cs
 }
 

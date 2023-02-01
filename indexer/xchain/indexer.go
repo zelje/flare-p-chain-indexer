@@ -46,19 +46,26 @@ func (xi *xChainIndexer) Run() error {
 		return err
 	}
 
+	var nextIndex uint64
+	if currentState.NextDBIndex < xi.config.StartIndex {
+		nextIndex = xi.config.StartIndex
+	} else {
+		nextIndex = currentState.NextDBIndex
+	}
+
+	// Fetch last accepted index on chain
 	_, lastIndex, err := chain.FetchLastAcceptedContainer(xi.client)
 	if err != nil {
 		return err
 	}
-
-	if lastIndex < currentState.NextDBIndex {
+	if lastIndex < nextIndex {
 		// Nothing to do; no new containers
-		logger.Debug("Nothing to do. Last index %d < next to process %d", lastIndex, currentState.NextDBIndex)
+		logger.Debug("Nothing to do. Last index %d < next to process %d", lastIndex, nextIndex)
 		return nil
 	}
 
 	// Get MaxBatch containers from the chain
-	containers, err := chain.FetchContainerRangeFromIndexer(xi.client, currentState.NextDBIndex, xi.config.BatchSize)
+	containers, err := chain.FetchContainerRangeFromIndexer(xi.client, nextIndex, xi.config.BatchSize)
 	if err != nil {
 		return err
 	}
@@ -67,7 +74,7 @@ func (xi *xChainIndexer) Run() error {
 
 	var index uint64
 	for i, container := range containers {
-		index = currentState.NextDBIndex + uint64(i)
+		index = nextIndex + uint64(i)
 
 		tx, err := x.Parser.ParseGenesisTx(container.Bytes)
 		if err != nil {

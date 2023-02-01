@@ -3,7 +3,6 @@ package chain
 import (
 	"context"
 	"flare-indexer/logger"
-	"fmt"
 	"time"
 
 	"github.com/ava-labs/avalanchego/ids"
@@ -44,7 +43,6 @@ func FetchContainerFromIndexer(client indexer.Client, id string) (*indexer.Conta
 		logger.Warn("Cannot fetch a container with id %s", id)
 		return nil, nil
 	}
-	fmt.Printf("index is %d\n", index)
 
 	container, err := client.GetContainerByIndex(ctx, index)
 	if err != nil {
