@@ -23,8 +23,6 @@ type txBatchIndexer struct {
 	newTxs       []*database.XChainTx
 }
 
-// Return new indexer; batch size is approximate and is used for
-// the initialization of arrays
 func NewXChainBatchIndexer(
 	db *gorm.DB,
 	client indexer.Client,
@@ -39,42 +37,36 @@ func NewXChainBatchIndexer(
 	}
 }
 
-func (xi *txBatchIndexer) ProcessContainers(nextIndex uint64, containers []indexer.Container) (uint64, error) {
-	// Reset indexer
-	xi.newTxs = make([]*database.XChainTx, 0, len(containers))
+func (xi *txBatchIndexer) Reset(containerLen int) {
+	xi.newTxs = make([]*database.XChainTx, 0, containerLen)
 	xi.inOutIndexer.Reset()
+}
 
-	var index uint64
-	for i, container := range containers {
-		index = nextIndex + uint64(i)
-
-		tx, err := x.Parser.ParseGenesisTx(container.Bytes)
-		if err != nil {
-			return 0, err
-		}
-
-		switch unsignedTx := tx.Unsigned.(type) {
-		case *txs.BaseTx:
-			err := xi.addTx(&container, unsignedTx, database.XChainBaseTx, index)
-			if err != nil {
-				return 0, nil
-			}
-		case *txs.ImportTx:
-			err := xi.addTx(&container, &unsignedTx.BaseTx, database.XChainImportTx, index)
-			if err != nil {
-				return 0, nil
-			}
-		default:
-			logger.Warn("Transaction with id '%s' is NOT indexed, type is %T", container.ID, unsignedTx)
-		}
-	}
-
-	err := xi.inOutIndexer.ProcessBatch()
+func (xi *txBatchIndexer) AddContainer(index uint64, container indexer.Container) error {
+	tx, err := x.Parser.ParseGenesisTx(container.Bytes)
 	if err != nil {
-		return 0, err
+		return err
 	}
 
-	return index, nil
+	switch unsignedTx := tx.Unsigned.(type) {
+	case *txs.BaseTx:
+		err := xi.addTx(&container, unsignedTx, database.XChainBaseTx, index)
+		if err != nil {
+			return err
+		}
+	case *txs.ImportTx:
+		err := xi.addTx(&container, &unsignedTx.BaseTx, database.XChainImportTx, index)
+		if err != nil {
+			return err
+		}
+	default:
+		logger.Warn("Transaction with id '%s' is NOT indexed, type is %T", container.ID, unsignedTx)
+	}
+	return nil
+}
+
+func (xi *txBatchIndexer) ProcessBatch() error {
+	return xi.inOutIndexer.ProcessBatch()
 }
 
 func (xi *txBatchIndexer) addTx(container *indexer.Container, baseTx *txs.BaseTx, txType database.XChainTxType, index uint64) error {

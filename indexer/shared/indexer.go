@@ -16,7 +16,9 @@ type ChainIndexer interface {
 }
 
 type ContainerBatchIndexer interface {
-	ProcessContainers(nextIndex uint64, containers []indexer.Container) (uint64, error)
+	Reset(containerLen int)
+	AddContainer(index uint64, container indexer.Container) error
+	ProcessBatch() error
 	PersistEntities(db *gorm.DB) error
 }
 
@@ -64,7 +66,7 @@ func (ci *ChainIndexerBase) IndexBatch() error {
 		return err
 	}
 
-	lastProcessedIndex, err := ci.BatchIndexer.ProcessContainers(nextIndex, containers)
+	lastProcessedIndex, err := ci.ProcessContainers(nextIndex, containers)
 	if err != nil {
 		return err
 	}
@@ -84,5 +86,25 @@ func (ci *ChainIndexerBase) IndexBatch() error {
 		ci.IndexerName,
 		lastProcessedIndex, lastIndex, endTime.Sub(startTime).Milliseconds())
 	return nil
+}
 
+func (ci *ChainIndexerBase) ProcessContainers(nextIndex uint64, containers []indexer.Container) (uint64, error) {
+	ci.BatchIndexer.Reset(len(containers))
+
+	var index uint64
+	for i, container := range containers {
+		index = nextIndex + uint64(i)
+
+		err := ci.BatchIndexer.AddContainer(index, container)
+		if err != nil {
+			return 0, err
+		}
+	}
+
+	err := ci.BatchIndexer.ProcessBatch()
+	if err != nil {
+		return 0, err
+	}
+
+	return index, nil
 }
