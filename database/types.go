@@ -1,16 +1,32 @@
 package database
 
-type TransactionType string
+// X-chain types
+
+type XChainTxType string
 
 const (
-	BaseTx   TransactionType = "BASE_TX"
-	ImportTx TransactionType = "IMPORT_TX"
+	XChainBaseTx   XChainTxType = "BASE_TX"
+	XChainImportTx XChainTxType = "IMPORT_TX"
 )
+
+// P-chain types
+
+type PChainTxType string
+
+const (
+	PChainRewardValidatorTx PChainTxType = "REWARD_TX"
+	PChainAddDelegatorTx    PChainTxType = "ADD_DELEGATOR_TX"
+	PChainAddValidatorTx    PChainTxType = "ADD_VALIDATOR_TX"
+	PChainImportTx          PChainTxType = "IMPORT_TX"
+	PChainExportTx          PChainTxType = "EXPORT_TX"
+)
+
+// Misc other types
 
 type MigrationStatus string
 
 const (
-	Pending   MigrationStatus = "PENDING"
-	Completed MigrationStatus = "COMPLETED"
-	Failed    MigrationStatus = "FAILED"
+	MigrationPending   MigrationStatus = "PENDING"
+	MigrationCompleted MigrationStatus = "COMPLETED"
+	MigrationFailed    MigrationStatus = "FAILED"
 )

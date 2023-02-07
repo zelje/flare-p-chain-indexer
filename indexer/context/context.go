@@ -3,7 +3,6 @@ package context
 import (
 	"flare-indexer/config"
 	"flare-indexer/database"
-	"flare-indexer/indexer/client"
 
 	"gorm.io/gorm"
 )
@@ -11,13 +10,11 @@ import (
 type IndexerContext interface {
 	Config() *config.Config
 	DB() *gorm.DB
-	Clients() client.Clients
 }
 
 type indexerContext struct {
-	config  *config.Config
-	db      *gorm.DB
-	clients client.Clients
+	config *config.Config
+	db     *gorm.DB
 }
 
 func BuildContext() (IndexerContext, error) {
@@ -33,13 +30,9 @@ func BuildContext() (IndexerContext, error) {
 	if err != nil {
 		return nil, err
 	}
-	ctx.clients = client.NewClients(&cfg.Chain)
-
 	return &ctx, nil
 }
 
 func (c *indexerContext) Config() *config.Config { return c.config }
 
 func (c *indexerContext) DB() *gorm.DB { return c.db }
-
-func (c *indexerContext) Clients() client.Clients { return c.clients }

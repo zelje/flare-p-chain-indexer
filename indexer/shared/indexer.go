@@ -27,9 +27,11 @@ type ChainIndexerBase struct {
 	DB     *gorm.DB
 	Client indexer.Client
 	Config config.IndexerConfig
+
+	BatchIndexer ContainerBatchIndexer
 }
 
-func (ci *ChainIndexerBase) IndexBatch(ch ContainerBatchIndexer) error {
+func (ci *ChainIndexerBase) IndexBatch() error {
 	startTime := time.Now()
 
 	// Get current state of tx indexer from db
@@ -62,13 +64,13 @@ func (ci *ChainIndexerBase) IndexBatch(ch ContainerBatchIndexer) error {
 		return err
 	}
 
-	lastProcessedIndex, err := ch.ProcessContainers(nextIndex, containers)
+	lastProcessedIndex, err := ci.BatchIndexer.ProcessContainers(nextIndex, containers)
 	if err != nil {
 		return err
 	}
 
 	err = database.DoInTransaction(ci.DB,
-		func(db *gorm.DB) error { return ch.PersistEntities(db) },
+		func(db *gorm.DB) error { return ci.BatchIndexer.PersistEntities(db) },
 		func(db *gorm.DB) error {
 			currentState.Update(lastProcessedIndex+1, lastIndex)
 			return database.UpdateState(db, &currentState)

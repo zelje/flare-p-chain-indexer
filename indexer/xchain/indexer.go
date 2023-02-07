@@ -1,8 +1,12 @@
 package xchain
 
 import (
+	"flare-indexer/config"
 	"flare-indexer/indexer/context"
 	"flare-indexer/indexer/shared"
+	"flare-indexer/utils"
+
+	"github.com/ava-labs/avalanchego/indexer"
 )
 
 const (
@@ -15,7 +19,7 @@ type xChainTxIndexer struct {
 
 func CreateXChainTxIndexer(ctx context.IndexerContext) shared.ChainIndexer {
 	config := ctx.Config().Indexer
-	client := ctx.Clients().XChainTxClient()
+	client := newClient(&ctx.Config().Chain)
 
 	idxr := xChainTxIndexer{}
 	idxr.StateName = StateName
@@ -24,10 +28,15 @@ func CreateXChainTxIndexer(ctx context.IndexerContext) shared.ChainIndexer {
 	idxr.DB = ctx.DB()
 	idxr.Config = config
 
+	idxr.BatchIndexer = NewXChainBatchIndexer(ctx.DB(), client)
+
 	return &idxr
 }
 
 func (xi *xChainTxIndexer) Run() error {
-	batchHandler := NewTxBatchIndexer(xi.DB, xi.Client, xi.Config.BatchSize)
-	return xi.IndexBatch(batchHandler)
+	return xi.IndexBatch()
+}
+
+func newClient(cfg *config.ChainConfig) indexer.Client {
+	return indexer.NewClient(utils.JoinPaths(cfg.IndexerURL, "ext/index/X/tx"))
 }

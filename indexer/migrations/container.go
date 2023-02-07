@@ -29,7 +29,7 @@ func executeMigration(db *gorm.DB, m migration) error {
 	dbMigration := database.Migration{
 		Version:     m.version,
 		Description: m.description,
-		Status:      database.Pending,
+		Status:      database.MigrationPending,
 	}
 	err := database.CreateMigration(db, &dbMigration)
 	if err != nil {
@@ -43,9 +43,9 @@ func executeMigration(db *gorm.DB, m migration) error {
 
 	var status database.MigrationStatus
 	if execErr != nil {
-		status = database.Failed
+		status = database.MigrationFailed
 	} else {
-		status = database.Completed
+		status = database.MigrationCompleted
 	}
 	dbMigration.Status = status
 	dbMigration.Duration = int((end.Sub(start)).Milliseconds())
@@ -90,7 +90,7 @@ func (mc *migrationContainer) ExecuteAll(ctx context.IndexerContext) error {
 
 	executedVersions := mapset.NewSet[string]()
 	for _, m := range dbMigrations {
-		if m.Status != database.Completed {
+		if m.Status != database.MigrationCompleted {
 			return fmt.Errorf("there is a PENDING or FAILED migration with version: '%s'. Aborting execution of migrations. Problem should be resolved manually", m.Version)
 		}
 		executedVersions.Add(m.Version)

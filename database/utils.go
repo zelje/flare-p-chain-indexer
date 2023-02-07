@@ -17,6 +17,9 @@ var (
 		XChainTx{},
 		XChainTxInput{},
 		XChainTxOutput{},
+		PChainTx{},
+		PChainTxInput{},
+		PChainTxOutput{},
 	}
 )
 

@@ -4,6 +4,7 @@ import (
 	"time"
 )
 
+// Abstact entity, all other entities should be derived from it
 type BaseEntity struct {
 	ID uint64 `gorm:"primaryKey"`
 }
@@ -25,24 +26,17 @@ type State struct {
 	Updated        time.Time
 }
 
-// Table with indexed data for X-chain transaction
-type XChainTx struct {
-	BaseEntity
-	Type      TransactionType `gorm:"type:varchar(20)"`                 // Transaction type
-	TxID      string          `gorm:"type:varchar(50);unique;not null"` // Transaction ID
-	TxIndex   uint64          `gorm:"unique"`                           // Transaction index
-	Timestamp time.Time
-	Memo      string `gorm:"type:varchar(256)"`
-	Bytes     []byte `gorm:"type:mediumblob"`
-}
-
-type XChainTxInput struct {
+// Abstact entity, common columns for X-chain and P-chain transaction inputs
+type TxInput struct {
 	BaseEntity
 	TxID    string `gorm:"type:varchar(50);not null"` // Transaction ID
 	Address string `gorm:"type:varchar(60);index"`
+	OutTxID string `gorm:"type:varchar(50)"` // Transaction ID with output
+	OutIdx  uint32 // Index of the output transaction
 }
 
-type XChainTxOutput struct {
+// Abstact entity, common columns for X-chain and P-chain transaction inputs
+type TxOutput struct {
 	BaseEntity
 	TxID    string `gorm:"type:varchar(50);not null"` // Transaction ID
 	Amount  uint64
