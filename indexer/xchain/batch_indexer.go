@@ -2,6 +2,7 @@ package xchain
 
 import (
 	"flare-indexer/database"
+	"flare-indexer/indexer/context"
 	"flare-indexer/indexer/shared"
 	"flare-indexer/logger"
 	"time"
@@ -24,12 +25,12 @@ type txBatchIndexer struct {
 }
 
 func NewXChainBatchIndexer(
-	db *gorm.DB,
+	ctx context.IndexerContext,
 	client indexer.Client,
 ) *txBatchIndexer {
-	updater := newXChainInputUpdater(db, client)
+	updater := newXChainInputUpdater(ctx, client)
 	return &txBatchIndexer{
-		db:     db,
+		db:     ctx.DB(),
 		client: client,
 
 		inOutIndexer: shared.NewInputOutputIndexer(updater),

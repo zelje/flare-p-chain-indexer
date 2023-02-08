@@ -22,11 +22,15 @@ type IdIndexKey struct {
 }
 
 type BaseInputUpdater struct {
-	cache utils.Cache[string, []*database.TxOutput] // Map from transaction id to its outputs
+	Cache utils.Cache[string, []*database.TxOutput] // Map from transaction id to its outputs
+}
+
+func (iu *BaseInputUpdater) InitCache(maxSize int) {
+	iu.Cache = utils.NewCache[string, []*database.TxOutput](maxSize)
 }
 
 func (iu *BaseInputUpdater) CacheOutputs(txID string, outs []*database.TxOutput) {
-	iu.cache.Add(txID, outs[:])
+	iu.Cache.Add(txID, outs[:])
 }
 
 // Return map from output tx id to inputs referring to this output which have not been updated yet
@@ -35,7 +39,7 @@ func (iu *BaseInputUpdater) UpdateInputsFromCache(inputs []*database.TxInput) ma
 
 	// Update from cache and fill missing outputs (for inputs)
 	for _, in := range inputs {
-		if outs, ok := iu.cache.Get(in.OutTxID); ok {
+		if outs, ok := iu.Cache.Get(in.OutTxID); ok {
 			in.Address = outs[in.OutIdx].Address
 		} else {
 			ins, ok := notUpdated[in.OutTxID]

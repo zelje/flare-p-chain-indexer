@@ -28,7 +28,7 @@ func CreateXChainTxIndexer(ctx context.IndexerContext) shared.ChainIndexer {
 	idxr.DB = ctx.DB()
 	idxr.Config = config
 
-	idxr.BatchIndexer = NewXChainBatchIndexer(ctx.DB(), client)
+	idxr.BatchIndexer = NewXChainBatchIndexer(ctx, client)
 
 	return &idxr
 }

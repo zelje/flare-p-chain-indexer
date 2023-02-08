@@ -28,9 +28,10 @@ type DBConfig struct {
 }
 
 type IndexerConfig struct {
-	TimeoutMillis int    `yaml:"timeout_millis"`
-	BatchSize     int    `yaml:"batch_size"`
-	StartIndex    uint64 `yaml:"start_index"`
+	TimeoutMillis    int    `yaml:"timeout_millis"`
+	BatchSize        int    `yaml:"batch_size"`
+	StartIndex       uint64 `yaml:"start_index"`
+	OutputsCacheSize int    `yaml:"outputs_cache_size"`
 }
 
 type ChainConfig struct {
@@ -40,9 +41,10 @@ type ChainConfig struct {
 func newConfig() *Config {
 	return &Config{
 		Indexer: IndexerConfig{
-			TimeoutMillis: 3000,
-			BatchSize:     10,
-			StartIndex:    0,
+			TimeoutMillis:    3000,
+			BatchSize:        10,
+			StartIndex:       0,
+			OutputsCacheSize: 1000,
 		},
 		Chain: ChainConfig{
 			IndexerURL: "http://localhost:9650/",

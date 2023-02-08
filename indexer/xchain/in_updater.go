@@ -2,6 +2,7 @@ package xchain
 
 import (
 	"flare-indexer/database"
+	"flare-indexer/indexer/context"
 	"flare-indexer/indexer/shared"
 	"flare-indexer/utils"
 	"flare-indexer/utils/chain"
@@ -20,15 +21,13 @@ type xChainInputUpdater struct {
 	client indexer.Client
 }
 
-func newXChainInputUpdater(db *gorm.DB, client indexer.Client) *xChainInputUpdater {
-	return &xChainInputUpdater{
-		db:     db,
+func newXChainInputUpdater(ctx context.IndexerContext, client indexer.Client) *xChainInputUpdater {
+	ioUpdater := xChainInputUpdater{
+		db:     ctx.DB(),
 		client: client,
 	}
-}
-
-func (iu *xChainInputUpdater) CacheOutputs(txID string, outs []*database.TxOutput) {
-	iu.BaseInputUpdater.CacheOutputs(txID, outs)
+	ioUpdater.InitCache(ctx.Config().Indexer.OutputsCacheSize)
+	return &ioUpdater
 }
 
 func (iu *xChainInputUpdater) UpdateInputs(inputs []*database.TxInput) error {
