@@ -16,6 +16,12 @@ func FetchXChainTxOutputs(db *gorm.DB, ids []string) ([]XChainTxOutput, error) {
 	return txs, err
 }
 
+func FetchPChainTxOutputs(db *gorm.DB, ids []string) ([]PChainTxOutput, error) {
+	var txs []PChainTxOutput
+	err := db.Where("tx_id IN ?", ids).Find(&txs).Error
+	return txs, err
+}
+
 func FetchMigrations(db *gorm.DB) ([]Migration, error) {
 	var migrations []Migration
 	err := db.Order("version asc").Find(&migrations).Error
@@ -49,13 +55,27 @@ func CreateXChainEntities(db *gorm.DB, txs []*XChainTx, ins []*XChainTxInput, ou
 	if err != nil {
 		return err
 	}
-
-	// if db != nil {
-	// 	return fmt.Errorf("rollback test error")
-	// }
 	err = db.Create(&outs).Error
 	if err != nil {
 		return err
 	}
 	return nil
+}
+
+func CreatePChainEntities(db *gorm.DB, txs []*PChainTx, ins []*PChainTxInput, outs []*PChainTxOutput, stakeOuts []*PChainStakeOutput) error {
+	var err error
+
+	err = db.Create(&txs).Error
+	if err != nil {
+		return err
+	}
+	err = db.Create(&ins).Error
+	if err != nil {
+		return err
+	}
+	err = db.Create(&outs).Error
+	if err != nil {
+		return err
+	}
+	return db.Create(&stakeOuts).Error
 }

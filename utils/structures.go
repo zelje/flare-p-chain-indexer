@@ -1,5 +1,13 @@
 package utils
 
+func Map[T, V any](ins []T, f func(T) V) []V {
+	result := make([]V, len(ins))
+	for i, el := range ins {
+		result[i] = f(el)
+	}
+	return result
+}
+
 // Create a map from array with kf providing keys, values are array elements
 func ArrayToMap[T, K comparable](ts []T, kf func(T) K) map[K]T {
 	result := make(map[K]T)

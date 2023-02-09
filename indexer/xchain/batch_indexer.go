@@ -5,6 +5,7 @@ import (
 	"flare-indexer/indexer/context"
 	"flare-indexer/indexer/shared"
 	"flare-indexer/logger"
+	"flare-indexer/utils"
 	"time"
 
 	"github.com/ava-labs/avalanchego/indexer"
@@ -13,9 +14,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// Indexer for X-chain transactions of "type" baseTx
-// Implements ContainerBatchIndexer
-
+// Indexer for X-chain transactions. Implements ContainerBatchIndexer
 type txBatchIndexer struct {
 	db     *gorm.DB
 	client indexer.Client
@@ -80,26 +79,16 @@ func (xi *txBatchIndexer) addTx(container *indexer.Container, baseTx *txs.BaseTx
 	tx.Bytes = container.Bytes
 
 	xi.newTxs = append(xi.newTxs, tx)
-
-	return xi.inOutIndexer.AddTx(tx.TxID, baseTx)
+	return xi.inOutIndexer.AddTx(tx.TxID, &baseTx.BaseTx)
 }
 
 // Persist all entities
 func (i *txBatchIndexer) PersistEntities(db *gorm.DB) error {
 	ins := i.inOutIndexer.GetIns()
-	dbIns := make([]*database.XChainTxInput, 0, len(ins))
-	for _, in := range i.inOutIndexer.GetIns() {
-		dbIns = append(dbIns, &database.XChainTxInput{
-			TxInput: *in,
-		})
-	}
+	dbIns := utils.Map(ins, database.XChainTxInputFromTxInput)
 
 	outs := i.inOutIndexer.GetOuts()
-	dbOuts := make([]*database.XChainTxOutput, 0, len(outs))
-	for _, out := range outs {
-		dbOuts = append(dbOuts, &database.XChainTxOutput{
-			TxOutput: *out,
-		})
-	}
+	dbOuts := utils.Map(outs, database.XChainTxOutputFromTxOutput)
+
 	return database.CreateXChainEntities(db, i.newTxs, dbIns, dbOuts)
 }

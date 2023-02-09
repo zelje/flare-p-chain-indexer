@@ -1,4 +1,4 @@
-package xchain
+package pchain
 
 import (
 	"flare-indexer/config"
@@ -28,13 +28,13 @@ func CreatePChainBlockIndexer(ctx context.IndexerContext) shared.ChainIndexer {
 	idxr.DB = ctx.DB()
 	idxr.Config = config
 
+	idxr.BatchIndexer := NewTxBatchIndexer(xi.DB, xi.Client, xi.Config.BatchSize)
+
 	return &idxr
 }
 
 func (xi *pChainBlockIndexer) Run() error {
-	// batchHandler := NewTxBatchIndexer(xi.DB, xi.Client, xi.Config.BatchSize)
-	// return xi.IndexBatch(batchHandler)
-	return nil
+	return xi.IndexBatch()
 }
 
 func newIndexerClient(cfg *config.ChainConfig) indexer.Client {

@@ -5,7 +5,7 @@ import (
 	"flare-indexer/utils"
 	"fmt"
 
-	"github.com/ava-labs/avalanchego/vms/avm/txs"
+	"github.com/ava-labs/avalanchego/vms/components/avax"
 )
 
 // Indexer for transactions of "type" baseTx (UTXO transactions)
@@ -29,11 +29,11 @@ func (iox *InputOutputIndexer) Reset() {
 	iox.ins = make([]*database.TxInput, 0, 100)
 }
 
-func (iox *InputOutputIndexer) AddTx(txID string, tx *txs.BaseTx) error {
+func (iox *InputOutputIndexer) AddTx(txID string, tx *avax.BaseTx) error {
 	if _, ok := iox.outs[txID]; ok {
 		return nil
 	}
-	outs, err := TxOutputsFromBaseTx(txID, tx)
+	outs, err := TxOutputsFromTxOuts(txID, tx.Outs)
 	if err != nil {
 		return err
 	}
