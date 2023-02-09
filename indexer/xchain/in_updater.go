@@ -30,20 +30,16 @@ func newXChainInputUpdater(ctx context.IndexerContext, client indexer.Client) *x
 	return &ioUpdater
 }
 
-func (iu *xChainInputUpdater) UpdateInputs(inputs []*database.TxInput) error {
-	notUpdated := iu.BaseInputUpdater.UpdateInputsFromCache(inputs)
-	err := iu.updateFromDB(notUpdated)
+func (iu *xChainInputUpdater) UpdateInputs(inputs map[string][]*database.TxInput) error {
+	err := iu.UpdateInputsFromCache(inputs)
 	if err != nil {
 		return err
 	}
-	err = iu.updateFromChain(notUpdated)
+	err = iu.updateFromDB(inputs)
 	if err != nil {
 		return err
 	}
-	if len(notUpdated) > 0 {
-		return fmt.Errorf("unable to fetch transactions with ids %v", utils.Keys(notUpdated))
-	}
-	return nil
+	return iu.updateFromChain(inputs)
 }
 
 // notUpdated is a map from *output* id to inputs referring this output

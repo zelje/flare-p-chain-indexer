@@ -10,7 +10,9 @@ import (
 
 type InputUpdater interface {
 	// Update inputs with addresses. Updater can get outputs from cache, db, chain (indexer, api), ...
-	UpdateInputs(inputs []*database.TxInput) error
+	// Parameter is a map from output tx id to inputs referring to this output which have not been updated yet
+	// Updated inputs should be removed from the map
+	UpdateInputs(inputs map[string][]*database.TxInput) error
 
 	// Put outputs of a transaction to cache -- to avoid updating from chain or database
 	CacheOutputs(txID string, outs []*database.TxOutput)
@@ -33,23 +35,15 @@ func (iu *BaseInputUpdater) CacheOutputs(txID string, outs []*database.TxOutput)
 	iu.Cache.Add(txID, outs[:])
 }
 
-// Return map from output tx id to inputs referring to this output which have not been updated yet
-func (iu *BaseInputUpdater) UpdateInputsFromCache(inputs []*database.TxInput) map[string][]*database.TxInput {
-	notUpdated := make(map[string][]*database.TxInput)
-
-	// Update from cache and fill missing outputs (for inputs)
-	for _, in := range inputs {
-		if outs, ok := iu.Cache.Get(in.OutTxID); ok {
-			in.Address = outs[in.OutIdx].Address
-		} else {
-			ins, ok := notUpdated[in.OutTxID]
-			if !ok {
-				ins = make([]*database.TxInput, 0, 4)
-			}
-			notUpdated[in.OutTxID] = append(ins, in)
+// Update inputs with addresses from outputs in cache
+func (iu *BaseInputUpdater) UpdateInputsFromCache(notUpdated map[string][]*database.TxInput) error {
+	cachedOutputs := make([]*database.TxOutput, 0)
+	for k := range notUpdated {
+		if outs, ok := iu.Cache.Get(k); ok {
+			cachedOutputs = append(cachedOutputs, outs...)
 		}
 	}
-	return notUpdated
+	return UpdateInputsWithOutputs(notUpdated, cachedOutputs)
 }
 
 // Update input address from outputs
