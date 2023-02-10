@@ -30,7 +30,7 @@ func newXChainInputUpdater(ctx context.IndexerContext, client indexer.Client) *x
 	return &ioUpdater
 }
 
-func (iu *xChainInputUpdater) UpdateInputs(inputs map[string][]*database.TxInput) error {
+func (iu *xChainInputUpdater) UpdateInputs(inputs map[string][]shared.Input) error {
 	err := iu.UpdateInputsFromCache(inputs)
 	if err != nil {
 		return err
@@ -43,12 +43,12 @@ func (iu *xChainInputUpdater) UpdateInputs(inputs map[string][]*database.TxInput
 }
 
 // notUpdated is a map from *output* id to inputs referring this output
-func (iu *xChainInputUpdater) updateFromDB(notUpdated map[string][]*database.TxInput) error {
+func (iu *xChainInputUpdater) updateFromDB(notUpdated map[string][]shared.Input) error {
 	outs, err := database.FetchXChainTxOutputs(iu.db, utils.Keys(notUpdated))
 	if err != nil {
 		return err
 	}
-	baseOuts := make([]*database.TxOutput, len(outs))
+	baseOuts := make([]shared.Output, len(outs))
 	for i, o := range outs {
 		baseOuts[i] = &o.TxOutput
 	}
@@ -56,8 +56,8 @@ func (iu *xChainInputUpdater) updateFromDB(notUpdated map[string][]*database.TxI
 }
 
 // notUpdated is a map from *output* id to inputs referring this output
-func (iu *xChainInputUpdater) updateFromChain(notUpdated map[string][]*database.TxInput) error {
-	fetchedOuts := make([]*database.TxOutput, 0, 4*len(notUpdated))
+func (iu *xChainInputUpdater) updateFromChain(notUpdated map[string][]shared.Input) error {
+	fetchedOuts := make([]shared.Output, 0, 4*len(notUpdated))
 	for txId := range notUpdated {
 		container, err := chain.FetchContainerFromIndexer(iu.client, txId)
 		if err != nil {
@@ -72,12 +72,12 @@ func (iu *xChainInputUpdater) updateFromChain(notUpdated map[string][]*database.
 			return err
 		}
 
-		var outs []*database.TxOutput
+		var outs []shared.Output
 		switch unsignedTx := tx.Unsigned.(type) {
 		case *txs.BaseTx:
-			outs, err = shared.TxOutputsFromTxOuts(txId, unsignedTx.Outs)
+			outs, err = shared.OutputsFromTxOuts(txId, unsignedTx.Outs, NewXChainTxOutput /* TODO could be identity, it is not persisted */)
 		case *txs.ImportTx:
-			outs, err = shared.TxOutputsFromTxOuts(txId, unsignedTx.BaseTx.Outs)
+			outs, err = shared.OutputsFromTxOuts(txId, unsignedTx.BaseTx.Outs, NewXChainTxOutput /* TODO could be identity it is not persisted */)
 		default:
 			return fmt.Errorf("transaction with id %s has unsupported type %T", container.ID.String(), unsignedTx)
 		}

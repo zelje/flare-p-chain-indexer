@@ -2,11 +2,13 @@ package pchain
 
 import (
 	"flare-indexer/config"
+	"flare-indexer/database"
 	"flare-indexer/indexer/context"
 	"flare-indexer/indexer/shared"
 	"flare-indexer/utils"
 
 	"github.com/ava-labs/avalanchego/indexer"
+	"github.com/ybbus/jsonrpc/v3"
 )
 
 const (
@@ -20,6 +22,7 @@ type pChainBlockIndexer struct {
 func CreatePChainBlockIndexer(ctx context.IndexerContext) shared.ChainIndexer {
 	config := ctx.Config().Indexer
 	client := newIndexerClient(&ctx.Config().Chain)
+	rpcClient := newJsonRpcClient(&ctx.Config().Chain)
 
 	idxr := pChainBlockIndexer{}
 	idxr.StateName = StateName
@@ -28,7 +31,7 @@ func CreatePChainBlockIndexer(ctx context.IndexerContext) shared.ChainIndexer {
 	idxr.DB = ctx.DB()
 	idxr.Config = config
 
-	idxr.BatchIndexer := NewTxBatchIndexer(xi.DB, xi.Client, xi.Config.BatchSize)
+	idxr.BatchIndexer = NewPChainBatchIndexer(ctx, client, rpcClient)
 
 	return &idxr
 }
@@ -39,4 +42,20 @@ func (xi *pChainBlockIndexer) Run() error {
 
 func newIndexerClient(cfg *config.ChainConfig) indexer.Client {
 	return indexer.NewClient(utils.JoinPaths(cfg.IndexerURL, "ext/index/P/block"))
+}
+
+func newJsonRpcClient(cfg *config.ChainConfig) jsonrpc.RPCClient {
+	return jsonrpc.NewClient(utils.JoinPaths(cfg.IndexerURL, "ext/bc/P"))
+}
+
+func NewPChainTxInput(in *database.TxInput) shared.Input {
+	return &database.PChainTxInput{
+		TxInput: *in,
+	}
+}
+
+func NewPChainTxOutput(out *database.TxOutput) shared.Output {
+	return &database.PChainTxOutput{
+		TxOutput: *out,
+	}
 }

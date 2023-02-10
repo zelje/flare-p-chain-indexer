@@ -28,8 +28,5 @@ type PChainTxInput struct {
 
 type PChainTxOutput struct {
 	TxOutput
-}
-
-type PChainStakeOutput struct {
-	TxOutput
+	Type PChainTxType `gorm:"type:varchar(20)"` // Transaction type
 }

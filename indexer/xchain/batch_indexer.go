@@ -5,7 +5,6 @@ import (
 	"flare-indexer/indexer/context"
 	"flare-indexer/indexer/shared"
 	"flare-indexer/logger"
-	"flare-indexer/utils"
 	"time"
 
 	"github.com/ava-labs/avalanchego/indexer"
@@ -79,16 +78,24 @@ func (xi *txBatchIndexer) addTx(container *indexer.Container, baseTx *txs.BaseTx
 	tx.Bytes = container.Bytes
 
 	xi.newTxs = append(xi.newTxs, tx)
-	return xi.inOutIndexer.AddTx(tx.TxID, &baseTx.BaseTx)
+	return xi.inOutIndexer.AddTx(tx.TxID, &baseTx.BaseTx, NewXChainTxOutput, NewXChainTxInput)
 }
 
 // Persist all entities
 func (i *txBatchIndexer) PersistEntities(db *gorm.DB) error {
 	ins := i.inOutIndexer.GetIns()
-	dbIns := utils.Map(ins, database.XChainTxInputFromTxInput)
-
 	outs := i.inOutIndexer.GetOuts()
-	dbOuts := utils.Map(outs, database.XChainTxOutputFromTxOutput)
+	return database.CreateXChainEntities(db, i.newTxs, ins, outs)
+}
 
-	return database.CreateXChainEntities(db, i.newTxs, dbIns, dbOuts)
+func NewXChainTxInput(in *database.TxInput) shared.Input {
+	return &database.XChainTxInput{
+		TxInput: *in,
+	}
+}
+
+func NewXChainTxOutput(out *database.TxOutput) shared.Output {
+	return &database.XChainTxOutput{
+		TxOutput: *out,
+	}
 }

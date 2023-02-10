@@ -1,7 +1,6 @@
 package shared
 
 import (
-	"flare-indexer/database"
 	"flare-indexer/utils"
 	"fmt"
 
@@ -11,8 +10,8 @@ import (
 // Indexer for transactions of "type" baseTx (UTXO transactions)
 type InputOutputIndexer struct {
 	inUpdater InputUpdater
-	outs      map[string][]*database.TxOutput // tx id -> outputs
-	ins       []*database.TxInput             // tx id -> inputs
+	outs      map[string][]Output // tx id -> outputs
+	ins       []Input             // tx id -> inputs
 }
 
 // Return new Input-Output indexer
@@ -25,33 +24,38 @@ func NewInputOutputIndexer(inUpdater InputUpdater) *InputOutputIndexer {
 }
 
 func (iox *InputOutputIndexer) Reset() {
-	iox.outs = make(map[string][]*database.TxOutput)
-	iox.ins = make([]*database.TxInput, 0, 100)
+	iox.outs = make(map[string][]Output)
+	iox.ins = make([]Input, 0, 100)
 }
 
-func (iox *InputOutputIndexer) AddTx(txID string, tx *avax.BaseTx) error {
+func (iox *InputOutputIndexer) AddTx(
+	txID string,
+	tx *avax.BaseTx,
+	outputCreator DbOutputCreator,
+	inputCreator DbInputCreator,
+) error {
 	if _, ok := iox.outs[txID]; ok {
 		return nil
 	}
-	outs, err := TxOutputsFromTxOuts(txID, tx.Outs)
+	outs, err := OutputsFromTxOuts(txID, tx.Outs, outputCreator)
 	if err != nil {
 		return err
 	}
 	iox.outs[txID] = outs
 	iox.inUpdater.CacheOutputs(txID, outs)
 
-	iox.ins = append(iox.ins, TxInputsFromBaseTx(txID, tx)...)
+	iox.ins = append(iox.ins, InputsFromBaseTx(txID, tx, inputCreator)...)
 	return nil
 }
 
-func (iox *InputOutputIndexer) UpdateInputs(inputs []*database.TxInput) error {
-	notUpdated := make(map[string][]*database.TxInput)
+func (iox *InputOutputIndexer) UpdateInputs(inputs []Input) error {
+	notUpdated := make(map[string][]Input)
 	for _, in := range inputs {
-		ins, ok := notUpdated[in.OutTxID]
+		ins, ok := notUpdated[in.OutTx()]
 		if !ok {
-			ins = make([]*database.TxInput, 0, 4)
+			ins = make([]Input, 0, 4)
 		}
-		notUpdated[in.OutTxID] = append(ins, in)
+		notUpdated[in.OutTx()] = append(ins, in)
 	}
 	err := iox.inUpdater.UpdateInputs(notUpdated)
 	if err != nil {
@@ -67,12 +71,12 @@ func (iox *InputOutputIndexer) ProcessBatch() error {
 	return iox.UpdateInputs(iox.ins)
 }
 
-func (iox *InputOutputIndexer) GetIns() []*database.TxInput {
+func (iox *InputOutputIndexer) GetIns() []Input {
 	return iox.ins
 }
 
-func (iox *InputOutputIndexer) GetOuts() []*database.TxOutput {
-	result := make([]*database.TxOutput, 0, 4*len(iox.outs))
+func (iox *InputOutputIndexer) GetOuts() []Output {
+	result := make([]Output, 0, 4*len(iox.outs))
 	for _, out := range iox.outs {
 		result = append(result, out...)
 	}

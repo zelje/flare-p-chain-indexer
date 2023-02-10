@@ -5,7 +5,6 @@ import (
 	"flare-indexer/indexer/context"
 	"flare-indexer/indexer/shared"
 	"flare-indexer/logger"
-	"flare-indexer/utils"
 	"fmt"
 	"time"
 
@@ -13,6 +12,7 @@ import (
 	"github.com/ava-labs/avalanchego/vms/platformvm/blocks"
 	"github.com/ava-labs/avalanchego/vms/platformvm/txs"
 	"github.com/ava-labs/avalanchego/vms/proposervm/block"
+	"github.com/ybbus/jsonrpc/v3"
 	"gorm.io/gorm"
 )
 
@@ -23,21 +23,20 @@ type txBatchIndexer struct {
 
 	inOutIndexer *shared.InputOutputIndexer
 	newTxs       []*database.PChainTx
-	newStakeOuts []*database.PChainStakeOutput
 }
 
 func NewPChainBatchIndexer(
 	ctx context.IndexerContext,
 	client indexer.Client,
+	rpcClient jsonrpc.RPCClient,
 ) *txBatchIndexer {
-	updater := newPChainInputUpdater(ctx, client)
+	updater := newPChainInputUpdater(ctx, rpcClient)
 	return &txBatchIndexer{
 		db:     ctx.DB(),
 		client: client,
 
 		inOutIndexer: shared.NewInputOutputIndexer(updater),
 		newTxs:       make([]*database.PChainTx, 0),
-		newStakeOuts: make([]*database.PChainStakeOutput, 0),
 	}
 }
 
@@ -115,7 +114,7 @@ func (xi *txBatchIndexer) updateAddValidatorTx(dbTx *database.PChainTx, tx *txs.
 	dbTx.RewardsOwner = ownerAddress
 
 	xi.newTxs = append(xi.newTxs, dbTx)
-	return xi.inOutIndexer.AddTx(dbTx.TxID, &tx.BaseTx.BaseTx)
+	return xi.inOutIndexer.AddTx(dbTx.TxID, &tx.BaseTx.BaseTx, NewPChainTxOutput, NewPChainTxInput)
 }
 
 func (xi *txBatchIndexer) updateAddDelegatorTx(dbTx *database.PChainTx, tx *txs.AddDelegatorTx) error {
@@ -132,7 +131,7 @@ func (xi *txBatchIndexer) updateAddDelegatorTx(dbTx *database.PChainTx, tx *txs.
 	dbTx.RewardsOwner = ownerAddress
 
 	xi.newTxs = append(xi.newTxs, dbTx)
-	return xi.inOutIndexer.AddTx(dbTx.TxID, &tx.BaseTx.BaseTx)
+	return xi.inOutIndexer.AddTx(dbTx.TxID, &tx.BaseTx.BaseTx, NewPChainTxOutput, NewPChainTxInput)
 }
 
 // Common code for AddDelegatorTx and AddValidatorTx
@@ -142,11 +141,10 @@ func (xi *txBatchIndexer) updateAddStakerTx(dbTx *database.PChainTx, tx txs.Perm
 	dbTx.EndTime = tx.EndTime()
 	dbTx.Weight = tx.Weight()
 
-	stakeOuts, err := shared.TxOutputsFromTxOuts(dbTx.TxID, tx.Stake())
+	stakeOuts, err := shared.OutputsFromTxOuts(dbTx.TxID, tx.Stake(), NewPChainTxOutput)
 	if err != nil {
 		return err
 	}
-	xi.newStakeOuts = append(xi.newStakeOuts, utils.Map(stakeOuts, database.PChainStakeOutputFromTxOutput)...)
 	return nil
 }
 
@@ -154,22 +152,19 @@ func (xi *txBatchIndexer) updateImportTx(dbTx *database.PChainTx, tx *txs.Import
 	dbTx.Type = database.PChainImportTx
 	dbTx.ChainID = tx.SourceChain.String()
 	xi.newTxs = append(xi.newTxs, dbTx)
-	return xi.inOutIndexer.AddTx(dbTx.TxID, &tx.BaseTx.BaseTx)
+	return xi.inOutIndexer.AddTx(dbTx.TxID, &tx.BaseTx.BaseTx, NewPChainTxOutput, NewPChainTxInput)
 }
 
 func (xi *txBatchIndexer) updateExportTx(dbTx *database.PChainTx, tx *txs.ExportTx) error {
 	dbTx.Type = database.PChainExportTx
 	dbTx.ChainID = tx.DestinationChain.String()
 	xi.newTxs = append(xi.newTxs, dbTx)
-	return xi.inOutIndexer.AddTx(dbTx.TxID, &tx.BaseTx.BaseTx)
+	return xi.inOutIndexer.AddTx(dbTx.TxID, &tx.BaseTx.BaseTx, NewPChainTxOutput, NewPChainTxInput)
 }
 
 // Persist all entities
 func (xi *txBatchIndexer) PersistEntities(db *gorm.DB) error {
 	ins := xi.inOutIndexer.GetIns()
-	dbIns := utils.Map(ins, database.PChainTxInputFromTxInput)
-
 	outs := xi.inOutIndexer.GetOuts()
-	dbOuts := utils.Map(outs, database.PChainTxOutputFromTxOutput)
-	return database.CreatePChainEntities(db, xi.newTxs, dbIns, dbOuts, xi.newStakeOuts)
+	return database.CreatePChainEntities(db, xi.newTxs, ins, outs)
 }

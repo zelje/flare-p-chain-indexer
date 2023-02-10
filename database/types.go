@@ -21,6 +21,13 @@ const (
 	PChainExportTx          PChainTxType = "EXPORT_TX"
 )
 
+type PChainOutputType string
+
+const (
+	PChainDefaultOutput PChainOutputType = "TX"
+	PChainStakeOutput   PChainOutputType = "STAKE"
+)
+
 // Misc other types
 
 type MigrationStatus string

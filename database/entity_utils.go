@@ -12,12 +12,6 @@ func PChainTxOutputFromTxOutput(out *TxOutput) *PChainTxOutput {
 	}
 }
 
-func PChainStakeOutputFromTxOutput(out *TxOutput) *PChainStakeOutput {
-	return &PChainStakeOutput{
-		TxOutput: *out,
-	}
-}
-
 func XChainTxInputFromTxInput(out *TxInput) *XChainTxInput {
 	return &XChainTxInput{
 		TxInput: *out,

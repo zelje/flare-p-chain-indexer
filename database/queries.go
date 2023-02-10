@@ -44,7 +44,8 @@ func UpdateState(db *gorm.DB, s *State) error {
 	return db.Save(s).Error
 }
 
-func CreateXChainEntities(db *gorm.DB, txs []*XChainTx, ins []*XChainTxInput, outs []*XChainTxOutput) error {
+// TODO: assert the right types or merge with CreatePChainEntities
+func CreateXChainEntities(db *gorm.DB, txs interface{}, ins interface{}, outs interface{}) error {
 	var err error
 
 	err = db.Create(&txs).Error
@@ -55,14 +56,11 @@ func CreateXChainEntities(db *gorm.DB, txs []*XChainTx, ins []*XChainTxInput, ou
 	if err != nil {
 		return err
 	}
-	err = db.Create(&outs).Error
-	if err != nil {
-		return err
-	}
-	return nil
+	return db.Create(&outs).Error
 }
 
-func CreatePChainEntities(db *gorm.DB, txs []*PChainTx, ins []*PChainTxInput, outs []*PChainTxOutput, stakeOuts []*PChainStakeOutput) error {
+// TODO: assert the right types or merge with CreateXChainEntities
+func CreatePChainEntities(db *gorm.DB, txs interface{}, ins interface{}, outs interface{}) error {
 	var err error
 
 	err = db.Create(&txs).Error
@@ -73,9 +71,5 @@ func CreatePChainEntities(db *gorm.DB, txs []*PChainTx, ins []*PChainTxInput, ou
 	if err != nil {
 		return err
 	}
-	err = db.Create(&outs).Error
-	if err != nil {
-		return err
-	}
-	return db.Create(&stakeOuts).Error
+	return db.Create(&outs).Error
 }

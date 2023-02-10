@@ -20,7 +20,6 @@ var (
 		PChainTx{},
 		PChainTxInput{},
 		PChainTxOutput{},
-		PChainStakeOutput{},
 	}
 )
 
