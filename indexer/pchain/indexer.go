@@ -2,7 +2,6 @@ package pchain
 
 import (
 	"flare-indexer/config"
-	"flare-indexer/database"
 	"flare-indexer/indexer/context"
 	"flare-indexer/indexer/shared"
 	"flare-indexer/utils"
@@ -46,16 +45,4 @@ func newIndexerClient(cfg *config.ChainConfig) indexer.Client {
 
 func newJsonRpcClient(cfg *config.ChainConfig) jsonrpc.RPCClient {
 	return jsonrpc.NewClient(utils.JoinPaths(cfg.IndexerURL, "ext/bc/P"))
-}
-
-func NewPChainTxInput(in *database.TxInput) shared.Input {
-	return &database.PChainTxInput{
-		TxInput: *in,
-	}
-}
-
-func NewPChainTxOutput(out *database.TxOutput) shared.Output {
-	return &database.PChainTxOutput{
-		TxOutput: *out,
-	}
 }

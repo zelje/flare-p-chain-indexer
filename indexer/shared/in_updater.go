@@ -63,7 +63,7 @@ func UpdateInputsWithOutputs(inputs map[string][]Input, outputs []Output) error 
 		for _, in := range ins {
 			out, ok := txIdToOutput[IdIndexKey{in.OutTx(), in.OutIndex()}]
 			if !ok {
-				return fmt.Errorf("missing output with index %d of transaction %s", in.OutIndex, in.OutTx)
+				return fmt.Errorf("missing output with index %d of transaction %s", in.OutIndex(), in.OutTx())
 			}
 			in.UpdateAddr(out.Addr())
 		}

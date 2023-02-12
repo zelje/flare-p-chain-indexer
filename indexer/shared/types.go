@@ -1,5 +1,7 @@
 package shared
 
+import "flare-indexer/database"
+
 type Output interface {
 	Tx() string    // transaction id of this output
 	Index() uint32 // output index
@@ -12,4 +14,19 @@ type Input interface {
 	Addr() string     // address
 
 	UpdateAddr(string)
+}
+
+// Create chain specific database object from generic TxOutput (TxInput) type, e.g.,
+// XChainTxOutput, PChainTxInput
+type OutputCreator interface {
+	CreateOutput(out *database.TxOutput) Output
+}
+
+type InputCreator interface {
+	CreateInput(out *database.TxInput) Input
+}
+
+type InputOutputCreator interface {
+	OutputCreator
+	InputCreator
 }

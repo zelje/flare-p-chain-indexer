@@ -11,7 +11,7 @@ import (
 type InputOutputIndexer struct {
 	inUpdater InputUpdater
 	outs      map[string][]Output // tx id -> outputs
-	ins       []Input             // tx id -> inputs
+	ins       []Input             // inputs
 }
 
 // Return new Input-Output indexer
@@ -28,24 +28,33 @@ func (iox *InputOutputIndexer) Reset() {
 	iox.ins = make([]Input, 0, 100)
 }
 
-func (iox *InputOutputIndexer) AddTx(
+func (iox *InputOutputIndexer) AddFromBaseTx(
 	txID string,
 	tx *avax.BaseTx,
-	outputCreator DbOutputCreator,
-	inputCreator DbInputCreator,
+	creator InputOutputCreator,
 ) error {
 	if _, ok := iox.outs[txID]; ok {
 		return nil
 	}
-	outs, err := OutputsFromTxOuts(txID, tx.Outs, outputCreator)
+	outs, err := OutputsFromTxOuts(txID, tx.Outs, creator)
 	if err != nil {
 		return err
 	}
 	iox.outs[txID] = outs
 	iox.inUpdater.CacheOutputs(txID, outs)
 
-	iox.ins = append(iox.ins, InputsFromBaseTx(txID, tx, inputCreator)...)
+	iox.ins = append(iox.ins, InputsFromTxIns(txID, tx.Ins, creator)...)
 	return nil
+}
+
+func (iox *InputOutputIndexer) Add(txID string, outs []Output, ins []Input) {
+	if _, ok := iox.outs[txID]; ok {
+		return
+	}
+	iox.outs[txID] = outs
+	iox.inUpdater.CacheOutputs(txID, outs)
+
+	iox.ins = append(iox.ins, ins...)
 }
 
 func (iox *InputOutputIndexer) UpdateInputs(inputs []Input) error {

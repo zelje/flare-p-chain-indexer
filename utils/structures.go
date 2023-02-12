@@ -1,5 +1,7 @@
 package utils
 
+import "fmt"
+
 func Map[T, V any](ins []T, f func(T) V) []V {
 	result := make([]V, len(ins))
 	for i, el := range ins {
@@ -32,4 +34,16 @@ func Keys[K comparable, V any](m map[K]V) []K {
 		keys = append(keys, k)
 	}
 	return keys
+}
+
+func CastArray[T, V any](a []V) ([]T, error) {
+	result := make([]T, len(a))
+	for i, e := range a {
+		if te, ok := any(e).(T); ok {
+			result[i] = te
+		} else {
+			return nil, fmt.Errorf("error casting item %d", i)
+		}
+	}
+	return result, nil
 }

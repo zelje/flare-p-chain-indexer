@@ -45,31 +45,41 @@ func UpdateState(db *gorm.DB, s *State) error {
 }
 
 // TODO: assert the right types or merge with CreatePChainEntities
-func CreateXChainEntities(db *gorm.DB, txs interface{}, ins interface{}, outs interface{}) error {
-	var err error
-
-	err = db.Create(&txs).Error
-	if err != nil {
-		return err
+func CreateXChainEntities(db *gorm.DB, txs []*XChainTx, ins []*XChainTxInput, outs []*XChainTxOutput) error {
+	if len(txs) > 0 { // attempt to create from empty slice returns error
+		err := db.Create(txs).Error
+		if err != nil {
+			return err
+		}
 	}
-	err = db.Create(&ins).Error
-	if err != nil {
-		return err
+	if len(ins) > 0 {
+		err := db.Create(ins).Error
+		if err != nil {
+			return err
+		}
 	}
-	return db.Create(&outs).Error
+	if len(outs) > 0 {
+		return db.Create(outs).Error
+	}
+	return nil
 }
 
 // TODO: assert the right types or merge with CreateXChainEntities
-func CreatePChainEntities(db *gorm.DB, txs interface{}, ins interface{}, outs interface{}) error {
-	var err error
-
-	err = db.Create(&txs).Error
-	if err != nil {
-		return err
+func CreatePChainEntities(db *gorm.DB, txs []*PChainTx, ins []*PChainTxInput, outs []*PChainTxOutput) error {
+	if len(txs) > 0 { // attempt to create from empty slice returns error
+		err := db.Create(txs).Error
+		if err != nil {
+			return err
+		}
 	}
-	err = db.Create(&ins).Error
-	if err != nil {
-		return err
+	if len(ins) > 0 {
+		err := db.Create(ins).Error
+		if err != nil {
+			return err
+		}
 	}
-	return db.Create(&outs).Error
+	if len(outs) > 0 {
+		return db.Create(outs).Error
+	}
+	return nil
 }

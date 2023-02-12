@@ -10,26 +10,25 @@ import (
 	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
 )
 
-// Create chain specific database object from generic TxOutput (TxInput) type, e.g.,
-// XChainTxOutput, PChainTxInput
-type DbOutputCreator func(out *database.TxOutput) Output
-type DbInputCreator func(out *database.TxInput) Input
-
 // Create database outputs from TransferableOutputs, provided their type is *secp256k1fx.TransferOutput and the
 // number of addresses for each output is 1. Error is returned if these two conditions
 // are not met.
-func OutputsFromTxOuts(txID string, outs []*avax.TransferableOutput, creator DbOutputCreator) ([]Output, error) {
+func OutputsFromTxOuts(txID string, outs []*avax.TransferableOutput, creator OutputCreator) ([]Output, error) {
+	return OutputsFromTxOutsI(txID, outs, 0, creator)
+}
+
+func OutputsFromTxOutsI(txID string, outs []*avax.TransferableOutput, startIndex int, creator OutputCreator) ([]Output, error) {
 	txOuts := make([]Output, len(outs))
 	for outi, cout := range outs {
 		dbOut := &database.TxOutput{
 			TxID: txID,
-			Idx:  uint32(outi),
+			Idx:  uint32(outi + startIndex),
 		}
 		err := UpdateTransferableOutput(dbOut, cout)
 		if err != nil {
 			return nil, err
 		}
-		txOuts[outi] = creator(dbOut)
+		txOuts[outi] = creator.CreateOutput(dbOut)
 	}
 	return txOuts, nil
 }
@@ -69,10 +68,10 @@ func RewardsOwnerAddress(owner fx.Owner) (string, error) {
 
 // Create inputs to BaseTx. Note that addresses of inputs are are not set. They should be updated from
 // cached outputs, outputs from the database or outputs from chain
-func InputsFromBaseTx(txID string, baseTx *avax.BaseTx, creator DbInputCreator) []Input {
-	txIns := make([]Input, len(baseTx.Ins))
-	for ini, in := range baseTx.Ins {
-		txIns[ini] = creator(&database.TxInput{
+func InputsFromTxIns(txID string, ins []*avax.TransferableInput, creator InputCreator) []Input {
+	txIns := make([]Input, len(ins))
+	for ini, in := range ins {
+		txIns[ini] = creator.CreateInput(&database.TxInput{
 			TxID:    txID,
 			OutTxID: in.TxID.String(),
 			OutIdx:  in.OutputIndex,

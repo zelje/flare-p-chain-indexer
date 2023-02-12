@@ -6,6 +6,7 @@ import (
 	"flare-indexer/indexer/shared"
 	"flare-indexer/utils"
 
+	"github.com/ava-labs/avalanchego/vms/platformvm/txs"
 	"github.com/ybbus/jsonrpc/v3"
 	"gorm.io/gorm"
 )
@@ -60,8 +61,16 @@ func (iu *pChainInputUpdater) updateFromChain(notUpdated map[string][]shared.Inp
 			return err
 		}
 
-		txOuts := tx.Unsigned.Outputs()
-		outs, err := shared.OutputsFromTxOuts(txId, txOuts, NewPChainTxOutput)
+		var outs []shared.Output = nil
+		switch unsignedTx := tx.Unsigned.(type) {
+		case *txs.AddValidatorTx:
+			outs, err = getAddStakerTxOutputs(txId, unsignedTx)
+		case *txs.AddDelegatorTx:
+			outs, err = getAddStakerTxOutputs(txId, unsignedTx)
+		default:
+			txOuts := tx.Unsigned.Outputs()
+			outs, err = shared.OutputsFromTxOuts(txId, txOuts, PChainDefaultInputOutputCreator)
+		}
 		if err != nil {
 			return err
 		}

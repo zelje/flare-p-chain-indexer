@@ -5,6 +5,7 @@ import (
 	"flare-indexer/indexer/context"
 	"flare-indexer/indexer/shared"
 	"flare-indexer/logger"
+	"flare-indexer/utils"
 	"time"
 
 	"github.com/ava-labs/avalanchego/indexer"
@@ -73,29 +74,23 @@ func (xi *txBatchIndexer) addTx(container *indexer.Container, baseTx *txs.BaseTx
 	tx.TxID = container.ID.String()
 	tx.TxIndex = index
 	tx.Type = txType
-	tx.Timestamp = time.Unix(container.Timestamp/1e9, container.Timestamp%1e9)
+	tx.Timestamp = time.Unix(container.Timestamp, 0)
 	tx.Memo = string(baseTx.Memo)
 	tx.Bytes = container.Bytes
 
 	xi.newTxs = append(xi.newTxs, tx)
-	return xi.inOutIndexer.AddTx(tx.TxID, &baseTx.BaseTx, NewXChainTxOutput, NewXChainTxInput)
+	return xi.inOutIndexer.AddFromBaseTx(tx.TxID, &baseTx.BaseTx, XChainInputOutputCreator)
 }
 
 // Persist all entities
 func (i *txBatchIndexer) PersistEntities(db *gorm.DB) error {
-	ins := i.inOutIndexer.GetIns()
-	outs := i.inOutIndexer.GetOuts()
+	ins, err := utils.CastArray[*database.XChainTxInput](i.inOutIndexer.GetIns())
+	if err != nil {
+		return err
+	}
+	outs, err := utils.CastArray[*database.XChainTxOutput](i.inOutIndexer.GetOuts())
+	if err != nil {
+		return err
+	}
 	return database.CreateXChainEntities(db, i.newTxs, ins, outs)
-}
-
-func NewXChainTxInput(in *database.TxInput) shared.Input {
-	return &database.XChainTxInput{
-		TxInput: *in,
-	}
-}
-
-func NewXChainTxOutput(out *database.TxOutput) shared.Output {
-	return &database.XChainTxOutput{
-		TxOutput: *out,
-	}
 }
