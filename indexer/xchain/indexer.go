@@ -1,7 +1,7 @@
 package xchain
 
 import (
-	"flare-indexer/config"
+	"flare-indexer/indexer/config"
 	"flare-indexer/indexer/context"
 	"flare-indexer/indexer/shared"
 	"flare-indexer/utils"
@@ -17,8 +17,8 @@ type xChainTxIndexer struct {
 	shared.ChainIndexerBase
 }
 
-func CreateXChainTxIndexer(ctx context.IndexerContext) shared.ChainIndexer {
-	config := ctx.Config().Indexer
+func CreateXChainTxIndexer(ctx context.IndexerContext) *xChainTxIndexer {
+	config := ctx.Config().XChainIndexer
 	client := newClient(&ctx.Config().Chain)
 
 	idxr := xChainTxIndexer{}
@@ -33,8 +33,8 @@ func CreateXChainTxIndexer(ctx context.IndexerContext) shared.ChainIndexer {
 	return &idxr
 }
 
-func (xi *xChainTxIndexer) Run() error {
-	return xi.IndexBatch()
+func (xi *xChainTxIndexer) Run() {
+	xi.ChainIndexerBase.Run()
 }
 
 func newClient(cfg *config.ChainConfig) indexer.Client {

@@ -26,7 +26,7 @@ func newXChainInputUpdater(ctx context.IndexerContext, client indexer.Client) *x
 		db:     ctx.DB(),
 		client: client,
 	}
-	ioUpdater.InitCache(ctx.Config().Indexer.OutputsCacheSize)
+	ioUpdater.InitCache()
 	return &ioUpdater
 }
 

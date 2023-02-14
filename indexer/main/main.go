@@ -4,7 +4,11 @@ import (
 	"flare-indexer/indexer/context"
 	"flare-indexer/indexer/migrations"
 	"flare-indexer/indexer/runner"
+	"flare-indexer/logger"
 	"fmt"
+	"os"
+	"os/signal"
+	"syscall"
 )
 
 func main() {
@@ -18,5 +22,13 @@ func main() {
 		fmt.Printf("%v\n", err)
 		return
 	}
+
+	cancelChan := make(chan os.Signal, 1)
+	signal.Notify(cancelChan, os.Interrupt, syscall.SIGTERM)
+
 	runner.Start(ctx)
+
+	<-cancelChan
+	logger.Info("Stopped flare indexer")
+
 }

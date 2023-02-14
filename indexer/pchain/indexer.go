@@ -1,7 +1,7 @@
 package pchain
 
 import (
-	"flare-indexer/config"
+	"flare-indexer/indexer/config"
 	"flare-indexer/indexer/context"
 	"flare-indexer/indexer/shared"
 	"flare-indexer/utils"
@@ -18,8 +18,8 @@ type pChainBlockIndexer struct {
 	shared.ChainIndexerBase
 }
 
-func CreatePChainBlockIndexer(ctx context.IndexerContext) shared.ChainIndexer {
-	config := ctx.Config().Indexer
+func CreatePChainBlockIndexer(ctx context.IndexerContext) *pChainBlockIndexer {
+	config := ctx.Config().PChainIndexer
 	client := newIndexerClient(&ctx.Config().Chain)
 	rpcClient := newJsonRpcClient(&ctx.Config().Chain)
 
@@ -35,8 +35,8 @@ func CreatePChainBlockIndexer(ctx context.IndexerContext) shared.ChainIndexer {
 	return &idxr
 }
 
-func (xi *pChainBlockIndexer) Run() error {
-	return xi.IndexBatch()
+func (xi *pChainBlockIndexer) Run() {
+	xi.ChainIndexerBase.Run()
 }
 
 func newIndexerClient(cfg *config.ChainConfig) indexer.Client {

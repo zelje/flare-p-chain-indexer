@@ -8,17 +8,6 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-const (
-	LOCAL_CONFIG_FILE string = "config.local.yml"
-	CONFIG_FILE       string = "config.yml"
-)
-
-type Config struct {
-	DB      DBConfig      `yaml:"db"`
-	Chain   ChainConfig   `yaml:"chain"`
-	Indexer IndexerConfig `yaml:"indexer"`
-}
-
 type DBConfig struct {
 	Host     string `yaml:"host" envconfig:"DB_HOST"`
 	Port     int    `yaml:"port" envconfig:"DB_PORT"`
@@ -27,49 +16,7 @@ type DBConfig struct {
 	Password string `yaml:"password" envconfig:"DB_PASSWORD"`
 }
 
-type IndexerConfig struct {
-	TimeoutMillis    int    `yaml:"timeout_millis"`
-	BatchSize        int    `yaml:"batch_size"`
-	StartIndex       uint64 `yaml:"start_index"`
-	OutputsCacheSize int    `yaml:"outputs_cache_size"`
-}
-
-type ChainConfig struct {
-	IndexerURL string `yaml:"indexer_url" envconfig:"CHAIN_INDEXER_URL"`
-}
-
-func newConfig() *Config {
-	return &Config{
-		Indexer: IndexerConfig{
-			TimeoutMillis:    3000,
-			BatchSize:        10,
-			StartIndex:       0,
-			OutputsCacheSize: 1000,
-		},
-		Chain: ChainConfig{
-			IndexerURL: "http://localhost:9650/",
-		},
-	}
-}
-
-func BuildConfig() (*Config, error) {
-	cfg := newConfig()
-	err := parseConfigFile(cfg, CONFIG_FILE)
-	if err != nil {
-		return nil, err
-	}
-	err = parseConfigFile(cfg, LOCAL_CONFIG_FILE)
-	if err != nil {
-		return nil, err
-	}
-	err = readEnv(cfg)
-	if err != nil {
-		return nil, err
-	}
-	return cfg, nil
-}
-
-func parseConfigFile(cfg *Config, fileName string) error {
+func ParseConfigFile(cfg interface{}, fileName string) error {
 	f, err := os.Open(fileName)
 	if err != nil {
 		return fmt.Errorf("error opening config file: %w", err)
@@ -84,7 +31,7 @@ func parseConfigFile(cfg *Config, fileName string) error {
 	return nil
 }
 
-func readEnv(cfg *Config) error {
+func ReadEnv(cfg interface{}) error {
 	err := envconfig.Process("", cfg)
 	if err != nil {
 		return fmt.Errorf("error reading env config: %w", err)

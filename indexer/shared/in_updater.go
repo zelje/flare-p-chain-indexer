@@ -28,7 +28,7 @@ type BaseInputUpdater struct {
 	cache map[IdIndexKey]Output
 }
 
-func (iu *BaseInputUpdater) InitCache(maxSize int) {
+func (iu *BaseInputUpdater) InitCache() {
 	iu.cache = make(map[IdIndexKey]Output)
 }
 

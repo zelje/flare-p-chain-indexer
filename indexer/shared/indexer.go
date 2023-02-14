@@ -1,8 +1,8 @@
 package shared
 
 import (
-	"flare-indexer/config"
 	"flare-indexer/database"
+	"flare-indexer/indexer/config"
 	"flare-indexer/logger"
 	"flare-indexer/utils/chain"
 	"time"
@@ -10,10 +10,6 @@ import (
 	"github.com/ava-labs/avalanchego/indexer"
 	"gorm.io/gorm"
 )
-
-type ChainIndexer interface {
-	Run() error
-}
 
 type ContainerBatchIndexer interface {
 	Reset(containerLen int)
@@ -107,4 +103,17 @@ func (ci *ChainIndexerBase) ProcessContainers(nextIndex uint64, containers []ind
 	}
 
 	return index, nil
+}
+
+func (ci *ChainIndexerBase) Run() {
+	if !ci.Config.Enabled {
+		return
+	}
+	ticker := time.NewTicker(time.Duration(ci.Config.TimeoutMillis * int(time.Millisecond)))
+	for range ticker.C {
+		err := ci.IndexBatch()
+		if err != nil {
+			logger.Error("%s indexer error %v", ci.IndexerName, err)
+		}
+	}
 }

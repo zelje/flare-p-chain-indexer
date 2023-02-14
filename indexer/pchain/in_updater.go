@@ -23,7 +23,7 @@ func newPChainInputUpdater(ctx context.IndexerContext, client jsonrpc.RPCClient)
 		db:     ctx.DB(),
 		client: client,
 	}
-	ioUpdater.InitCache(ctx.Config().Indexer.OutputsCacheSize)
+	ioUpdater.InitCache()
 	return &ioUpdater
 }
 

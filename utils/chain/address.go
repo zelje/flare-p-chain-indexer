@@ -1,4 +1,4 @@
-package utils
+package chain
 
 import "github.com/ava-labs/avalanchego/utils/formatting/address"
 

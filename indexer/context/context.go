@@ -1,8 +1,8 @@
 package context
 
 import (
-	"flare-indexer/config"
 	"flare-indexer/database"
+	"flare-indexer/indexer/config"
 
 	"gorm.io/gorm"
 )
