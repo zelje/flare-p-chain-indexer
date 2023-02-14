@@ -10,6 +10,7 @@ type PChainTx struct {
 	Type         PChainTxType `gorm:"type:varchar(20)"`                 // Transaction type
 	TxID         string       `gorm:"type:varchar(50);unique;not null"` // Transaction ID
 	BlockID      string       `gorm:"type:varchar(50);not null"`        // Block ID
+	RewardTxID   string       `gorm:"type:varchar(50)"`                 // Referred transaction id in case of reward validator tx
 	BlockIndex   uint64       // Block index
 	Timestamp    time.Time
 	ChainID      string    `gorm:"type:varchar(50)"` // Filled in case of export or import transaction

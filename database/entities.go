@@ -30,6 +30,7 @@ type State struct {
 type TxInput struct {
 	BaseEntity
 	TxID    string `gorm:"type:varchar(50);not null"` // Transaction ID
+	Amount  uint64
 	Address string `gorm:"type:varchar(60);index"`
 	OutTxID string `gorm:"type:varchar(50)"` // Transaction ID with output
 	OutIdx  uint32 // Index of the output transaction

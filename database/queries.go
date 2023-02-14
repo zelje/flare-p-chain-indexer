@@ -44,9 +44,8 @@ func UpdateState(db *gorm.DB, s *State) error {
 	return db.Save(s).Error
 }
 
-// TODO: assert the right types or merge with CreatePChainEntities
 func CreateXChainEntities(db *gorm.DB, txs []*XChainTx, ins []*XChainTxInput, outs []*XChainTxOutput) error {
-	if len(txs) > 0 { // attempt to create from empty slice returns error
+	if len(txs) > 0 { // attempt to create from an empty slice returns error
 		err := db.Create(txs).Error
 		if err != nil {
 			return err
@@ -64,9 +63,8 @@ func CreateXChainEntities(db *gorm.DB, txs []*XChainTx, ins []*XChainTxInput, ou
 	return nil
 }
 
-// TODO: assert the right types or merge with CreateXChainEntities
 func CreatePChainEntities(db *gorm.DB, txs []*PChainTx, ins []*PChainTxInput, outs []*PChainTxOutput) error {
-	if len(txs) > 0 { // attempt to create from empty slice returns error
+	if len(txs) > 0 { // attempt to create from an empty slice returns error
 		err := db.Create(txs).Error
 		if err != nil {
 			return err

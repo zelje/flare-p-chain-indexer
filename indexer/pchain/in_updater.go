@@ -4,9 +4,9 @@ import (
 	"flare-indexer/database"
 	"flare-indexer/indexer/context"
 	"flare-indexer/indexer/shared"
-	"flare-indexer/utils"
 
 	"github.com/ava-labs/avalanchego/vms/platformvm/txs"
+	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/ybbus/jsonrpc/v3"
 	"gorm.io/gorm"
 )
@@ -27,55 +27,71 @@ func newPChainInputUpdater(ctx context.IndexerContext, client jsonrpc.RPCClient)
 	return &ioUpdater
 }
 
-func (iu *pChainInputUpdater) UpdateInputs(inputs map[string][]shared.Input) error {
-	err := iu.UpdateInputsFromCache(inputs)
+func (iu *pChainInputUpdater) UpdateInputs(inputs shared.InputList) (mapset.Set[string], error) {
+	missingTxIds := iu.UpdateInputsFromCache(inputs)
+	missingTxIds, err := iu.updateFromDB(inputs, missingTxIds)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	err = iu.updateFromDB(inputs)
-	if err != nil {
-		return err
-	}
-	return iu.updateFromChain(inputs)
+	return iu.updateFromChain(inputs, missingTxIds)
 }
 
 // notUpdated is a map from *output* id to inputs referring this output
-func (iu *pChainInputUpdater) updateFromDB(notUpdated map[string][]shared.Input) error {
-	outs, err := database.FetchPChainTxOutputs(iu.db, utils.Keys(notUpdated))
+func (iu *pChainInputUpdater) updateFromDB(
+	inputs shared.InputList,
+	missingTxIds mapset.Set[string],
+) (mapset.Set[string], error) {
+	outs, err := database.FetchPChainTxOutputs(iu.db, missingTxIds.ToSlice())
 	if err != nil {
-		return err
+		return nil, err
 	}
-	baseOuts := make([]shared.Output, len(outs))
-	for i, o := range outs {
-		baseOuts[i] = &o.TxOutput
+	baseOuts := make(map[shared.IdIndexKey]shared.Output)
+	for _, out := range outs {
+		baseOuts[shared.NewIdIndexKey(out.TxID, out.Index())] = &out.TxOutput
 	}
-	return shared.UpdateInputsWithOutputs(notUpdated, baseOuts)
+	return inputs.UpdateWithOutputs(baseOuts), nil
 }
 
 // notUpdated is a map from *output* id to inputs referring this output
-func (iu *pChainInputUpdater) updateFromChain(notUpdated map[string][]shared.Input) error {
-	fetchedOuts := make([]shared.Output, 0, 4*len(notUpdated))
-	for txId := range notUpdated {
+func (iu *pChainInputUpdater) updateFromChain(
+	inputs shared.InputList,
+	missingTxIds mapset.Set[string],
+) (mapset.Set[string], error) {
+	fetchedOuts := make(map[shared.IdIndexKey]shared.Output)
+	for txId := range missingTxIds.Iterator().C {
 		tx, err := CallPChainGetTxApi(iu.client, txId)
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		var outs []shared.Output = nil
 		switch unsignedTx := tx.Unsigned.(type) {
 		case *txs.AddValidatorTx:
-			outs, err = getAddStakerTxOutputs(txId, unsignedTx)
+			outs, err = iu.getAddStakerTxAndRewardTxOutputs(txId, unsignedTx)
 		case *txs.AddDelegatorTx:
-			outs, err = getAddStakerTxOutputs(txId, unsignedTx)
+			outs, err = iu.getAddStakerTxAndRewardTxOutputs(txId, unsignedTx)
 		default:
 			txOuts := tx.Unsigned.Outputs()
-			outs, err = shared.OutputsFromTxOuts(txId, txOuts, PChainDefaultInputOutputCreator)
+			outs, err = shared.OutputsFromTxOuts(txId, txOuts, 0, PChainDefaultInputOutputCreator)
 		}
 		if err != nil {
-			return err
+			return nil, err
 		}
-
-		fetchedOuts = append(fetchedOuts, outs...)
+		for _, out := range outs {
+			fetchedOuts[shared.NewIdIndexKey(out.Tx(), out.Index())] = out
+		}
 	}
-	return shared.UpdateInputsWithOutputs(notUpdated, fetchedOuts)
+	return inputs.UpdateWithOutputs(fetchedOuts), nil
+}
+
+func (iu *pChainInputUpdater) getAddStakerTxAndRewardTxOutputs(txId string, tx txs.PermissionlessStaker) ([]shared.Output, error) {
+	outs, err := getAddStakerTxOutputs(txId, tx)
+	if err != nil {
+		return nil, err
+	}
+	rewardOuts, err := getRewardOutputs(iu.client, txId)
+	if err != nil {
+		return nil, err
+	}
+	return append(outs, rewardOuts...), nil
 }

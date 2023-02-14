@@ -39,7 +39,7 @@ func NewXChainBatchIndexer(
 
 func (xi *txBatchIndexer) Reset(containerLen int) {
 	xi.newTxs = make([]*database.XChainTx, 0, containerLen)
-	xi.inOutIndexer.Reset()
+	xi.inOutIndexer.Reset(containerLen)
 }
 
 func (xi *txBatchIndexer) AddContainer(index uint64, container indexer.Container) error {
@@ -79,7 +79,7 @@ func (xi *txBatchIndexer) addTx(container *indexer.Container, baseTx *txs.BaseTx
 	tx.Bytes = container.Bytes
 
 	xi.newTxs = append(xi.newTxs, tx)
-	return xi.inOutIndexer.AddFromBaseTx(tx.TxID, &baseTx.BaseTx, XChainInputOutputCreator)
+	return xi.inOutIndexer.AddNewFromBaseTx(tx.TxID, &baseTx.BaseTx, XChainInputOutputCreator)
 }
 
 // Persist all entities
@@ -88,7 +88,7 @@ func (i *txBatchIndexer) PersistEntities(db *gorm.DB) error {
 	if err != nil {
 		return err
 	}
-	outs, err := utils.CastArray[*database.XChainTxOutput](i.inOutIndexer.GetOuts())
+	outs, err := utils.CastArray[*database.XChainTxOutput](i.inOutIndexer.GetNewOuts())
 	if err != nil {
 		return err
 	}

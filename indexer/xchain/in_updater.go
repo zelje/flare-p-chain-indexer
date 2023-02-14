@@ -4,13 +4,13 @@ import (
 	"flare-indexer/database"
 	"flare-indexer/indexer/context"
 	"flare-indexer/indexer/shared"
-	"flare-indexer/utils"
 	"flare-indexer/utils/chain"
 	"fmt"
 
 	"github.com/ava-labs/avalanchego/indexer"
 	"github.com/ava-labs/avalanchego/vms/avm/txs"
 	"github.com/ava-labs/avalanchego/wallet/chain/x"
+	mapset "github.com/deckarep/golang-set/v2"
 	"gorm.io/gorm"
 )
 
@@ -30,38 +30,39 @@ func newXChainInputUpdater(ctx context.IndexerContext, client indexer.Client) *x
 	return &ioUpdater
 }
 
-func (iu *xChainInputUpdater) UpdateInputs(inputs map[string][]shared.Input) error {
-	err := iu.UpdateInputsFromCache(inputs)
+func (iu *xChainInputUpdater) UpdateInputs(inputs shared.InputList) (mapset.Set[string], error) {
+	missingTxIds := iu.UpdateInputsFromCache(inputs)
+	missingTxIds, err := iu.updateFromDB(inputs, missingTxIds)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	err = iu.updateFromDB(inputs)
-	if err != nil {
-		return err
-	}
-	return iu.updateFromChain(inputs)
+	return iu.updateFromChain(inputs, missingTxIds)
 }
 
-// notUpdated is a map from *output* id to inputs referring this output
-func (iu *xChainInputUpdater) updateFromDB(notUpdated map[string][]shared.Input) error {
-	outs, err := database.FetchXChainTxOutputs(iu.db, utils.Keys(notUpdated))
+func (iu *xChainInputUpdater) updateFromDB(
+	inputs shared.InputList,
+	missingTxIds mapset.Set[string],
+) (mapset.Set[string], error) {
+	outs, err := database.FetchXChainTxOutputs(iu.db, missingTxIds.ToSlice())
 	if err != nil {
-		return err
+		return nil, err
 	}
-	baseOuts := make([]shared.Output, len(outs))
-	for i, o := range outs {
-		baseOuts[i] = &o.TxOutput
+	baseOuts := make(map[shared.IdIndexKey]shared.Output)
+	for _, out := range outs {
+		baseOuts[shared.NewIdIndexKey(out.TxID, out.Index())] = &out.TxOutput
 	}
-	return shared.UpdateInputsWithOutputs(notUpdated, baseOuts)
+	return inputs.UpdateWithOutputs(baseOuts), nil
 }
 
-// notUpdated is a map from *output* id to inputs referring this output
-func (iu *xChainInputUpdater) updateFromChain(notUpdated map[string][]shared.Input) error {
-	fetchedOuts := make([]shared.Output, 0, 4*len(notUpdated))
-	for txId := range notUpdated {
+func (iu *xChainInputUpdater) updateFromChain(
+	inputs shared.InputList,
+	missingTxIds mapset.Set[string],
+) (mapset.Set[string], error) {
+	fetchedOuts := make(map[shared.IdIndexKey]shared.Output)
+	for txId := range missingTxIds.Iterator().C {
 		container, err := chain.FetchContainerFromIndexer(iu.client, txId)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		if container == nil {
 			continue
@@ -69,23 +70,24 @@ func (iu *xChainInputUpdater) updateFromChain(notUpdated map[string][]shared.Inp
 
 		tx, err := x.Parser.ParseGenesisTx(container.Bytes)
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		var outs []shared.Output
 		switch unsignedTx := tx.Unsigned.(type) {
 		case *txs.BaseTx:
-			outs, err = shared.OutputsFromTxOuts(txId, unsignedTx.Outs, XChainInputOutputCreator /* TODO could be identity, it is not persisted */)
+			outs, err = shared.OutputsFromTxOuts(txId, unsignedTx.Outs, 0, XChainInputOutputCreator /* TODO could be identity, it is not persisted */)
 		case *txs.ImportTx:
-			outs, err = shared.OutputsFromTxOuts(txId, unsignedTx.BaseTx.Outs, XChainInputOutputCreator /* TODO could be identity it is not persisted */)
+			outs, err = shared.OutputsFromTxOuts(txId, unsignedTx.BaseTx.Outs, 0, XChainInputOutputCreator /* TODO could be identity it is not persisted */)
 		default:
-			return fmt.Errorf("transaction with id %s has unsupported type %T", container.ID.String(), unsignedTx)
+			return nil, fmt.Errorf("transaction with id %s has unsupported type %T", container.ID.String(), unsignedTx)
 		}
 		if err != nil {
-			return err
+			return nil, err
 		}
-
-		fetchedOuts = append(fetchedOuts, outs...)
+		for _, out := range outs {
+			fetchedOuts[shared.NewIdIndexKey(out.Tx(), out.Index())] = out
+		}
 	}
-	return shared.UpdateInputsWithOutputs(notUpdated, fetchedOuts)
+	return inputs.UpdateWithOutputs(fetchedOuts), nil
 }

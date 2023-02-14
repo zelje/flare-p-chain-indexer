@@ -8,6 +8,7 @@ import (
 var (
 	PChainDefaultInputOutputCreator = inputOutputCreator{outputType: database.PChainDefaultOutput}
 	PChainStakerInputOutputCreator  = inputOutputCreator{outputType: database.PChainStakeOutput}
+	PChainRewardOutputCreator       = inputOutputCreator{outputType: database.PChainRewardOutput}
 )
 
 type inputCreator struct{}

@@ -26,6 +26,7 @@ type PChainOutputType string
 const (
 	PChainDefaultOutput PChainOutputType = "TX"
 	PChainStakeOutput   PChainOutputType = "STAKE"
+	PChainRewardOutput  PChainOutputType = "REWARD"
 )
 
 // Misc other types

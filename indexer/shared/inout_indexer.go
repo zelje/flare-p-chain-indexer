@@ -1,82 +1,71 @@
 package shared
 
 import (
-	"flare-indexer/utils"
 	"fmt"
 
 	"github.com/ava-labs/avalanchego/vms/components/avax"
 )
 
-// Indexer for transactions of "type" baseTx (UTXO transactions)
+// Indexer for inputs and outputs of transactions for batch processing
 type InputOutputIndexer struct {
 	inUpdater InputUpdater
-	outs      map[string][]Output // tx id -> outputs
-	ins       []Input             // inputs
+
+	// Outputs of new transactions in a batch or additional outputs (reward transactions),
+	// outputs should be chain-specific database objects
+	outs []Output
+
+	// Inputs of new transactions, should be chain-specific database objects
+	ins []Input
 }
 
-// Return new Input-Output indexer
+// Return new input output indexer
 func NewInputOutputIndexer(inUpdater InputUpdater) *InputOutputIndexer {
 	indexer := InputOutputIndexer{
 		inUpdater: inUpdater,
 	}
-	indexer.Reset()
+	indexer.Reset(0)
 	return &indexer
 }
 
-func (iox *InputOutputIndexer) Reset() {
-	iox.outs = make(map[string][]Output)
-	iox.ins = make([]Input, 0, 100)
+// Should be called before new batch is started
+func (iox *InputOutputIndexer) Reset(containersLen int) {
+	iox.outs = make([]Output, 0, 2*containersLen)
+	iox.ins = make([]Input, 0, 2*containersLen)
 }
 
-func (iox *InputOutputIndexer) AddFromBaseTx(
+func (iox *InputOutputIndexer) AddNewFromBaseTx(
 	txID string,
 	tx *avax.BaseTx,
 	creator InputOutputCreator,
 ) error {
-	if _, ok := iox.outs[txID]; ok {
-		return nil
-	}
-	outs, err := OutputsFromTxOuts(txID, tx.Outs, creator)
+	outs, err := OutputsFromTxOuts(txID, tx.Outs, 0, creator)
 	if err != nil {
 		return err
 	}
-	iox.outs[txID] = outs
-	iox.inUpdater.CacheOutputs(txID, outs)
-
+	iox.outs = append(iox.outs, outs...)
 	iox.ins = append(iox.ins, InputsFromTxIns(txID, tx.Ins, creator)...)
 	return nil
 }
 
-func (iox *InputOutputIndexer) Add(txID string, outs []Output, ins []Input) {
-	if _, ok := iox.outs[txID]; ok {
-		return
-	}
-	iox.outs[txID] = outs
-	iox.inUpdater.CacheOutputs(txID, outs)
-
+func (iox *InputOutputIndexer) Add(outs []Output, ins []Input) {
+	iox.outs = append(iox.outs, outs...)
 	iox.ins = append(iox.ins, ins...)
 }
 
 func (iox *InputOutputIndexer) UpdateInputs(inputs []Input) error {
-	notUpdated := make(map[string][]Input)
-	for _, in := range inputs {
-		ins, ok := notUpdated[in.OutTx()]
-		if !ok {
-			ins = make([]Input, 0, 4)
-		}
-		notUpdated[in.OutTx()] = append(ins, in)
-	}
-	err := iox.inUpdater.UpdateInputs(notUpdated)
+	list := NewInputList(inputs)
+	notUpdated, err := iox.inUpdater.UpdateInputs(list)
 	if err != nil {
 		return err
 	}
-	if len(notUpdated) > 0 {
-		return fmt.Errorf("unable to fetch transactions with ids %v", utils.Keys(notUpdated))
+	if notUpdated.Cardinality() > 0 {
+		return fmt.Errorf("unable to fetch transactions with ids %v", notUpdated)
 	}
 	return nil
 }
 
 func (iox *InputOutputIndexer) ProcessBatch() error {
+	iox.inUpdater.CacheOutputs(iox.outs)
 	return iox.UpdateInputs(iox.ins)
 }
 
@@ -84,10 +73,6 @@ func (iox *InputOutputIndexer) GetIns() []Input {
 	return iox.ins
 }
 
-func (iox *InputOutputIndexer) GetOuts() []Output {
-	result := make([]Output, 0, 4*len(iox.outs))
-	for _, out := range iox.outs {
-		result = append(result, out...)
-	}
-	return result
+func (iox *InputOutputIndexer) GetNewOuts() []Output {
+	return iox.outs
 }

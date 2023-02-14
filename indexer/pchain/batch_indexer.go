@@ -12,6 +12,7 @@ import (
 	"github.com/ava-labs/avalanchego/indexer"
 	"github.com/ava-labs/avalanchego/vms/components/avax"
 	"github.com/ava-labs/avalanchego/vms/platformvm/blocks"
+	"github.com/ava-labs/avalanchego/vms/platformvm/fx"
 	"github.com/ava-labs/avalanchego/vms/platformvm/txs"
 	"github.com/ava-labs/avalanchego/vms/proposervm/block"
 	"github.com/ybbus/jsonrpc/v3"
@@ -20,8 +21,9 @@ import (
 
 // Indexer for P-chain transactions. Implements ContainerBatchIndexer
 type txBatchIndexer struct {
-	db     *gorm.DB
-	client indexer.Client
+	db        *gorm.DB
+	client    indexer.Client
+	rpcClient jsonrpc.RPCClient
 
 	inOutIndexer *shared.InputOutputIndexer
 	newTxs       []*database.PChainTx
@@ -34,8 +36,9 @@ func NewPChainBatchIndexer(
 ) *txBatchIndexer {
 	updater := newPChainInputUpdater(ctx, rpcClient)
 	return &txBatchIndexer{
-		db:     ctx.DB(),
-		client: client,
+		db:        ctx.DB(),
+		client:    client,
+		rpcClient: rpcClient,
 
 		inOutIndexer: shared.NewInputOutputIndexer(updater),
 		newTxs:       make([]*database.PChainTx, 0),
@@ -44,7 +47,7 @@ func NewPChainBatchIndexer(
 
 func (xi *txBatchIndexer) Reset(containerLen int) {
 	xi.newTxs = make([]*database.PChainTx, 0, containerLen)
-	xi.inOutIndexer.Reset()
+	xi.inOutIndexer.Reset(containerLen)
 }
 
 func (xi *txBatchIndexer) AddContainer(index uint64, container indexer.Container) error {
@@ -87,7 +90,7 @@ func (xi *txBatchIndexer) addTx(container *indexer.Container, tx *txs.Tx, index 
 	var err error = nil
 	switch unsignedTx := tx.Unsigned.(type) {
 	case *txs.RewardValidatorTx:
-		dbTx.Type = database.PChainRewardValidatorTx
+		err = xi.updateRewardValidatorTx(dbTx, unsignedTx)
 	case *txs.AddValidatorTx:
 		err = xi.updateAddValidatorTx(dbTx, unsignedTx)
 	case *txs.AddDelegatorTx:
@@ -102,38 +105,41 @@ func (xi *txBatchIndexer) addTx(container *indexer.Container, tx *txs.Tx, index 
 	return err
 }
 
-func (xi *txBatchIndexer) updateAddValidatorTx(dbTx *database.PChainTx, tx *txs.AddValidatorTx) error {
-	dbTx.Type = database.PChainAddValidatorTx
-	ownerAddress, err := shared.RewardsOwnerAddress(tx.RewardsOwner)
+func (xi *txBatchIndexer) updateRewardValidatorTx(dbTx *database.PChainTx, tx *txs.RewardValidatorTx) error {
+	dbTx.Type = database.PChainRewardValidatorTx
+	dbTx.RewardTxID = tx.TxID.String()
+
+	outs, err := getRewardOutputs(xi.rpcClient, dbTx.RewardTxID)
 	if err != nil {
 		return err
 	}
-	dbTx.RewardsOwner = ownerAddress
-	return xi.updateAddStakerTx(dbTx, tx, tx.Ins)
+	xi.inOutIndexer.Add(outs, nil)
+	xi.newTxs = append(xi.newTxs, dbTx)
+	return nil
+}
+
+func (xi *txBatchIndexer) updateAddValidatorTx(dbTx *database.PChainTx, tx *txs.AddValidatorTx) error {
+	dbTx.Type = database.PChainAddValidatorTx
+	return xi.updateAddStakerTx(dbTx, tx, tx.Ins, tx.RewardsOwner)
 }
 
 func (xi *txBatchIndexer) updateAddDelegatorTx(dbTx *database.PChainTx, tx *txs.AddDelegatorTx) error {
 	dbTx.Type = database.PChainAddDelegatorTx
-	ownerAddress, err := shared.RewardsOwnerAddress(tx.DelegationRewardsOwner)
-	if err != nil {
-		return err
-	}
-	dbTx.RewardsOwner = ownerAddress
-	return xi.updateAddStakerTx(dbTx, tx, tx.Ins)
+	return xi.updateAddStakerTx(dbTx, tx, tx.Ins, tx.DelegationRewardsOwner)
 }
 
 func (xi *txBatchIndexer) updateImportTx(dbTx *database.PChainTx, tx *txs.ImportTx) error {
 	dbTx.Type = database.PChainImportTx
 	dbTx.ChainID = tx.SourceChain.String()
 	xi.newTxs = append(xi.newTxs, dbTx)
-	return xi.inOutIndexer.AddFromBaseTx(dbTx.TxID, &tx.BaseTx.BaseTx, PChainDefaultInputOutputCreator)
+	return xi.inOutIndexer.AddNewFromBaseTx(dbTx.TxID, &tx.BaseTx.BaseTx, PChainDefaultInputOutputCreator)
 }
 
 func (xi *txBatchIndexer) updateExportTx(dbTx *database.PChainTx, tx *txs.ExportTx) error {
 	dbTx.Type = database.PChainExportTx
 	dbTx.ChainID = tx.DestinationChain.String()
 	xi.newTxs = append(xi.newTxs, dbTx)
-	return xi.inOutIndexer.AddFromBaseTx(dbTx.TxID, &tx.BaseTx.BaseTx, PChainDefaultInputOutputCreator)
+	return xi.inOutIndexer.AddNewFromBaseTx(dbTx.TxID, &tx.BaseTx.BaseTx, PChainDefaultInputOutputCreator)
 }
 
 // Persist all entities
@@ -142,7 +148,7 @@ func (xi *txBatchIndexer) PersistEntities(db *gorm.DB) error {
 	if err != nil {
 		return err
 	}
-	outs, err := utils.CastArray[*database.PChainTxOutput](xi.inOutIndexer.GetOuts())
+	outs, err := utils.CastArray[*database.PChainTxOutput](xi.inOutIndexer.GetNewOuts())
 	if err != nil {
 		return err
 	}
@@ -154,11 +160,18 @@ func (xi *txBatchIndexer) updateAddStakerTx(
 	dbTx *database.PChainTx,
 	tx txs.PermissionlessStaker,
 	txIns []*avax.TransferableInput,
+	rewardsOwner fx.Owner,
 ) error {
 	dbTx.NodeID = tx.NodeID().String()
 	dbTx.StartTime = tx.StartTime()
 	dbTx.EndTime = tx.EndTime()
 	dbTx.Weight = tx.Weight()
+
+	ownerAddress, err := shared.RewardsOwnerAddress(rewardsOwner)
+	if err != nil {
+		return err
+	}
+	dbTx.RewardsOwner = ownerAddress
 
 	outs, err := getAddStakerTxOutputs(dbTx.TxID, tx)
 	if err != nil {
@@ -167,19 +180,27 @@ func (xi *txBatchIndexer) updateAddStakerTx(
 	ins := shared.InputsFromTxIns(dbTx.TxID, txIns, PChainDefaultInputOutputCreator)
 
 	xi.newTxs = append(xi.newTxs, dbTx)
-	xi.inOutIndexer.Add(dbTx.TxID, outs, ins)
+	xi.inOutIndexer.Add(outs, ins)
 	return nil
 }
 
 func getAddStakerTxOutputs(txID string, tx txs.PermissionlessStaker) ([]shared.Output, error) {
-	outs, err := shared.OutputsFromTxOuts(txID, tx.Outputs(), PChainDefaultInputOutputCreator)
+	outs, err := shared.OutputsFromTxOuts(txID, tx.Outputs(), 0, PChainDefaultInputOutputCreator)
 	if err != nil {
 		return nil, err
 	}
-	stakeOuts, err := shared.OutputsFromTxOutsI(txID, tx.Stake(), len(outs), PChainStakerInputOutputCreator)
+	stakeOuts, err := shared.OutputsFromTxOuts(txID, tx.Stake(), len(outs), PChainStakerInputOutputCreator)
 	if err != nil {
 		return nil, err
 	}
 	outs = append(outs, stakeOuts...)
 	return outs, nil
+}
+
+func getRewardOutputs(client jsonrpc.RPCClient, txID string) ([]shared.Output, error) {
+	utxos, err := CallPChainGetRewardUTXOsApi(client, txID)
+	if err != nil {
+		return nil, err
+	}
+	return shared.OutputsFromUTXO(txID, utxos, PChainRewardOutputCreator)
 }
