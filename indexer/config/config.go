@@ -4,29 +4,25 @@ import (
 	"flare-indexer/config"
 )
 
-const (
-	LOCAL_CONFIG_FILE string = "config.local.yml"
-	CONFIG_FILE       string = "config.yml"
-)
-
 type Config struct {
-	DB            config.DBConfig `yaml:"db"`
-	Chain         ChainConfig     `yaml:"chain"`
-	XChainIndexer IndexerConfig   `yaml:"x_chain_indexer"`
-	PChainIndexer IndexerConfig   `yaml:"p_chain_indexer"`
+	DB            config.DBConfig     `toml:"db"`
+	Logger        config.LoggerConfig `toml:"logger"`
+	Chain         ChainConfig         `toml:"chain"`
+	XChainIndexer IndexerConfig       `toml:"x_chain_indexer"`
+	PChainIndexer IndexerConfig       `toml:"p_chain_indexer"`
 }
 
 type IndexerConfig struct {
-	Enabled          bool   `yaml:"enabled"`
-	TimeoutMillis    int    `yaml:"timeout_millis"`
-	BatchSize        int    `yaml:"batch_size"`
-	StartIndex       uint64 `yaml:"start_index"`
-	OutputsCacheSize int    `yaml:"outputs_cache_size"`
+	Enabled          bool   `toml:"enabled"`
+	TimeoutMillis    int    `toml:"timeout_millis"`
+	BatchSize        int    `toml:"batch_size"`
+	StartIndex       uint64 `toml:"start_index"`
+	OutputsCacheSize int    `toml:"outputs_cache_size"`
 }
 
 type ChainConfig struct {
-	IndexerURL      string `yaml:"indexer_url" envconfig:"CHAIN_INDEXER_URL"`
-	ChainAddressHRP string `yaml:"address_hrp" envconfig:"CHAIN_ADDRESS_HRP"`
+	IndexerURL      string `toml:"indexer_url" envconfig:"CHAIN_INDEXER_URL"`
+	ChainAddressHRP string `toml:"address_hrp" envconfig:"CHAIN_ADDRESS_HRP"`
 }
 
 func newConfig() *Config {
@@ -49,13 +45,21 @@ func newConfig() *Config {
 	}
 }
 
+func (c Config) AddressHRP() string {
+	return c.Chain.ChainAddressHRP
+}
+
+func (c Config) LoggerConfig() config.LoggerConfig {
+	return c.Logger
+}
+
 func BuildConfig() (*Config, error) {
 	cfg := newConfig()
-	err := config.ParseConfigFile(cfg, CONFIG_FILE)
+	err := config.ParseConfigFile(cfg, config.CONFIG_FILE, false)
 	if err != nil {
 		return nil, err
 	}
-	err = config.ParseConfigFile(cfg, LOCAL_CONFIG_FILE)
+	err = config.ParseConfigFile(cfg, config.LOCAL_CONFIG_FILE, true)
 	if err != nil {
 		return nil, err
 	}

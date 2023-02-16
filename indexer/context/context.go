@@ -1,6 +1,7 @@
 package context
 
 import (
+	globalConfig "flare-indexer/config"
 	"flare-indexer/database"
 	"flare-indexer/indexer/config"
 
@@ -25,6 +26,7 @@ func BuildContext() (IndexerContext, error) {
 		return nil, err
 	}
 	ctx.config = cfg
+	globalConfig.GlobalConfigCallback.Call(cfg)
 
 	ctx.db, err = database.ConnectAndInitialize(&cfg.DB)
 	if err != nil {
