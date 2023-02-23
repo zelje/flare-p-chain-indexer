@@ -1,13 +1,18 @@
 package utils
 
 import (
-	"container/list"
 	"sync"
 )
 
-type Cache[K comparable, V any] interface {
+type CacheBase[K comparable, V any] interface {
 	Add(K, V)
 	Get(K) (V, bool)
+}
+
+type Cache[K comparable, V any] interface {
+	CacheBase[K, V]
+
+	RemoveAccessed()
 }
 
 // Map object cache
@@ -15,35 +20,35 @@ type cache[K comparable, V any] struct {
 	sync.RWMutex
 
 	cacheMap map[K]V
-	keys     *list.List
-	maxSize  int
+	accessed []K
 }
 
-func NewCache[K comparable, V any](maxSize int) Cache[K, V] {
+func NewCache[K comparable, V any]() Cache[K, V] {
 	return &cache[K, V]{
 		cacheMap: make(map[K]V),
-		keys:     list.New(),
-		maxSize:  maxSize,
+		accessed: nil,
 	}
 }
 
 func (c *cache[K, V]) Add(k K, v V) {
-	c.Lock()
-	if _, ok := c.cacheMap[k]; ok {
-		c.cacheMap[k] = v
-	} else {
-		c.cacheMap[k] = v
-		c.keys.PushBack(k)
-		if c.keys.Len() > c.maxSize {
-			e := c.keys.Front()
-			c.keys.Remove(e)
-			delete(c.cacheMap, e.Value.(K))
-		}
-	}
-	c.Unlock()
+	c.cacheMap[k] = v
 }
 
 func (c *cache[K, V]) Get(k K) (V, bool) {
+	c.RWMutex.Lock()
 	v, ok := c.cacheMap[k]
+	if ok {
+		c.accessed = append(c.accessed, k)
+	}
+	c.RWMutex.Unlock()
 	return v, ok
+}
+
+func (c *cache[K, V]) RemoveAccessed() {
+	c.RWMutex.Lock()
+	for _, k := range c.accessed {
+		delete(c.cacheMap, k)
+	}
+	c.accessed = nil
+	c.RWMutex.Unlock()
 }

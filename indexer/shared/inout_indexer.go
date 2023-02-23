@@ -31,6 +31,7 @@ func NewInputOutputIndexer(inUpdater InputUpdater) *InputOutputIndexer {
 func (iox *InputOutputIndexer) Reset(containersLen int) {
 	iox.outs = make([]Output, 0, 2*containersLen)
 	iox.ins = make([]Input, 0, 2*containersLen)
+	iox.inUpdater.PurgeCache()
 }
 
 func (iox *InputOutputIndexer) AddNewFromBaseTx(

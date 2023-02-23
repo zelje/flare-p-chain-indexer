@@ -2,13 +2,10 @@ package shared
 
 import (
 	"container/list"
+	"flare-indexer/utils"
 
 	mapset "github.com/deckarep/golang-set/v2"
 )
-
-type InputList struct {
-	inputs *list.List
-}
 
 type InputUpdater interface {
 	// Update inputs with addresses. Updater can get outputs from cache, db, chain (indexer, api), ...
@@ -17,25 +14,25 @@ type InputUpdater interface {
 
 	// Put outputs of a transaction to cache -- to avoid updating from chain or database
 	CacheOutputs(outs []Output)
-}
-
-type IdIndexKey struct {
-	ID    string
-	Index uint32
+	PurgeCache()
 }
 
 type BaseInputUpdater struct {
-	cache map[IdIndexKey]Output
+	cache utils.Cache[IdIndexKey, Output]
 }
 
 func (iu *BaseInputUpdater) InitCache() {
-	iu.cache = make(map[IdIndexKey]Output)
+	iu.cache = utils.NewCache[IdIndexKey, Output]()
 }
 
 func (iu *BaseInputUpdater) CacheOutputs(outs []Output) {
 	for _, out := range outs {
-		iu.cache[IdIndexKey{out.Tx(), out.Index()}] = out
+		iu.cache.Add(IdIndexKey{out.Tx(), out.Index()}, out)
 	}
+}
+
+func (iu *BaseInputUpdater) PurgeCache() {
+	iu.cache.RemoveAccessed()
 }
 
 // Update inputs with addresses from outputs in cache, return missing output tx ids
@@ -54,12 +51,12 @@ func NewInputList(inputs []Input) InputList {
 // Update input address from outputs
 //  - updated inputs will be removed from the list
 //  - return missing output tx ids
-func (il InputList) UpdateWithOutputs(outputs map[IdIndexKey]Output) mapset.Set[string] {
+func (il InputList) UpdateWithOutputs(outputs utils.CacheBase[IdIndexKey, Output]) mapset.Set[string] {
 	missingTxIds := mapset.NewSet[string]()
 	for e := il.inputs.Front(); e != nil; {
 		next := e.Next()
 		in := e.Value.(Input)
-		if out, ok := outputs[IdIndexKey{in.OutTx(), in.OutIndex()}]; ok {
+		if out, ok := outputs.Get(IdIndexKey{in.OutTx(), in.OutIndex()}); ok {
 			in.UpdateAddr(out.Addr())
 			il.inputs.Remove(e)
 		} else {
@@ -68,6 +65,19 @@ func (il InputList) UpdateWithOutputs(outputs map[IdIndexKey]Output) mapset.Set[
 		e = next
 	}
 	return missingTxIds
+}
+
+func NewOutputMap() OutputMap {
+	return make(map[IdIndexKey]Output)
+}
+
+func (om OutputMap) Add(k IdIndexKey, o Output) {
+	om[k] = o
+}
+
+func (om OutputMap) Get(k IdIndexKey) (v Output, ok bool) {
+	v, ok = om[k]
+	return
 }
 
 func NewIdIndexKey(id string, index uint32) IdIndexKey {

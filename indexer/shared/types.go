@@ -1,6 +1,9 @@
 package shared
 
-import "flare-indexer/database"
+import (
+	"container/list"
+	"flare-indexer/database"
+)
 
 type Output interface {
 	Tx() string    // transaction id of this output
@@ -29,4 +32,15 @@ type InputCreator interface {
 type InputOutputCreator interface {
 	OutputCreator
 	InputCreator
+}
+
+type IdIndexKey struct {
+	ID    string
+	Index uint32
+}
+
+type OutputMap map[IdIndexKey]Output
+
+type InputList struct {
+	inputs *list.List
 }

@@ -45,9 +45,9 @@ func (iu *pChainInputUpdater) updateFromDB(
 	if err != nil {
 		return nil, err
 	}
-	baseOuts := make(map[shared.IdIndexKey]shared.Output)
+	baseOuts := shared.NewOutputMap()
 	for _, out := range outs {
-		baseOuts[shared.NewIdIndexKey(out.TxID, out.Index())] = &out.TxOutput
+		baseOuts.Add(shared.NewIdIndexKey(out.TxID, out.Index()), &out.TxOutput)
 	}
 	return inputs.UpdateWithOutputs(baseOuts), nil
 }
@@ -57,7 +57,7 @@ func (iu *pChainInputUpdater) updateFromChain(
 	inputs shared.InputList,
 	missingTxIds mapset.Set[string],
 ) (mapset.Set[string], error) {
-	fetchedOuts := make(map[shared.IdIndexKey]shared.Output)
+	fetchedOuts := shared.NewOutputMap()
 	for txId := range missingTxIds.Iterator().C {
 		tx, err := CallPChainGetTxApi(iu.client, txId)
 		if err != nil {
@@ -78,7 +78,7 @@ func (iu *pChainInputUpdater) updateFromChain(
 			return nil, err
 		}
 		for _, out := range outs {
-			fetchedOuts[shared.NewIdIndexKey(out.Tx(), out.Index())] = out
+			fetchedOuts.Add(shared.NewIdIndexKey(out.Tx(), out.Index()), out)
 		}
 	}
 	return inputs.UpdateWithOutputs(fetchedOuts), nil
