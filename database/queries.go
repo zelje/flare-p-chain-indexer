@@ -44,8 +44,14 @@ func UpdateState(db *gorm.DB, s *State) error {
 	return db.Save(s).Error
 }
 
-func CreateXChainEntities(db *gorm.DB, txs []*XChainTx, ins []*XChainTxInput, outs []*XChainTxOutput) error {
-	if len(txs) > 0 { // attempt to create from an empty slice returns error
+func CreateXChainEntities(db *gorm.DB, vertices []*XChainVtx, txs []*XChainTx, ins []*XChainTxInput, outs []*XChainTxOutput) error {
+	if len(vertices) > 0 { // attempt to create from an empty slice returns error
+		err := db.Create(vertices).Error
+		if err != nil {
+			return err
+		}
+	}
+	if len(txs) > 0 {
 		err := db.Create(txs).Error
 		if err != nil {
 			return err

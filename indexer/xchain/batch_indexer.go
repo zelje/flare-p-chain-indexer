@@ -6,28 +6,32 @@ import (
 	"flare-indexer/indexer/shared"
 	"flare-indexer/logger"
 	"flare-indexer/utils"
+	"fmt"
 	"time"
 
 	"github.com/ava-labs/avalanchego/indexer"
+	"github.com/ava-labs/avalanchego/snow/engine/avalanche/vertex"
 	"github.com/ava-labs/avalanchego/vms/avm/txs"
 	"github.com/ava-labs/avalanchego/wallet/chain/x"
 	"gorm.io/gorm"
 )
 
-// Indexer for X-chain transactions. Implements ContainerBatchIndexer
+// Indexer for X-chain vertices (blocks). Implements ContainerBatchIndexer
 type txBatchIndexer struct {
 	db     *gorm.DB
 	client indexer.Client
 
 	inOutIndexer *shared.InputOutputIndexer
 	newTxs       []*database.XChainTx
+	newVertices  []*database.XChainVtx
 }
 
 func NewXChainBatchIndexer(
 	ctx context.IndexerContext,
 	client indexer.Client,
+	txClient indexer.Client,
 ) *txBatchIndexer {
-	updater := newXChainInputUpdater(ctx, client)
+	updater := newXChainInputUpdater(ctx, txClient)
 	return &txBatchIndexer{
 		db:     ctx.DB(),
 		client: client,
@@ -38,29 +42,56 @@ func NewXChainBatchIndexer(
 }
 
 func (xi *txBatchIndexer) Reset(containerLen int) {
-	xi.newTxs = make([]*database.XChainTx, 0, containerLen)
+	xi.newVertices = make([]*database.XChainVtx, 0, containerLen)
+	xi.newTxs = make([]*database.XChainTx, 0, 5*containerLen) // approximate
 	xi.inOutIndexer.Reset(containerLen)
 }
 
 func (xi *txBatchIndexer) AddContainer(index uint64, container indexer.Container) error {
-	tx, err := x.Parser.ParseGenesisTx(container.Bytes)
+	vtx, err := vertex.Parse(container.Bytes)
+	if err != nil {
+		return err
+	}
+	if len(vtx.ParentIDs()) > 1 {
+		return fmt.Errorf("only one vertex parent is expected, got %d for id %s at height %d",
+			len(vtx.ParentIDs()), vtx.ID().String(), vtx.Height())
+	}
+	for _, txBytes := range vtx.Txs() {
+		err = xi.addTransaction(vtx.Height(), txBytes)
+		if err != nil {
+			return err
+		}
+	}
+
+	xi.newVertices = append(xi.newVertices, &database.XChainVtx{
+		VtxID:     vtx.ID().String(),
+		ParentID:  vtx.ParentIDs()[0].String(),
+		VtxIndex:  index,
+		Height:    vtx.Height(),
+		Timestamp: time.Unix(container.Timestamp, 0),
+	})
+	return nil
+}
+
+func (xi *txBatchIndexer) addTransaction(vtxHeight uint64, txBytes []byte) error {
+	tx, err := x.Parser.ParseGenesisTx(txBytes)
 	if err != nil {
 		return err
 	}
 
 	switch unsignedTx := tx.Unsigned.(type) {
 	case *txs.BaseTx:
-		err := xi.addTx(&container, unsignedTx, database.XChainBaseTx, index)
+		err := xi.addBaseTx(tx.ID().String(), vtxHeight, unsignedTx, database.XChainBaseTx, txBytes)
 		if err != nil {
 			return err
 		}
 	case *txs.ImportTx:
-		err := xi.addTx(&container, &unsignedTx.BaseTx, database.XChainImportTx, index)
+		err := xi.addBaseTx(tx.ID().String(), vtxHeight, &unsignedTx.BaseTx, database.XChainImportTx, txBytes)
 		if err != nil {
 			return err
 		}
 	default:
-		logger.Warn("Transaction with id '%s' is NOT indexed, type is %T", container.ID, unsignedTx)
+		logger.Warn("Transaction with id '%s' is NOT indexed, type is %T", tx.ID().String(), unsignedTx)
 	}
 	return nil
 }
@@ -69,14 +100,19 @@ func (xi *txBatchIndexer) ProcessBatch() error {
 	return xi.inOutIndexer.ProcessBatch()
 }
 
-func (xi *txBatchIndexer) addTx(container *indexer.Container, baseTx *txs.BaseTx, txType database.XChainTxType, index uint64) error {
+func (xi *txBatchIndexer) addBaseTx(
+	txID string,
+	VtxHeight uint64,
+	baseTx *txs.BaseTx,
+	txType database.XChainTxType,
+	bytes []byte,
+) error {
 	tx := &database.XChainTx{}
-	tx.TxID = container.ID.String()
-	tx.TxIndex = index
+	tx.TxID = txID
+	tx.VtxHeight = VtxHeight
 	tx.Type = txType
-	tx.Timestamp = time.Unix(container.Timestamp, 0)
 	tx.Memo = string(baseTx.Memo)
-	tx.Bytes = container.Bytes
+	tx.Bytes = bytes
 
 	xi.newTxs = append(xi.newTxs, tx)
 	return xi.inOutIndexer.AddNewFromBaseTx(tx.TxID, &baseTx.BaseTx, XChainInputOutputCreator)
@@ -92,5 +128,5 @@ func (i *txBatchIndexer) PersistEntities(db *gorm.DB) error {
 	if err != nil {
 		return err
 	}
-	return database.CreateXChainEntities(db, i.newTxs, ins, outs)
+	return database.CreateXChainEntities(db, i.newVertices, i.newTxs, ins, outs)
 }

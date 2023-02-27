@@ -15,6 +15,7 @@ var (
 		Migration{},
 		State{},
 		XChainTx{},
+		XChainVtx{},
 		XChainTxInput{},
 		XChainTxOutput{},
 		PChainTx{},
