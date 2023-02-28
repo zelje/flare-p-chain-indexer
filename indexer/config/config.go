@@ -7,9 +7,14 @@ import (
 type Config struct {
 	DB            config.DBConfig     `toml:"db"`
 	Logger        config.LoggerConfig `toml:"logger"`
+	Metrics       MetricsConfig       `toml:"metrics"`
 	Chain         ChainConfig         `toml:"chain"`
 	XChainIndexer IndexerConfig       `toml:"x_chain_indexer"`
 	PChainIndexer IndexerConfig       `toml:"p_chain_indexer"`
+}
+
+type MetricsConfig struct {
+	PrometheusAddress string `toml:"prometheus_address"`
 }
 
 type IndexerConfig struct {

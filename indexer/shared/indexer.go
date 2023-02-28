@@ -27,6 +27,8 @@ type ChainIndexerBase struct {
 	Config config.IndexerConfig
 
 	BatchIndexer ContainerBatchIndexer
+
+	metrics *metrics
 }
 
 func (ci *ChainIndexerBase) IndexBatch() error {
@@ -53,6 +55,9 @@ func (ci *ChainIndexerBase) IndexBatch() error {
 	if lastIndex < nextIndex {
 		// Nothing to do; no new containers
 		logger.Debug("Nothing to do. Last index %d < next to process %d", lastIndex, nextIndex)
+
+		duration := time.Since(startTime).Milliseconds()
+		ci.metrics.Update(currentState.LastChainIndex, currentState.NextDBIndex-1, duration)
 		return nil
 	}
 
@@ -77,10 +82,13 @@ func (ci *ChainIndexerBase) IndexBatch() error {
 	if err != nil {
 		return err
 	}
-	endTime := time.Now()
+	duration := time.Since(startTime).Milliseconds()
 	logger.Info("Indexer '%s' processed to index %d, last accepted index is %d, duration %dms",
 		ci.IndexerName,
-		lastProcessedIndex, lastIndex, endTime.Sub(startTime).Milliseconds())
+		lastProcessedIndex, lastIndex, duration)
+
+	ci.metrics.Update(lastIndex, lastProcessedIndex, duration)
+
 	return nil
 }
 
@@ -116,4 +124,8 @@ func (ci *ChainIndexerBase) Run() {
 			logger.Error("%s indexer error %v", ci.IndexerName, err)
 		}
 	}
+}
+
+func (ci *ChainIndexerBase) InitMetrics(namespace string) {
+	ci.metrics = newMetrics(namespace)
 }

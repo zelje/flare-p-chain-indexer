@@ -28,6 +28,7 @@ func CreateXChainTxIndexer(ctx context.IndexerContext) *xChainTxIndexer {
 	idxr.Client = client
 	idxr.DB = ctx.DB()
 	idxr.Config = config
+	idxr.InitMetrics(StateName)
 
 	idxr.BatchIndexer = NewXChainBatchIndexer(ctx, client, txClient)
 
