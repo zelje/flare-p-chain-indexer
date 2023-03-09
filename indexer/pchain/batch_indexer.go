@@ -65,6 +65,8 @@ func (xi *txBatchIndexer) AddContainer(index uint64, container indexer.Container
 		xi.addTx(&container, tx, index)
 	case *blocks.ApricotCommitBlock:
 		logger.Info("Block %d is ApricotCommitBlock. Skipping indexing", index)
+	case *blocks.ApricotAbortBlock:
+		logger.Info("Block %d is ApricotAbortBlock. Skipping indexing", index)
 	case *blocks.ApricotStandardBlock:
 		for _, tx := range innerBlkType.Txs() {
 			xi.addTx(&container, tx, index)

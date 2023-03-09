@@ -21,6 +21,7 @@ var (
 		PChainTx{},
 		PChainTxInput{},
 		PChainTxOutput{},
+		UptimeCronjob{},
 	}
 )
 

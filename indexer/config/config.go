@@ -11,6 +11,7 @@ type Config struct {
 	Chain         ChainConfig         `toml:"chain"`
 	XChainIndexer IndexerConfig       `toml:"x_chain_indexer"`
 	PChainIndexer IndexerConfig       `toml:"p_chain_indexer"`
+	UptimeCronjob CronjobConfig       `toml:"uptime_cronjob"`
 }
 
 type MetricsConfig struct {
@@ -23,6 +24,11 @@ type IndexerConfig struct {
 	BatchSize        int    `toml:"batch_size"`
 	StartIndex       uint64 `toml:"start_index"`
 	OutputsCacheSize int    `toml:"outputs_cache_size"`
+}
+
+type CronjobConfig struct {
+	Enabled        bool `toml:"enabled"`
+	TimeoutSeconds int  `toml:"timeout_seconds"`
 }
 
 type ChainConfig struct {
@@ -43,6 +49,10 @@ func newConfig() *Config {
 			TimeoutMillis: 3000,
 			BatchSize:     10,
 			StartIndex:    0,
+		},
+		UptimeCronjob: CronjobConfig{
+			Enabled:        false,
+			TimeoutSeconds: 60,
 		},
 		Chain: ChainConfig{
 			IndexerURL: "http://localhost:9650/",

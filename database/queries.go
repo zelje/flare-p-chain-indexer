@@ -87,3 +87,10 @@ func CreatePChainEntities(db *gorm.DB, txs []*PChainTx, ins []*PChainTxInput, ou
 	}
 	return nil
 }
+
+func CreateUptimeCronjobEntry(db *gorm.DB, entities []*UptimeCronjob) error {
+	if len(entities) > 0 {
+		return db.Create(entities).Error
+	}
+	return nil
+}

@@ -2,6 +2,7 @@ package runner
 
 import (
 	"flare-indexer/indexer/context"
+	"flare-indexer/indexer/cronjob"
 	"flare-indexer/indexer/pchain"
 	"flare-indexer/indexer/xchain"
 )
@@ -12,4 +13,8 @@ func Start(ctx context.IndexerContext) {
 
 	go xIndexer.Run()
 	go pIndexer.Run()
+
+	uptimeCronjob := cronjob.NewUptimeCronjob(ctx)
+
+	go cronjob.RunCronjob(uptimeCronjob)
 }
