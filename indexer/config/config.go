@@ -4,6 +4,14 @@ import (
 	"flare-indexer/config"
 )
 
+var (
+	IndexerConfigCallback config.ConfigCallback[IndexerApplicationConfig] = config.ConfigCallback[IndexerApplicationConfig]{}
+)
+
+type IndexerApplicationConfig interface {
+	AddressHRP() string
+}
+
 type Config struct {
 	DB            config.DBConfig     `toml:"db"`
 	Logger        config.LoggerConfig `toml:"logger"`

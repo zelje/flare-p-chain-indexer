@@ -3,23 +3,23 @@ package context
 import (
 	globalConfig "flare-indexer/config"
 	"flare-indexer/database"
-	"flare-indexer/indexer/config"
+	"flare-indexer/services/config"
 
 	"gorm.io/gorm"
 )
 
-type IndexerContext interface {
+type ServicesContext interface {
 	Config() *config.Config
 	DB() *gorm.DB
 }
 
-type indexerContext struct {
+type servicesContext struct {
 	config *config.Config
 	db     *gorm.DB
 }
 
-func BuildContext() (IndexerContext, error) {
-	ctx := indexerContext{}
+func BuildContext() (ServicesContext, error) {
+	ctx := servicesContext{}
 
 	cfg, err := config.BuildConfig()
 	if err != nil {
@@ -27,15 +27,14 @@ func BuildContext() (IndexerContext, error) {
 	}
 	ctx.config = cfg
 	globalConfig.GlobalConfigCallback.Call(cfg)
-	config.IndexerConfigCallback.Call(cfg)
 
-	ctx.db, err = database.ConnectAndInitialize(&cfg.DB)
+	ctx.db, err = database.Connect(&cfg.DB)
 	if err != nil {
 		return nil, err
 	}
 	return &ctx, nil
 }
 
-func (c *indexerContext) Config() *config.Config { return c.config }
+func (c *servicesContext) Config() *config.Config { return c.config }
 
-func (c *indexerContext) DB() *gorm.DB { return c.db }
+func (c *servicesContext) DB() *gorm.DB { return c.db }

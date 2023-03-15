@@ -16,12 +16,6 @@ func FetchXChainTxOutputs(db *gorm.DB, ids []string) ([]XChainTxOutput, error) {
 	return txs, err
 }
 
-func FetchPChainTxOutputs(db *gorm.DB, ids []string) ([]PChainTxOutput, error) {
-	var txs []PChainTxOutput
-	err := db.Where("tx_id IN ?", ids).Find(&txs).Error
-	return txs, err
-}
-
 func FetchMigrations(db *gorm.DB) ([]Migration, error) {
 	var migrations []Migration
 	err := db.Order("version asc").Find(&migrations).Error
@@ -52,25 +46,6 @@ func CreateXChainEntities(db *gorm.DB, vertices []*XChainVtx, txs []*XChainTx, i
 		}
 	}
 	if len(txs) > 0 {
-		err := db.Create(txs).Error
-		if err != nil {
-			return err
-		}
-	}
-	if len(ins) > 0 {
-		err := db.Create(ins).Error
-		if err != nil {
-			return err
-		}
-	}
-	if len(outs) > 0 {
-		return db.Create(outs).Error
-	}
-	return nil
-}
-
-func CreatePChainEntities(db *gorm.DB, txs []*PChainTx, ins []*PChainTxInput, outs []*PChainTxOutput) error {
-	if len(txs) > 0 { // attempt to create from an empty slice returns error
 		err := db.Create(txs).Error
 		if err != nil {
 			return err

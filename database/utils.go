@@ -25,7 +25,7 @@ var (
 	}
 )
 
-func ConnectAndInitialize(cfg *config.DBConfig) (*gorm.DB, error) {
+func Connect(cfg *config.DBConfig) (*gorm.DB, error) {
 	// Connect to the database
 	dbConfig := mysql.Config{
 		User:                 cfg.Username,
@@ -39,7 +39,11 @@ func ConnectAndInitialize(cfg *config.DBConfig) (*gorm.DB, error) {
 	gormConfig := gorm.Config{
 		// Logger: logger.Default.LogMode(logger.Info),
 	}
-	db, err := gorm.Open(gormMysql.Open(dbConfig.FormatDSN()), &gormConfig)
+	return gorm.Open(gormMysql.Open(dbConfig.FormatDSN()), &gormConfig)
+}
+
+func ConnectAndInitialize(cfg *config.DBConfig) (*gorm.DB, error) {
+	db, err := Connect(cfg)
 	if err != nil {
 		return nil, err
 	}

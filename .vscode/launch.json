@@ -5,11 +5,19 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Launch Main",
+            "name": "Launch Indexer",
             "type": "go",
             "request": "launch",
             "mode": "auto",
             "program": "${workspaceFolder}/indexer/main/main.go",
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "name": "Launch Services",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/services/main/main.go",
             "cwd": "${workspaceFolder}"
         }
     ]

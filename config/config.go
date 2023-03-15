@@ -14,11 +14,10 @@ const (
 )
 
 var (
-	GlobalConfigCallback ConfigCallback = ConfigCallback{}
+	GlobalConfigCallback ConfigCallback[GlobalConfig] = ConfigCallback[GlobalConfig]{}
 )
 
 type GlobalConfig interface {
-	AddressHRP() string
 	LoggerConfig() LoggerConfig
 }
 
@@ -37,22 +36,6 @@ type DBConfig struct {
 	Database string `toml:"database" envconfig:"DB_DATABASE"`
 	Username string `toml:"username" envconfig:"DB_USERNAME"`
 	Password string `toml:"password" envconfig:"DB_PASSWORD"`
-}
-
-type GlobalConfigCallbackFunc func(GlobalConfig)
-
-type ConfigCallback struct {
-	globalCallbacks []GlobalConfigCallbackFunc
-}
-
-func (cc *ConfigCallback) AddCallback(f GlobalConfigCallbackFunc) {
-	cc.globalCallbacks = append(cc.globalCallbacks, f)
-}
-
-func (cc *ConfigCallback) Call(config GlobalConfig) {
-	for _, gc := range cc.globalCallbacks {
-		gc(config)
-	}
 }
 
 func ParseConfigFile(cfg interface{}, fileName string, allowMissing bool) error {
