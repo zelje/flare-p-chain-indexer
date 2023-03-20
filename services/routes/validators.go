@@ -1,9 +1,10 @@
 package routes
 
 import (
-	"encoding/json"
 	"flare-indexer/database"
+	"flare-indexer/services/api"
 	"flare-indexer/services/context"
+	"flare-indexer/services/utils"
 	"net/http"
 	"time"
 
@@ -19,7 +20,7 @@ type GetStakerRequest struct {
 }
 
 type GetStakerResponse struct {
-	TxIDs []string
+	TxIDs []string `json:"txIds"`
 }
 
 type validatorRouteHandlers struct {
@@ -32,27 +33,33 @@ func newValidatorRouteHandlers(ctx context.ServicesContext) *validatorRouteHandl
 	}
 }
 
-func (vr *validatorRouteHandlers) getValidators(w http.ResponseWriter, r *http.Request) {
-	decoder := json.NewDecoder(r.Body)
+func (vr *validatorRouteHandlers) listValidators(w http.ResponseWriter, r *http.Request) {
 	var request GetStakerRequest
-	err := decoder.Decode(&request)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+	if !utils.DecodeBody(w, r, &request) {
 		return
 	}
-	txIDs, err := database.FetchPChainValidators(vr.db, request.NodeID, request.Address, request.StartTime,
-		request.EndTime, 0, 100)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	txIDs, err := database.FetchPChainValidators(vr.db, database.PChainAddValidatorTx, request.NodeID,
+		request.Address, request.StartTime, request.EndTime, 0, 100)
+	if utils.HandleInternalServerError(w, err) {
 		return
 	}
-	response := GetStakerResponse{TxIDs: txIDs}
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(&response)
+	utils.WriteApiResponseOk(w, GetStakerResponse{TxIDs: txIDs})
+}
+
+func (vr *validatorRouteHandlers) getValidator(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	txID := params["tx_id"]
+	tx, inputs, outputs, err := database.FetchPChainTxFull(vr.db, txID)
+	if utils.HandleInternalServerError(w, err) {
+		return
+	}
+	utils.WriteApiResponseOk(w, api.NewApiPChainTx(tx, inputs, outputs))
 }
 
 func AddValidatorRoutes(router *mux.Router, ctx context.ServicesContext) {
 	vr := newValidatorRouteHandlers(ctx)
+	subrouter := router.PathPrefix("/validators").Subrouter()
 
-	router.HandleFunc("/validators", vr.getValidators).Methods(http.MethodPost)
+	subrouter.HandleFunc("/list", vr.listValidators).Methods(http.MethodPost)
+	subrouter.HandleFunc("/get/{tx_id:[0-9a-zA-Z]+}", vr.getValidator).Methods(http.MethodGet)
 }

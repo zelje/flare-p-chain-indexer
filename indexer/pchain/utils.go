@@ -19,6 +19,11 @@ func CallPChainGetTxApi(client jsonrpc.RPCClient, txID string) (*txs.Tx, error) 
 		return nil, err
 	}
 
+	// In case of genesis? transaction
+	if id == ids.Empty {
+		return nil, nil
+	}
+
 	// Fetch from chain
 	params := api.GetTxArgs{
 		TxID:     id,

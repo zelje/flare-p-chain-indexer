@@ -62,14 +62,14 @@ func (xi *txBatchIndexer) AddContainer(index uint64, container indexer.Container
 	switch innerBlkType := innerBlk.(type) {
 	case *blocks.ApricotProposalBlock:
 		tx := innerBlkType.Tx
-		xi.addTx(&container, tx, index)
+		xi.addTx(&container, innerBlk.Height(), tx, index)
 	case *blocks.ApricotCommitBlock:
 		logger.Info("Block %d is ApricotCommitBlock. Skipping indexing", index)
 	case *blocks.ApricotAbortBlock:
 		logger.Info("Block %d is ApricotAbortBlock. Skipping indexing", index)
 	case *blocks.ApricotStandardBlock:
 		for _, tx := range innerBlkType.Txs() {
-			xi.addTx(&container, tx, index)
+			xi.addTx(&container, innerBlk.Height(), tx, index)
 		}
 	default:
 		return fmt.Errorf("block %d has unexpected type %T", index, innerBlkType)
@@ -81,11 +81,11 @@ func (xi *txBatchIndexer) ProcessBatch() error {
 	return xi.inOutIndexer.ProcessBatch()
 }
 
-func (xi *txBatchIndexer) addTx(container *indexer.Container, tx *txs.Tx, index uint64) error {
+func (xi *txBatchIndexer) addTx(container *indexer.Container, height uint64, tx *txs.Tx, index uint64) error {
 	dbTx := &database.PChainTx{}
 	dbTx.TxID = tx.ID().String()
 	dbTx.BlockID = container.ID.String()
-	dbTx.BlockIndex = index
+	dbTx.BlockHeight = height
 	dbTx.Timestamp = time.Unix(container.Timestamp, 0)
 	dbTx.Bytes = container.Bytes
 

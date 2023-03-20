@@ -34,6 +34,7 @@ func CreatePChainEntities(db *gorm.DB, txs []*PChainTx, ins []*PChainTxInput, ou
 
 func FetchPChainValidators(
 	db *gorm.DB,
+	txType PChainTxType,
 	nodeID string,
 	address string,
 	startTime time.Time,
@@ -43,17 +44,44 @@ func FetchPChainValidators(
 ) ([]string, error) {
 	var validatorTxs []PChainTx
 
-	query := db.Where(&PChainTx{Type: PChainAddValidatorTx, NodeID: nodeID})
+	query := db.Where(&PChainTx{Type: txType, NodeID: nodeID})
 	if !startTime.IsZero() {
 		query = query.Where("start_time >= ?", startTime)
 	}
 	if !endTime.IsZero() {
 		query = query.Where("end_time <= ?", endTime)
 	}
-	err := query.Select("tx_id").Find(&validatorTxs).Error
+	if len(address) > 0 {
+		query = query.Joins("left join p_chain_tx_inputs as inputs on inputs.tx_id = p_chain_txes.tx_id").
+			Where("inputs.address = ?", address)
+	}
+	err := query.Offset(offset).Limit(limit).Order("p_chain_txes.id").
+		Distinct().Select("p_chain_txes.tx_id").Find(&validatorTxs).Error
 	if err != nil {
 		return nil, err
 	}
 
 	return utils.Map(validatorTxs, func(t PChainTx) string { return t.TxID }), nil
+}
+
+func FetchPChainTxFull(db *gorm.DB, txID string) (*PChainTx, []PChainTxInput, []PChainTxOutput, error) {
+	var tx PChainTx
+	err := db.Where(&PChainTx{TxID: txID}).First(&tx).Error
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	var inputs []PChainTxInput
+	err = db.Where(&PChainTxInput{TxInput: TxInput{TxID: txID}}).Find(&inputs).Error
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	var outputs []PChainTxOutput
+	err = db.Where(&PChainTxOutput{TxOutput: TxOutput{TxID: txID}}).Order("idx").Find(&outputs).Error
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	return &tx, inputs, outputs, nil
 }

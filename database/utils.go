@@ -7,6 +7,7 @@ import (
 	"github.com/go-sql-driver/mysql"
 	gormMysql "gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 var (
@@ -36,8 +37,15 @@ func Connect(cfg *config.DBConfig) (*gorm.DB, error) {
 		AllowNativePasswords: true,
 		ParseTime:            true,
 	}
+
+	var gormLogLevel logger.LogLevel
+	if cfg.LogQueries {
+		gormLogLevel = logger.Info
+	} else {
+		gormLogLevel = logger.Silent
+	}
 	gormConfig := gorm.Config{
-		// Logger: logger.Default.LogMode(logger.Info),
+		Logger: logger.Default.LogMode(gormLogLevel),
 	}
 	return gorm.Open(gormMysql.Open(dbConfig.FormatDSN()), &gormConfig)
 }

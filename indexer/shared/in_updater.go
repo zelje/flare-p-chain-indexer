@@ -57,7 +57,12 @@ func (il InputList) UpdateWithOutputs(outputs utils.CacheBase[IdIndexKey, Output
 		next := e.Next()
 		in := e.Value.(Input)
 		if out, ok := outputs.Get(IdIndexKey{in.OutTx(), in.OutIndex()}); ok {
-			in.UpdateAddr(out.Addr())
+			if out == nil {
+				// Genesis tx
+				in.UpdateAddr(in.OutTx())
+			} else {
+				in.UpdateAddr(out.Addr())
+			}
 			il.inputs.Remove(e)
 		} else {
 			missingTxIds.Add(in.OutTx())

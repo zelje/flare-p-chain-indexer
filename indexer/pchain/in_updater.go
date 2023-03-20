@@ -63,6 +63,11 @@ func (iu *pChainInputUpdater) updateFromChain(
 		if err != nil {
 			return nil, err
 		}
+		if tx == nil {
+			// Genesis tx
+			fetchedOuts.Add(shared.NewIdIndexKey(txId, 0), nil)
+			continue
+		}
 
 		var outs []shared.Output = nil
 		switch unsignedTx := tx.Unsigned.(type) {
