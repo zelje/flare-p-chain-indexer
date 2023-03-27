@@ -4,7 +4,6 @@ import (
 	"flare-indexer/database"
 	"flare-indexer/indexer/context"
 	"flare-indexer/indexer/shared"
-	"flare-indexer/logger"
 	"flare-indexer/utils"
 	"fmt"
 	"time"
@@ -59,32 +58,37 @@ func (xi *txBatchIndexer) AddContainer(index uint64, container indexer.Container
 	if err != nil {
 		return err
 	}
+
 	switch innerBlkType := innerBlk.(type) {
 	case *blocks.ApricotProposalBlock:
 		tx := innerBlkType.Tx
-		xi.addTx(&container, innerBlk.Height(), tx, index)
+		err = xi.addTx(&container, database.PChainProposalBlock, innerBlk.Height(), tx)
 	case *blocks.ApricotCommitBlock:
-		logger.Info("Block %d is ApricotCommitBlock. Skipping indexing", index)
+		xi.addEmptyTx(&container, database.PChainCommitBlock, innerBlk.Height())
 	case *blocks.ApricotAbortBlock:
-		logger.Info("Block %d is ApricotAbortBlock. Skipping indexing", index)
+		xi.addEmptyTx(&container, database.PChainAbortBlock, innerBlk.Height())
 	case *blocks.ApricotStandardBlock:
 		for _, tx := range innerBlkType.Txs() {
-			xi.addTx(&container, innerBlk.Height(), tx, index)
+			err = xi.addTx(&container, database.PChainStandardBlock, innerBlk.Height(), tx)
+			if err != nil {
+				break
+			}
 		}
 	default:
-		return fmt.Errorf("block %d has unexpected type %T", index, innerBlkType)
+		err = fmt.Errorf("block %d has unexpected type %T", index, innerBlkType)
 	}
-	return nil
+	return err
 }
 
 func (xi *txBatchIndexer) ProcessBatch() error {
 	return xi.inOutIndexer.ProcessBatch()
 }
 
-func (xi *txBatchIndexer) addTx(container *indexer.Container, height uint64, tx *txs.Tx, index uint64) error {
+func (xi *txBatchIndexer) addTx(container *indexer.Container, blockType database.PChainBlockType, height uint64, tx *txs.Tx) error {
 	dbTx := &database.PChainTx{}
 	dbTx.TxID = tx.ID().String()
 	dbTx.BlockID = container.ID.String()
+	dbTx.BlockType = blockType
 	dbTx.BlockHeight = height
 	dbTx.Timestamp = time.Unix(container.Timestamp, 0)
 	dbTx.Bytes = container.Bytes
@@ -101,10 +105,29 @@ func (xi *txBatchIndexer) addTx(container *indexer.Container, height uint64, tx 
 		err = xi.updateImportTx(dbTx, unsignedTx)
 	case *txs.ExportTx:
 		err = xi.updateExportTx(dbTx, unsignedTx)
+	case *txs.AdvanceTimeTx:
+		xi.updateAdvanceTimeTx(dbTx, unsignedTx)
+	case *txs.AddSubnetValidatorTx:
+		err = xi.updateGeneralBaseTx(dbTx, database.PChainAddSubnetValidatorTx, &unsignedTx.BaseTx)
+	case *txs.CreateChainTx:
+		err = xi.updateGeneralBaseTx(dbTx, database.PChainCreateChainTx, &unsignedTx.BaseTx)
+	case *txs.CreateSubnetTx:
+		err = xi.updateGeneralBaseTx(dbTx, database.PChainCreateSubnetTx, &unsignedTx.BaseTx)
 	default:
-		logger.Info("P-chain transaction %s with type %T in block %d is not indexed", dbTx.TxID, unsignedTx, index)
+		err = fmt.Errorf("p-chain transaction %s with type %T in block %d is not indexed", dbTx.TxID, unsignedTx, height)
 	}
 	return err
+}
+
+func (xi *txBatchIndexer) addEmptyTx(container *indexer.Container, blockType database.PChainBlockType, height uint64) {
+	dbTx := &database.PChainTx{}
+	dbTx.BlockID = container.ID.String()
+	dbTx.BlockType = blockType
+	dbTx.BlockHeight = height
+	dbTx.Timestamp = time.Unix(container.Timestamp, 0)
+	dbTx.Bytes = container.Bytes
+
+	xi.newTxs = append(xi.newTxs, dbTx)
 }
 
 func (xi *txBatchIndexer) updateRewardValidatorTx(dbTx *database.PChainTx, tx *txs.RewardValidatorTx) error {
@@ -142,6 +165,18 @@ func (xi *txBatchIndexer) updateExportTx(dbTx *database.PChainTx, tx *txs.Export
 	dbTx.ChainID = tx.DestinationChain.String()
 	xi.newTxs = append(xi.newTxs, dbTx)
 	return xi.inOutIndexer.AddNewFromBaseTx(dbTx.TxID, &tx.BaseTx.BaseTx, PChainDefaultInputOutputCreator)
+}
+
+func (xi *txBatchIndexer) updateAdvanceTimeTx(dbTx *database.PChainTx, tx *txs.AdvanceTimeTx) {
+	dbTx.Type = database.PChainAdvanceTimeTx
+	dbTx.Time = time.Unix(int64(tx.Time), 0)
+	xi.newTxs = append(xi.newTxs, dbTx)
+}
+
+func (xi *txBatchIndexer) updateGeneralBaseTx(dbTx *database.PChainTx, txType database.PChainTxType, baseTx *txs.BaseTx) error {
+	dbTx.Type = txType
+	xi.newTxs = append(xi.newTxs, dbTx)
+	return xi.inOutIndexer.AddNewFromBaseTx(dbTx.TxID, &baseTx.BaseTx, PChainDefaultInputOutputCreator)
 }
 
 // Persist all entities

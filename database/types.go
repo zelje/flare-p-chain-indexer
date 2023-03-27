@@ -14,11 +14,25 @@ const (
 type PChainTxType string
 
 const (
-	PChainRewardValidatorTx PChainTxType = "REWARD_TX"
-	PChainAddDelegatorTx    PChainTxType = "ADD_DELEGATOR_TX"
-	PChainAddValidatorTx    PChainTxType = "ADD_VALIDATOR_TX"
-	PChainImportTx          PChainTxType = "IMPORT_TX"
-	PChainExportTx          PChainTxType = "EXPORT_TX"
+	PChainRewardValidatorTx    PChainTxType = "REWARD_TX"
+	PChainAddDelegatorTx       PChainTxType = "ADD_DELEGATOR_TX"
+	PChainAddValidatorTx       PChainTxType = "ADD_VALIDATOR_TX"
+	PChainImportTx             PChainTxType = "IMPORT_TX"
+	PChainExportTx             PChainTxType = "EXPORT_TX"
+	PChainAdvanceTimeTx        PChainTxType = "ADVANCE_TIME_TX"
+	PChainCreateChainTx        PChainTxType = "CREATE_CHAIN_TX"
+	PChainCreateSubnetTx       PChainTxType = "CREATE_SUBNET_TX"
+	PChainAddSubnetValidatorTx PChainTxType = "ADD_SUBNET_VALIDATOR_TX"
+	PChainUnknownTx            PChainTxType = "UNKNOWN_TX"
+)
+
+type PChainBlockType string
+
+const (
+	PChainProposalBlock PChainBlockType = "PROPOSAL_BLOCK"
+	PChainCommitBlock   PChainBlockType = "COMMIT_BLOCK"
+	PChainAbortBlock    PChainBlockType = "ABORT_BLOCK"
+	PChainStandardBlock PChainBlockType = "STANDARD_BLOCK"
 )
 
 type PChainOutputType string
