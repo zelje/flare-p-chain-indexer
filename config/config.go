@@ -19,6 +19,7 @@ var (
 
 type GlobalConfig interface {
 	LoggerConfig() LoggerConfig
+	ChainConfig() ChainConfig
 }
 
 type LoggerLevel string
@@ -37,6 +38,12 @@ type DBConfig struct {
 	Username   string `toml:"username" envconfig:"DB_USERNAME"`
 	Password   string `toml:"password" envconfig:"DB_PASSWORD"`
 	LogQueries bool   `toml:"log_queries"`
+}
+
+type ChainConfig struct {
+	NodeURL         string `toml:"node_url" envconfig:"CHAIN_NODE_URL"`
+	ChainAddressHRP string `toml:"address_hrp" envconfig:"CHAIN_ADDRESS_HRP"`
+	ChainID         int    `toml:"chain_id" envconfig:"CHAIN_ID"`
 }
 
 func ParseConfigFile(cfg interface{}, fileName string, allowMissing bool) error {

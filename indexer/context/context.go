@@ -27,7 +27,6 @@ func BuildContext() (IndexerContext, error) {
 	}
 	ctx.config = cfg
 	globalConfig.GlobalConfigCallback.Call(cfg)
-	config.IndexerConfigCallback.Call(cfg)
 
 	ctx.db, err = database.ConnectAndInitialize(&cfg.DB)
 	if err != nil {

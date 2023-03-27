@@ -1,7 +1,7 @@
 package xchain
 
 import (
-	"flare-indexer/indexer/config"
+	"flare-indexer/config"
 	"flare-indexer/indexer/context"
 	"flare-indexer/indexer/shared"
 	"flare-indexer/utils"
@@ -40,9 +40,9 @@ func (xi *xChainTxIndexer) Run() {
 }
 
 func newClient(cfg *config.ChainConfig) indexer.Client {
-	return indexer.NewClient(utils.JoinPaths(cfg.IndexerURL, "ext/index/X/vtx"))
+	return indexer.NewClient(utils.JoinPaths(cfg.NodeURL, "ext/index/X/vtx"))
 }
 
 func newTxClient(cfg *config.ChainConfig) indexer.Client {
-	return indexer.NewClient(utils.JoinPaths(cfg.IndexerURL, "ext/index/X/tx"))
+	return indexer.NewClient(utils.JoinPaths(cfg.NodeURL, "ext/index/X/tx"))
 }

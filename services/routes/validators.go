@@ -49,11 +49,14 @@ func (vr *validatorRouteHandlers) listValidators(w http.ResponseWriter, r *http.
 func (vr *validatorRouteHandlers) getValidator(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	txID := params["tx_id"]
-	tx, inputs, outputs, err := database.FetchPChainTxFull(vr.db, txID)
-	if utils.HandleInternalServerError(w, err) {
-		return
-	}
-	utils.WriteApiResponseOk(w, api.NewApiPChainTx(tx, inputs, outputs))
+	err := database.DoInTransaction(vr.db, func(dbTx *gorm.DB) error {
+		tx, inputs, outputs, err := database.FetchPChainTxFull(vr.db, txID)
+		if err == nil {
+			utils.WriteApiResponseOk(w, api.NewApiPChainTx(tx, inputs, outputs))
+		}
+		return err
+	})
+	utils.HandleInternalServerError(w, err)
 }
 
 func AddValidatorRoutes(router *mux.Router, ctx context.ServicesContext) {

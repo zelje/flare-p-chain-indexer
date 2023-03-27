@@ -85,3 +85,35 @@ func FetchPChainTxFull(db *gorm.DB, txID string) (*PChainTx, []PChainTxInput, []
 
 	return &tx, inputs, outputs, nil
 }
+
+type PChainTxData struct {
+	PChainTx
+	InputAddress string
+}
+
+// Find P-chain transaction in given block height
+// Returns transaction and true if found, nil and true if block was found,
+// nil and false if block height does not exist.
+func FindPChainTxInBlockHeight(db *gorm.DB,
+	txID string,
+	height uint64,
+) (*PChainTxData, bool, error) {
+	var txs []PChainTxData
+	// err := db.Where(&PChainTx{BlockHeight: height}).Find(&txs).Error
+	err := db.Table("p_chain_txes").
+		Joins("left join p_chain_tx_inputs as inputs on inputs.tx_id = p_chain_txes.tx_id").
+		Where("p_chain_txes.block_height = ?", height).
+		Select("p_chain_txes.*, inputs.address as input_address").
+		Scan(&txs).Error
+	if err != nil {
+		return nil, false, err
+	}
+	if len(txs) == 0 {
+		return nil, false, nil
+	}
+	tx := &txs[0]
+	if tx.TxID != txID {
+		return nil, true, nil
+	}
+	return &txs[0], true, nil
+}

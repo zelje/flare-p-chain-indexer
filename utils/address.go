@@ -1,7 +1,7 @@
-package shared
+package utils
 
 import (
-	"flare-indexer/indexer/config"
+	"flare-indexer/config"
 	"fmt"
 
 	"github.com/ava-labs/avalanchego/utils/formatting/address"
@@ -12,8 +12,8 @@ var (
 )
 
 func init() {
-	config.IndexerConfigCallback.AddCallback(func(config config.IndexerApplicationConfig) {
-		AddressHRP = config.AddressHRP()
+	config.GlobalConfigCallback.AddCallback(func(config config.GlobalConfig) {
+		AddressHRP = config.ChainConfig().ChainAddressHRP
 		if len(AddressHRP) == 0 {
 			panic(fmt.Errorf("AddressHRP must be specified"))
 		}

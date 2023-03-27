@@ -14,7 +14,6 @@ type ApiPChainTx struct {
 	StartTime   time.Time             `json:"startTime"`
 	EndTime     time.Time             `json:"endTime"`
 	Weight      uint64                `json:"weight"`
-	Memo        string                `json:"memo"`
 
 	Inputs  []ApiPChainTxInput  `json:"inputs"`
 	Outputs []ApiPChainTxOutput `json:"outputs"`
@@ -41,7 +40,6 @@ func NewApiPChainTx(tx *database.PChainTx, inputs []database.PChainTxInput, outp
 		StartTime:   tx.StartTime,
 		EndTime:     tx.EndTime,
 		Weight:      tx.Weight,
-		Memo:        tx.Memo,
 		Inputs:      newApiPChainInputs(inputs),
 		Outputs:     newApiPChainOutputs(outputs),
 	}

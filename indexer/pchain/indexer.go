@@ -1,7 +1,7 @@
 package pchain
 
 import (
-	"flare-indexer/indexer/config"
+	"flare-indexer/config"
 	"flare-indexer/indexer/context"
 	"flare-indexer/indexer/shared"
 	"flare-indexer/utils"
@@ -41,9 +41,9 @@ func (xi *pChainBlockIndexer) Run() {
 }
 
 func newIndexerClient(cfg *config.ChainConfig) indexer.Client {
-	return indexer.NewClient(utils.JoinPaths(cfg.IndexerURL, "ext/index/P/block"))
+	return indexer.NewClient(utils.JoinPaths(cfg.NodeURL, "ext/index/P/block"))
 }
 
 func newJsonRpcClient(cfg *config.ChainConfig) jsonrpc.RPCClient {
-	return jsonrpc.NewClient(utils.JoinPaths(cfg.IndexerURL, "ext/bc/P"))
+	return jsonrpc.NewClient(utils.JoinPaths(cfg.NodeURL, "ext/bc/P"))
 }

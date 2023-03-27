@@ -4,19 +4,11 @@ import (
 	"flare-indexer/config"
 )
 
-var (
-	IndexerConfigCallback config.ConfigCallback[IndexerApplicationConfig] = config.ConfigCallback[IndexerApplicationConfig]{}
-)
-
-type IndexerApplicationConfig interface {
-	AddressHRP() string
-}
-
 type Config struct {
 	DB            config.DBConfig     `toml:"db"`
 	Logger        config.LoggerConfig `toml:"logger"`
+	Chain         config.ChainConfig  `toml:"chain"`
 	Metrics       MetricsConfig       `toml:"metrics"`
-	Chain         ChainConfig         `toml:"chain"`
 	XChainIndexer IndexerConfig       `toml:"x_chain_indexer"`
 	PChainIndexer IndexerConfig       `toml:"p_chain_indexer"`
 	UptimeCronjob CronjobConfig       `toml:"uptime_cronjob"`
@@ -39,11 +31,6 @@ type CronjobConfig struct {
 	TimeoutSeconds int  `toml:"timeout_seconds"`
 }
 
-type ChainConfig struct {
-	IndexerURL      string `toml:"indexer_url" envconfig:"CHAIN_INDEXER_URL"`
-	ChainAddressHRP string `toml:"address_hrp" envconfig:"CHAIN_ADDRESS_HRP"`
-}
-
 func newConfig() *Config {
 	return &Config{
 		XChainIndexer: IndexerConfig{
@@ -62,18 +49,18 @@ func newConfig() *Config {
 			Enabled:        false,
 			TimeoutSeconds: 60,
 		},
-		Chain: ChainConfig{
-			IndexerURL: "http://localhost:9650/",
+		Chain: config.ChainConfig{
+			NodeURL: "http://localhost:9650/",
 		},
 	}
 }
 
-func (c Config) AddressHRP() string {
-	return c.Chain.ChainAddressHRP
-}
-
 func (c Config) LoggerConfig() config.LoggerConfig {
 	return c.Logger
+}
+
+func (c Config) ChainConfig() config.ChainConfig {
+	return c.Chain
 }
 
 func BuildConfig() (*Config, error) {

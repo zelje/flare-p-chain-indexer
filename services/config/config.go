@@ -7,6 +7,7 @@ import (
 type Config struct {
 	DB       config.DBConfig     `toml:"db"`
 	Logger   config.LoggerConfig `toml:"logger"`
+	Chain    config.ChainConfig  `toml:"chain"`
 	Services ServicesConfig      `toml:"services"`
 }
 
@@ -24,6 +25,10 @@ func newConfig() *Config {
 
 func (c Config) LoggerConfig() config.LoggerConfig {
 	return c.Logger
+}
+
+func (c Config) ChainConfig() config.ChainConfig {
+	return c.Chain
 }
 
 func BuildConfig() (*Config, error) {

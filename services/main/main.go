@@ -18,6 +18,7 @@ func main() {
 
 	router := mux.NewRouter()
 	routes.AddValidatorRoutes(router, ctx)
+	routes.AddQueryRoutes(router, ctx)
 
 	srv := &http.Server{
 		Handler: router,

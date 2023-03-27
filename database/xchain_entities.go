@@ -28,6 +28,6 @@ type XChainVtx struct {
 	VtxID     string    `gorm:"type:varchar(50);unique;not null"`
 	ParentID  string    `gorm:"type:varchar(50)"`
 	VtxIndex  uint64    `gorm:"unique"` // Vertex index - from indexer
-	Height    uint64    `gorm:"unique"` // Vertex height
+	Height    uint64    // Vertex height
 	Timestamp time.Time // Time indexed, not when accepted by the consensus
 }

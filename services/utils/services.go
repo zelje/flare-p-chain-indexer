@@ -10,13 +10,18 @@ import (
 // Decode body from the request into value.
 // Any error is written into the response and false is returned.
 // (It is enough to just return from the request handler on false value)
-//
-// TODO: add validation from go-playground/validator
 func DecodeBody(w http.ResponseWriter, r *http.Request, value any) bool {
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&value)
 	if err != nil {
-		http.Error(w, fmt.Sprint("error parsing request body: %w", err), http.StatusBadRequest)
+		WriteApiResponseError(w, api.ApiResStatusRequestBodyError,
+			"error parsing request body", err.Error())
+		return false
+	}
+	err = validate.Struct(value)
+	if err != nil {
+		WriteApiResponseError(w, api.ApiResStatusRequestBodyError,
+			"error validating request body", err.Error())
 		return false
 	}
 	return true
@@ -33,8 +38,8 @@ func WriteResponse(w http.ResponseWriter, value any) {
 
 // Writes value as data field in ApiResponse
 // Handles error as internal server error
-func WriteApiResponse(w http.ResponseWriter, status api.ApiResponseStatus, value any) {
-	response := api.ApiResponse{
+func WriteApiResponse[T any](w http.ResponseWriter, status api.ApiResStatusEnum, value T) {
+	response := api.ApiResponseWrapper[T]{
 		Status: status,
 		Data:   value,
 	}
@@ -43,7 +48,22 @@ func WriteApiResponse(w http.ResponseWriter, status api.ApiResponseStatus, value
 
 // Equivalent to WriteApiResponse with status ApiResponseStatusOk
 func WriteApiResponseOk(w http.ResponseWriter, value any) {
-	WriteApiResponse(w, api.ApiResponseStatusOk, value)
+	WriteApiResponse(w, api.ApiResStatusOk, value)
+}
+
+// Use for error responses
+func WriteApiResponseError(
+	w http.ResponseWriter,
+	status api.ApiResStatusEnum,
+	errorMessage string,
+	errorDetails string,
+) {
+	response := api.ApiResponseWrapper[any]{
+		Status:       status,
+		ErrorDetails: errorDetails,
+		ErrorMessage: errorMessage,
+	}
+	WriteResponse(w, response)
 }
 
 // Set InternalServerError to output if err is not nil. Return true if err is not nil

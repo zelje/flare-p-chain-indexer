@@ -19,7 +19,7 @@ type uptimeCronjob struct {
 }
 
 func NewUptimeCronjob(ctx context.IndexerContext) Cronjob {
-	client := jsonrpc.NewClient(utils.JoinPaths(ctx.Config().Chain.IndexerURL, "ext/bc/P"))
+	client := jsonrpc.NewClient(utils.JoinPaths(ctx.Config().Chain.NodeURL, "ext/bc/P"))
 	return &uptimeCronjob{
 		config: ctx.Config().UptimeCronjob,
 		db:     ctx.DB(),
