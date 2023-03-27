@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"errors"
 	"flare-indexer/config"
 	"flare-indexer/database"
 	"flare-indexer/services/api"
@@ -57,6 +58,7 @@ func (qr *queryRouteHandlers) prepare(w http.ResponseWriter, r *http.Request) {
 	tx, blockExists, err := database.FindPChainTxInBlockHeight(qr.db, txID, request.BlockNumber)
 	if err != nil {
 		utils.HandleInternalServerError(w, err)
+		return
 	}
 
 	response := api.APIVerification[api.ARPChainStaking, api.DHPChainStaking]{}
@@ -77,7 +79,16 @@ func (qr *queryRouteHandlers) prepare(w http.ResponseWriter, r *http.Request) {
 
 		// Ignore error, should be valid for add validator/delegator transactions
 		nodeID, _ := globalUtils.NodeIDToHex(tx.NodeID)
-		address, _ := globalUtils.AddressToHex(tx.InputAddress)
+
+		address, err := globalUtils.AddressToHex(tx.InputAddress)
+		if err != nil {
+			// Handle the case where the address is a node ID (genesis validator)
+			address, err = globalUtils.IdToHex(tx.InputAddress)
+			if err != nil {
+				utils.HandleInternalServerError(w, errors.New("failed to convert address to hex"))
+				return
+			}
+		}
 
 		response.Status = api.VerificationStatusOK
 		response.Request = &request

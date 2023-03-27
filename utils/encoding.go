@@ -10,8 +10,8 @@ import (
 )
 
 const (
-	hexPrefix      = "0x"
-	chainSeparator = "-"
+	hexPrefix             = "0x"
+	addressChainSeparator = "-"
 )
 
 // DecodeHexString decodes a string that is prefixed with "0x" into a byte slice
@@ -31,13 +31,23 @@ func NodeIDToHex(nodeID string) (string, error) {
 	return hexPrefix + hex.EncodeToString(id.Bytes()), nil
 }
 
+// Convert address string to 20 byte hex string
 func AddressToHex(addrStr string) (string, error) {
-	if !strings.Contains(addrStr, chainSeparator) {
-		addrStr = chainSeparator + addrStr
+	if !strings.Contains(addrStr, addressChainSeparator) {
+		addrStr = addressChainSeparator + addrStr
 	}
 	id, err := address.ParseToID(addrStr)
 	if err != nil {
 		return "", err
 	}
 	return hexPrefix + hex.EncodeToString(id.Bytes()), nil
+}
+
+// Convert id string to 20 byte hex string
+func IdToHex(idStr string) (string, error) {
+	id, err := ids.FromString(idStr)
+	if err != nil {
+		return "", err
+	}
+	return hexPrefix + hex.EncodeToString(id[:]), nil
 }
