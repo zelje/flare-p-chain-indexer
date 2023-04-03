@@ -27,7 +27,7 @@ func HashPChainStaking(request *api.ARPChainStaking, response *api.DHPChainStaki
 	arguments := abi.Arguments{
 		abi.Argument{Type: AbiTypeUint16},  // AttestationType
 		abi.Argument{Type: AbiTypeUint32},  // SourceId
-		abi.Argument{Type: AbiTypeUint64},  // BlockNumber
+		abi.Argument{Type: AbiTypeUint32},  // BlockNumber
 		abi.Argument{Type: AbiTypeBytes32}, // TransactionHash
 		abi.Argument{Type: AbiTypeUint8},   // TransactionType
 		abi.Argument{Type: AbiTypeBytes20}, // NodeId
@@ -76,11 +76,11 @@ func PackPChainStakingRequest(request *api.ARPChainStaking) (string, error) {
 	if request == nil {
 		return "", errors.New("request is empty")
 	}
-	miCode, err := utils.PadHexString(request.MessageIntegrityCode, 32)
+	miCode, err := utils.PadHexString(request.MessageIntegrityCode, 64)
 	if err != nil {
 		return "", fmt.Errorf("error packing MessageIntegrityCode: %w", err)
 	}
-	id, err := utils.PadHexString(request.Id, 32)
+	id, err := utils.PadHexString(request.Id, 64)
 	if err != nil {
 		return "", fmt.Errorf("error packing id: %w", err)
 	}
@@ -105,8 +105,8 @@ func UnpackPChainStakingRequest(request string) (*api.ARPChainStaking, error) {
 	result := api.ARPChainStaking{}
 	result.AttestationType = api.AttestationType(binary.LittleEndian.Uint16(byteRequest[0:2]))
 	result.SourceId = api.SourceId(binary.LittleEndian.Uint32(byteRequest[2:6]))
-	result.MessageIntegrityCode = hex.EncodeToString(byteRequest[6:38])
-	result.Id = hex.EncodeToString(byteRequest[38:70])
+	result.MessageIntegrityCode = "0x" + hex.EncodeToString(byteRequest[6:38])
+	result.Id = "0x" + hex.EncodeToString(byteRequest[38:70])
 	result.BlockNumber = binary.LittleEndian.Uint32(byteRequest[70:74])
 	return &result, nil
 }

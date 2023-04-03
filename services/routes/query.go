@@ -19,9 +19,10 @@ func AddQueryRoutes(router *mux.Router, ctx context.ServicesContext) {
 	qr := newQueryRouteHandlers(ctx)
 	subrouter := router.PathPrefix("/query").Subrouter()
 
-	subrouter.HandleFunc("/", qr.processAttestationRequest).Methods(http.MethodPost)
-	subrouter.HandleFunc("/prepare", qr.prepareAttestationRequest).Methods(http.MethodPost)
-	subrouter.HandleFunc("/integrity", qr.integrityAttestationRequest).Methods(http.MethodPost)
+	subrouter.HandleFunc("", qr.processAttestationRequest).Methods(http.MethodPost)
+	subrouter.HandleFunc("/prepare", qr.prepareRequest).Methods(http.MethodPost)
+	subrouter.HandleFunc("/integrity", qr.integrityRequest).Methods(http.MethodPost)
+	subrouter.HandleFunc("/prepareAttestation", qr.prepareAttestationRequest).Methods(http.MethodPost)
 }
 
 type queryRouteHandlers struct {
@@ -60,7 +61,7 @@ func (qr *queryRouteHandlers) processAttestationRequest(w http.ResponseWriter, r
 //
 // Request type: api.ARPChainStaking
 // Response type: api.ApiResponseWrapper[api.APIVerification[api.ARPChainStaking, api.DHPChainStaking]]
-func (qr *queryRouteHandlers) prepareAttestationRequest(w http.ResponseWriter, r *http.Request) {
+func (qr *queryRouteHandlers) prepareRequest(w http.ResponseWriter, r *http.Request) {
 	var request api.ARPChainStaking
 	if !utils.DecodeBody(w, r, &request) {
 		return
@@ -75,7 +76,7 @@ func (qr *queryRouteHandlers) prepareAttestationRequest(w http.ResponseWriter, r
 //
 // Request type: api.ARPChainStaking
 // Response type: api.ApiResponseWrapper[string]
-func (qr *queryRouteHandlers) integrityAttestationRequest(w http.ResponseWriter, r *http.Request) {
+func (qr *queryRouteHandlers) integrityRequest(w http.ResponseWriter, r *http.Request) {
 	var request api.ARPChainStaking
 	if !utils.DecodeBody(w, r, &request) {
 		return
@@ -87,6 +88,33 @@ func (qr *queryRouteHandlers) integrityAttestationRequest(w http.ResponseWriter,
 			return
 		}
 		utils.WriteApiResponseOk(w, code)
+	}
+}
+
+// Given parsed @param request in JSON with possibly invalid message integrity code it returns the byte encoded
+// attestation request with the correct message integrity code. The response can be directly used for submitting
+// attestation request to StateConnector smart contract.
+//
+// Request type: api.ARPChainStaking
+// Response type: api.ApiResponseWrapper[string]
+func (qr *queryRouteHandlers) prepareAttestationRequest(w http.ResponseWriter, r *http.Request) {
+	var request api.ARPChainStaking
+	if !utils.DecodeBody(w, r, &request) {
+		return
+	}
+	if response := qr.processPChainStakingRequest(w, &request); response != nil {
+		code, err := utils.HashPChainStaking(&request, response.Response, "")
+		if err != nil {
+			utils.WriteApiResponseError(w, api.ApiResStatusError, "internal error", err.Error())
+			return
+		}
+		request.MessageIntegrityCode = code
+		packedRequest, err := utils.PackPChainStakingRequest(&request)
+		if err != nil {
+			utils.WriteApiResponseError(w, api.ApiResStatusError, "internal error", err.Error())
+			return
+		}
+		utils.WriteApiResponseOk(w, packedRequest)
 	}
 }
 
