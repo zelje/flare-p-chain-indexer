@@ -37,7 +37,7 @@ const (
 	SourceIdCOSTON2  SourceId = 114
 )
 
-type AttestationType int
+type AttestationType uint16
 
 const (
 	AttestationTypePayment                       AttestationType = 1
@@ -79,9 +79,9 @@ type DHPChainStaking struct {
 	MerkleProof []string `json:"merkleProof"`
 
 	// Number of the transaction block on the underlying chain.
-	BlockNumber uint64 `json:"blockNumber"`
+	BlockNumber uint32 `json:"blockNumber"`
 
-	// Hash of the transaction on the underlying chain.
+	// Id of the transaction on the underlying chain.
 	TransactionHash string `json:"transactionHash"`
 
 	// Type of the staking/delegation transaction: '0' for 'ADD_VALIDATOR_TX' and '1' for 'ADD_DELEGATOR_TX'.
@@ -113,12 +113,14 @@ type ARPChainStaking struct {
 	// The ID of the underlying chain, see 'SourceId' enum.
 	SourceId SourceId `json:"sourceId"`
 
-	// The hash of the expected attestation response appended by string 'Flare'. Used to verify consistency of the attestation response against the anticipated result, thus preventing wrong (forms of) attestations.
+	// The hash of the expected attestation response appended by string 'Flare'.
+	// Used to verify consistency of the attestation response against the anticipated result,
+	// thus preventing wrong (forms of) attestations.
 	MessageIntegrityCode string `json:"messageIntegrityCode"`
 
 	// Transaction hash to search for.
 	Id string `json:"id" validate:"required,tx-id"`
 
 	// Block number of the transaction.
-	BlockNumber uint64 `json:"blockNumber"`
+	BlockNumber uint32 `json:"blockNumber"`
 }

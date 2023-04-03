@@ -28,7 +28,7 @@ type ApiResponseWrapper[T any] struct {
 	// Response status. OK for successful responses.
 	Status ApiResStatusEnum `json:"status"`
 
-	ValidationErrorDetails ApiValidationErrorDetails `json:"validationErrorDetails"`
+	ValidationErrorDetails *ApiValidationErrorDetails `json:"validationErrorDetails"`
 }
 
 type ApiValidationErrorDetails struct {

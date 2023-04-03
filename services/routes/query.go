@@ -15,6 +15,15 @@ import (
 	"gorm.io/gorm"
 )
 
+func AddQueryRoutes(router *mux.Router, ctx context.ServicesContext) {
+	qr := newQueryRouteHandlers(ctx)
+	subrouter := router.PathPrefix("/query").Subrouter()
+
+	subrouter.HandleFunc("/", qr.processAttestationRequest).Methods(http.MethodPost)
+	subrouter.HandleFunc("/prepare", qr.prepareAttestationRequest).Methods(http.MethodPost)
+	subrouter.HandleFunc("/integrity", qr.integrityAttestationRequest).Methods(http.MethodPost)
+}
+
 type queryRouteHandlers struct {
 	db  *gorm.DB
 	cfg config.ChainConfig
@@ -27,27 +36,88 @@ func newQueryRouteHandlers(ctx context.ServicesContext) *queryRouteHandlers {
 	}
 }
 
+// Verifies attestation request
+//
+// Request type: api.APIAttestationRequest
+// Response type: api.ApiResponseWrapper[api.APIVerification[api.ARPChainStaking, api.DHPChainStaking]]
 func (qr *queryRouteHandlers) processAttestationRequest(w http.ResponseWriter, r *http.Request) {
+	var request api.APIAttestationRequest
+	if !utils.DecodeBody(w, r, &request) {
+		return
+	}
 
+	unpackedReq, err := utils.UnpackPChainStakingRequest(request.Request)
+	if err != nil {
+		utils.WriteApiResponseError(w, api.ApiResStatusInvalidRequest, "invalid request", err.Error())
+		return
+	}
+	if response := qr.processPChainStakingRequest(w, unpackedReq); response != nil {
+		utils.WriteApiResponseOk(w, response)
+	}
 }
 
-// Request type: api.ARPChainStaking
+// Given parsed request in JSON with possibly invalid message integrity code it returns the verification object.
 //
+// Request type: api.ARPChainStaking
 // Response type: api.ApiResponseWrapper[api.APIVerification[api.ARPChainStaking, api.DHPChainStaking]]
-func (qr *queryRouteHandlers) prepare(w http.ResponseWriter, r *http.Request) {
+func (qr *queryRouteHandlers) prepareAttestationRequest(w http.ResponseWriter, r *http.Request) {
 	var request api.ARPChainStaking
 	if !utils.DecodeBody(w, r, &request) {
 		return
 	}
-	if request.AttestationType != api.AttestationTypePChainStaking {
-		utils.WriteApiResponseError(w, api.ApiResStatusInvalidRequest, "invalid attestation type",
-			"attestation type must be pchain staking")
+	if response := qr.processPChainStakingRequest(w, &request); response != nil {
+		utils.WriteApiResponseOk(w, response)
+	}
+}
+
+// Given parsed request in JSON with possibly invalid message integrity code it returns the message
+// integrity code.
+//
+// Request type: api.ARPChainStaking
+// Response type: api.ApiResponseWrapper[string]
+func (qr *queryRouteHandlers) integrityAttestationRequest(w http.ResponseWriter, r *http.Request) {
+	var request api.ARPChainStaking
+	if !utils.DecodeBody(w, r, &request) {
 		return
 	}
+	if response := qr.processPChainStakingRequest(w, &request); response != nil {
+		code, err := utils.HashPChainStaking(&request, response.Response, "")
+		if err != nil {
+			utils.WriteApiResponseError(w, api.ApiResStatusError, "internal error", err.Error())
+			return
+		}
+		utils.WriteApiResponseOk(w, code)
+	}
+}
+
+// Process attestation request. Write errors into w, if any, otherwise write the response.
+func (qr *queryRouteHandlers) processPChainStakingRequest(
+	w http.ResponseWriter,
+	request *api.ARPChainStaking,
+) *api.APIVerification[api.ARPChainStaking, api.DHPChainStaking] {
+	response, err1, err2 := qr.executePChainStakingRequest(request)
+	if err1 != nil {
+		utils.WriteApiResponseError(w, api.ApiResStatusInvalidRequest, "invalid request", err1.Error())
+		return nil
+	}
+	if err2 != nil {
+		utils.WriteApiResponseError(w, api.ApiResStatusError, "internal error", err2.Error())
+		return nil
+	}
+	return response
+}
+
+// Execute attestation request and return attestation response.
+// Returns an error if the request is invalid (1st error),
+// or if there is an error querying the database (2nd error)
+func (qr *queryRouteHandlers) executePChainStakingRequest(
+	request *api.ARPChainStaking,
+) (*api.APIVerification[api.ARPChainStaking, api.DHPChainStaking], error, error) {
+	if request.AttestationType != api.AttestationTypePChainStaking {
+		return nil, errors.New("invalid attestation type: attestation type must be pchain staking"), nil
+	}
 	if int(request.SourceId) != qr.cfg.ChainID {
-		utils.WriteApiResponseError(w, api.ApiResStatusInvalidRequest, "invalid source chain id",
-			"source chain id must be the same as the chain id of the indexer")
-		return
+		return nil, errors.New("invalid source chain id: source chain id must be the same as the chain id of the indexer"), nil
 	}
 
 	// Ignore error, because it's already validated
@@ -57,8 +127,7 @@ func (qr *queryRouteHandlers) prepare(w http.ResponseWriter, r *http.Request) {
 
 	tx, blockExists, err := database.FindPChainTxInBlockHeight(qr.db, txID, request.BlockNumber)
 	if err != nil {
-		utils.HandleInternalServerError(w, err)
-		return
+		return nil, nil, err
 	}
 
 	response := api.APIVerification[api.ARPChainStaking, api.DHPChainStaking]{}
@@ -85,13 +154,12 @@ func (qr *queryRouteHandlers) prepare(w http.ResponseWriter, r *http.Request) {
 			// Handle the case where the address is a node ID (genesis validator)
 			address, err = globalUtils.IdToHex(tx.InputAddress)
 			if err != nil {
-				utils.HandleInternalServerError(w, errors.New("failed to convert address to hex"))
-				return
+				return nil, nil, errors.New("failed to convert address to hex")
 			}
 		}
 
 		response.Status = api.VerificationStatusOK
-		response.Request = &request
+		response.Request = request
 		response.Response = &api.DHPChainStaking{
 			BlockNumber:     request.BlockNumber,
 			TransactionHash: request.Id,
@@ -103,13 +171,5 @@ func (qr *queryRouteHandlers) prepare(w http.ResponseWriter, r *http.Request) {
 			SourceAddress:   address,
 		}
 	}
-	utils.WriteApiResponseOk(w, response)
-}
-
-func AddQueryRoutes(router *mux.Router, ctx context.ServicesContext) {
-	qr := newQueryRouteHandlers(ctx)
-	subrouter := router.PathPrefix("/query").Subrouter()
-
-	subrouter.HandleFunc("/", qr.processAttestationRequest).Methods(http.MethodPost)
-	subrouter.HandleFunc("/prepare", qr.prepare).Methods(http.MethodPost)
+	return &response, nil, nil
 }

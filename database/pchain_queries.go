@@ -96,7 +96,7 @@ type PChainTxData struct {
 // nil and false if block height does not exist.
 func FindPChainTxInBlockHeight(db *gorm.DB,
 	txID string,
-	height uint64,
+	height uint32,
 ) (*PChainTxData, bool, error) {
 	var txs []PChainTxData
 	// err := db.Where(&PChainTx{BlockHeight: height}).Find(&txs).Error
