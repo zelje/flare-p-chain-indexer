@@ -1,19 +1,19 @@
 # Flare P-chain Attestation Suite
 
-Project consists of two projects
+This code implements two projects
 
 * P-chain indexer (indexer)
 * Attestation client (services)
 
 ## P-chain Indexer
 
-Indexer periodically reads blocks from Avalanche-Go (Flare) node with
+The P-chain indexer periodically reads blocks from an Avalanche-Go (Flare) node with
 enabled indexing (parameter `--index-enabled` set to true) from `/ext/index/P/block` route and writes transactions and their UTXO inputs and outputs to a MySQL database.
 
-Executable can be compiled from `indexer/main/main.go`.
+The executable can be built with `go build indexer/main/main.go`.
 
-Configuration is read from `toml` file `config.toml`. Some configuration
-parameters can also be configured from environment variables. See example below.
+The configuration is read from `toml` file `config.toml`. Some configuration
+parameters can also be configured using environment variables. See the list below:
 
 ```toml
 [db]
@@ -51,18 +51,18 @@ timeout_seconds = 10  # call uptime service on avalanche node evey
 
 ## Attestation client services
 
-Implements the following services
+The following services are implemented, according to the attestation specification:
 
-* `/query/`
+* `/query`
 * `/query/prepare`
 * `/query/integrity`
 * `/query/prepareAttestation`
 
-according to attestation specification.
+The executable can be built with with `go build services/main/main.go`.
 
-Configuration is read from `toml` file `config.toml`.
-Settings for `[db]`, `[logger]` are the same as for the indexer above.
-Specific settings are
+The configuration is read from `toml` file `config.toml`.
+The settings for `[db]`, `[logger]` are the same as for the indexer above.
+Specific settings are:
 
 ```toml
 [chain]
