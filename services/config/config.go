@@ -32,12 +32,9 @@ func (c Config) ChainConfig() config.ChainConfig {
 }
 
 func BuildConfig() (*Config, error) {
+	cfgFileName := config.ConfigFileName()
 	cfg := newConfig()
-	err := config.ParseConfigFile(cfg, config.CONFIG_FILE, false)
-	if err != nil {
-		return nil, err
-	}
-	err = config.ParseConfigFile(cfg, config.LOCAL_CONFIG_FILE, true)
+	err := config.ParseConfigFile(cfg, cfgFileName, false)
 	if err != nil {
 		return nil, err
 	}

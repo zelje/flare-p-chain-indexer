@@ -10,10 +10,12 @@ This code implements two projects
 The P-chain indexer periodically reads blocks from an Avalanche-Go (Flare) node with
 enabled indexing (parameter `--index-enabled` set to true) from `/ext/index/P/block` route and writes transactions and their UTXO inputs and outputs to a MySQL database.
 
-The executable can be built with `go build indexer/main/main.go`.
+The executable can be built with `go build indexer/main/indexer.go`.
 
-The configuration is read from `toml` file `config.toml`. Some configuration
-parameters can also be configured using environment variables. See the list below:
+The configuration is read from `toml` file. Some configuration
+parameters can also be configured using environment variables. See the list below.
+
+Config file can be specified using the command line parameter `--config`, e.g., `./indexer --config config.local.toml`. The default config file name is `config.toml`.
 
 ```toml
 [db]
@@ -27,7 +29,7 @@ log_queries = false  # Log db queries (for debugging)
 [logger]
 level = "INFO"      # valid values are: DEBUG, INFO, WARN, ERROR, DPANIC, PANIC, FATAL (as in zap logger)
 file = "./logs/flare-indexer.log"  # logger file
-max_file_size = 10  # max file size before rotating
+max_file_size = 10  # max file size before rotating, in MB
 console = true      # also log to console
 
 [metrics]
@@ -58,11 +60,13 @@ The following services are implemented, according to the attestation specificati
 * `/query/integrity`
 * `/query/prepareAttestation`
 
-The executable can be built with with `go build services/main/main.go`.
+The executable can be built with with `go build services/main/services.go`.
 
-The configuration is read from `toml` file `config.toml`.
+The configuration is read from `toml` file.
 The settings for `[db]`, `[logger]` are the same as for the indexer above.
-Specific settings are:
+Specific settings are listed below.
+
+Config file can be specified using the command line parameter `--config`, e.g., `./services --config config.local.toml`. The default config file name is `config.toml`.
 
 ```toml
 [chain]

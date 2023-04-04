@@ -1,6 +1,7 @@
 package config
 
 import (
+	"flag"
 	"fmt"
 	"os"
 
@@ -9,8 +10,7 @@ import (
 )
 
 const (
-	LOCAL_CONFIG_FILE string = "config.local.toml"
-	CONFIG_FILE       string = "config.toml"
+	CONFIG_FILE string = "config.toml"
 )
 
 var (
@@ -69,4 +69,10 @@ func ReadEnv(cfg interface{}) error {
 		return fmt.Errorf("error reading env config: %w", err)
 	}
 	return nil
+}
+
+func ConfigFileName() string {
+	cfgFlag := flag.String("config", CONFIG_FILE, "Configuration file (toml format)")
+	flag.Parse()
+	return *cfgFlag
 }
