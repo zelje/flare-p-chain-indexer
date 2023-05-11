@@ -7,7 +7,7 @@ import (
 )
 
 func TestRPCClient(t *testing.T) {
-	client := PChainRPCClient(t)
+	client := PChainTestRPCClient(t)
 	id1, _ := ids.FromString("22ewQXuJw8PKQPiqJxwDezQszrNT2GbLyh4oCpCyVCSjAaDp2o")
 	id2, _ := ids.FromString("oUpTu8TbYSWviCxV5mxuh2Wk9xSHRVrPXVKfPmFESPsRRdh2X")
 	id3, _ := ids.FromString("2VhbseqzJLTZ1wxBWzWqvgshmAqx8LshT2p8HJP7P6zwz4iZTg")
