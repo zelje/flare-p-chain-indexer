@@ -14,6 +14,7 @@ func createPChainTestBlockIndexer(t *testing.T, batchSize int, startIndex uint64
 	}
 
 	client := chain.PChainTestClient(t)
+	rpcClient := chain.PChainTestRPCClient(t)
 
 	idxr := pChainBlockIndexer{}
 	idxr.StateName = StateName
@@ -21,7 +22,7 @@ func createPChainTestBlockIndexer(t *testing.T, batchSize int, startIndex uint64
 	idxr.Client = client
 	idxr.DB = ctx.DB()
 	idxr.Config = ctx.Config().PChainIndexer
-	idxr.BatchIndexer = NewPChainBatchIndexer(ctx, idxr.Client, nil)
+	idxr.BatchIndexer = NewPChainBatchIndexer(ctx, idxr.Client, rpcClient)
 
 	return &idxr
 }

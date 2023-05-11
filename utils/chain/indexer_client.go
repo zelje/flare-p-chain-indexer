@@ -53,14 +53,14 @@ func (ic *AvalancheIndexerClient) GetIndex(ctx context.Context, id ids.ID) (uint
 //
 
 // Item returned by method index.getContainerByIndex
-type Recording struct {
+type ContainerRecording struct {
 	Id        string    `json:"id"`
 	Bytes     string    `json:"bytes"`
 	Timestamp time.Time `json:"timestamp"`
 	Index     string    `json:"index"`
 }
 
-func (r *Recording) toContainer() (*indexer.Container, uint64, error) {
+func (r *ContainerRecording) toContainer() (*indexer.Container, uint64, error) {
 	id, err := ids.FromString(r.Id)
 	if err != nil {
 		return nil, 0, err
@@ -84,8 +84,8 @@ func (r *Recording) toContainer() (*indexer.Container, uint64, error) {
 	return &result, index, nil
 }
 
-func readRecordings(fileName string) ([]Recording, error) {
-	var recordings []Recording
+func readContainerRecordings(fileName string) ([]ContainerRecording, error) {
+	var recordings []ContainerRecording
 	jsonFile, err := os.ReadFile(fileName)
 	if err != nil {
 		return nil, err
@@ -105,7 +105,7 @@ type RecordedIndexerClient struct {
 }
 
 func NewRecordedIndexerClient(fileName string) (*RecordedIndexerClient, error) {
-	rec, err := readRecordings(fileName)
+	rec, err := readContainerRecordings(fileName)
 	if err != nil {
 		return nil, err
 	}

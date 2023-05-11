@@ -1,19 +1,17 @@
 package pchain
 
 import (
-	"context"
+	"flare-indexer/utils/chain"
 
-	"github.com/ava-labs/avalanchego/api"
 	"github.com/ava-labs/avalanchego/ids"
 	"github.com/ava-labs/avalanchego/utils/formatting"
 	"github.com/ava-labs/avalanchego/utils/json"
 	"github.com/ava-labs/avalanchego/vms/components/avax"
 	"github.com/ava-labs/avalanchego/vms/platformvm/genesis"
 	"github.com/ava-labs/avalanchego/vms/platformvm/txs"
-	"github.com/ybbus/jsonrpc/v3"
 )
 
-func CallPChainGetTxApi(client jsonrpc.RPCClient, txID string) (*txs.Tx, error) {
+func CallPChainGetTxApi(client chain.RPCClient, txID string) (*txs.Tx, error) {
 	id, err := ids.FromString(txID)
 	if err != nil {
 		return nil, err
@@ -25,17 +23,7 @@ func CallPChainGetTxApi(client jsonrpc.RPCClient, txID string) (*txs.Tx, error) 
 	}
 
 	// Fetch from chain
-	params := api.GetTxArgs{
-		TxID:     id,
-		Encoding: formatting.Hex,
-	}
-	reply := api.GetTxReply{}
-	ctx := context.Background()
-	response, err := client.Call(ctx, "platform.getTx", params)
-	if err != nil {
-		return nil, err
-	}
-	err = response.GetObject(&reply)
+	reply, err := client.GetTx(id)
 	if err != nil {
 		return nil, err
 	}
@@ -61,23 +49,14 @@ type GetRewardUTXOsReply struct {
 	Encoding   formatting.Encoding `json:"encoding"`
 }
 
-func CallPChainGetRewardUTXOsApi(client jsonrpc.RPCClient, txID string) ([]*avax.UTXO, error) {
+func CallPChainGetRewardUTXOsApi(client chain.RPCClient, txID string) ([]*avax.UTXO, error) {
 	id, err := ids.FromString(txID)
 	if err != nil {
 		return nil, err
 	}
 
-	params := api.GetTxArgs{
-		TxID:     id,
-		Encoding: formatting.Hex,
-	}
-	reply := GetRewardUTXOsReply{}
-	ctx := context.Background()
-	response, err := client.Call(ctx, "platform.getRewardUTXOs", params)
-	if err != nil {
-		return nil, err
-	}
-	err = response.GetObject(&reply)
+	// Fetch from chain
+	reply, err := client.GetRewardUTXOs(id)
 	if err != nil {
 		return nil, err
 	}

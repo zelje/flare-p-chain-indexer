@@ -15,7 +15,6 @@ import (
 	"github.com/ava-labs/avalanchego/vms/platformvm/fx"
 	"github.com/ava-labs/avalanchego/vms/platformvm/txs"
 	"github.com/ava-labs/avalanchego/vms/proposervm/block"
-	"github.com/ybbus/jsonrpc/v3"
 	"gorm.io/gorm"
 )
 
@@ -23,7 +22,7 @@ import (
 type txBatchIndexer struct {
 	db        *gorm.DB
 	client    chain.IndexerClient
-	rpcClient jsonrpc.RPCClient
+	rpcClient chain.RPCClient
 
 	inOutIndexer *shared.InputOutputIndexer
 	newTxs       []*database.PChainTx
@@ -32,7 +31,7 @@ type txBatchIndexer struct {
 func NewPChainBatchIndexer(
 	ctx context.IndexerContext,
 	client chain.IndexerClient,
-	rpcClient jsonrpc.RPCClient,
+	rpcClient chain.RPCClient,
 ) *txBatchIndexer {
 	updater := newPChainInputUpdater(ctx, rpcClient)
 	return &txBatchIndexer{
@@ -237,7 +236,7 @@ func getAddStakerTxOutputs(txID string, tx txs.PermissionlessStaker) ([]shared.O
 	return outs, nil
 }
 
-func getRewardOutputs(client jsonrpc.RPCClient, txID string) ([]shared.Output, error) {
+func getRewardOutputs(client chain.RPCClient, txID string) ([]shared.Output, error) {
 	utxos, err := CallPChainGetRewardUTXOsApi(client, txID)
 	if err != nil {
 		return nil, err

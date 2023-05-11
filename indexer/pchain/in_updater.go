@@ -4,10 +4,10 @@ import (
 	"flare-indexer/database"
 	"flare-indexer/indexer/context"
 	"flare-indexer/indexer/shared"
+	"flare-indexer/utils/chain"
 
 	"github.com/ava-labs/avalanchego/vms/platformvm/txs"
 	mapset "github.com/deckarep/golang-set/v2"
-	"github.com/ybbus/jsonrpc/v3"
 	"gorm.io/gorm"
 )
 
@@ -15,10 +15,10 @@ type pChainInputUpdater struct {
 	shared.BaseInputUpdater
 
 	db     *gorm.DB
-	client jsonrpc.RPCClient
+	client chain.RPCClient
 }
 
-func newPChainInputUpdater(ctx context.IndexerContext, client jsonrpc.RPCClient) *pChainInputUpdater {
+func newPChainInputUpdater(ctx context.IndexerContext, client chain.RPCClient) *pChainInputUpdater {
 	ioUpdater := pChainInputUpdater{
 		db:     ctx.DB(),
 		client: client,

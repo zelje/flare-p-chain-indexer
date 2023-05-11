@@ -9,8 +9,19 @@ import (
 func PChainTestClient(t *testing.T) *RecordedIndexerClient {
 	_, filename, _, _ := runtime.Caller(0)
 	dir, _ := path.Split(filename)
-	blocksFile := path.Join(dir, "../../resources/test/p_chain_blocks.json")
+	blocksFile := path.Join(dir, "../../resources/test/p_chain_indexer_blocks.json")
 	client, err := NewRecordedIndexerClient(blocksFile)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return client
+}
+
+func PChainTestRPCClient(t *testing.T) *RecordedRPCClient {
+	_, filename, _, _ := runtime.Caller(0)
+	dir, _ := path.Split(filename)
+	blocksFile := path.Join(dir, "../../resources/test/p_chain_rpc_data.json")
+	client, err := NewRecordedRPCClient(blocksFile)
 	if err != nil {
 		t.Fatal(err)
 	}

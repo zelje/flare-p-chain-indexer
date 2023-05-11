@@ -6,8 +6,6 @@ import (
 	"flare-indexer/indexer/shared"
 	"flare-indexer/utils"
 	"flare-indexer/utils/chain"
-
-	"github.com/ybbus/jsonrpc/v3"
 )
 
 const (
@@ -44,6 +42,6 @@ func newIndexerClient(cfg *config.ChainConfig) chain.IndexerClient {
 	return chain.NewAvalancheIndexerClient(utils.JoinPaths(cfg.NodeURL, "ext/index/P/block"))
 }
 
-func newJsonRpcClient(cfg *config.ChainConfig) jsonrpc.RPCClient {
-	return jsonrpc.NewClient(utils.JoinPaths(cfg.NodeURL, "ext/bc/P"))
+func newJsonRpcClient(cfg *config.ChainConfig) chain.RPCClient {
+	return chain.NewAvalancheRPCClient(utils.JoinPaths(cfg.NodeURL, "ext/bc/P"))
 }
