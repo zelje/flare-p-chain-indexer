@@ -23,7 +23,7 @@ type ChainIndexerBase struct {
 	IndexerName string
 
 	DB     *gorm.DB
-	Client indexer.Client
+	Client chain.IndexerClient
 	Config config.IndexerConfig
 
 	BatchIndexer ContainerBatchIndexer
@@ -57,7 +57,9 @@ func (ci *ChainIndexerBase) IndexBatch() error {
 		logger.Debug("Nothing to do. Last index %d < next to process %d", lastIndex, nextIndex)
 
 		duration := time.Since(startTime).Milliseconds()
-		ci.metrics.Update(currentState.LastChainIndex, currentState.NextDBIndex-1, duration)
+		if ci.metrics != nil {
+			ci.metrics.Update(currentState.LastChainIndex, currentState.NextDBIndex-1, duration)
+		}
 		return nil
 	}
 
@@ -87,7 +89,9 @@ func (ci *ChainIndexerBase) IndexBatch() error {
 		ci.IndexerName,
 		lastProcessedIndex, lastIndex, duration)
 
-	ci.metrics.Update(lastIndex, lastProcessedIndex, duration)
+	if ci.metrics != nil {
+		ci.metrics.Update(lastIndex, lastProcessedIndex, duration)
+	}
 
 	return nil
 }

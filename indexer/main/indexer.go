@@ -18,7 +18,7 @@ func main() {
 		fmt.Printf("%v\n", err)
 		return
 	}
-	err = migrations.Container.ExecuteAll(ctx)
+	err = migrations.Container.ExecuteAll(ctx.DB())
 	if err != nil {
 		fmt.Printf("%v\n", err)
 		return

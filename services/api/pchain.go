@@ -7,7 +7,7 @@ import (
 
 type ApiPChainTx struct {
 	Type        database.PChainTxType `json:"type"`
-	TxID        string                `json:"txID"`
+	TxID        *string               `json:"txID"`
 	BlockHeight uint64                `json:"blockHeight"`
 	ChainID     string                `json:"chainID"`
 	NodeID      string                `json:"nodeID"`

@@ -7,7 +7,6 @@ import (
 	"flare-indexer/utils/chain"
 	"fmt"
 
-	"github.com/ava-labs/avalanchego/indexer"
 	"github.com/ava-labs/avalanchego/vms/avm/txs"
 	"github.com/ava-labs/avalanchego/wallet/chain/x"
 	mapset "github.com/deckarep/golang-set/v2"
@@ -18,10 +17,10 @@ type xChainInputUpdater struct {
 	shared.BaseInputUpdater
 
 	db     *gorm.DB
-	client indexer.Client
+	client chain.IndexerClient
 }
 
-func newXChainInputUpdater(ctx context.IndexerContext, client indexer.Client) *xChainInputUpdater {
+func newXChainInputUpdater(ctx context.IndexerContext, client chain.IndexerClient) *xChainInputUpdater {
 	ioUpdater := xChainInputUpdater{
 		db:     ctx.DB(),
 		client: client,

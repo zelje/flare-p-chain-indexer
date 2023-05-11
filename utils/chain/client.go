@@ -14,15 +14,15 @@ const (
 )
 
 // Get range of indexed objects by calling "index.getContainerRange"
-func FetchContainerRangeFromIndexer(client indexer.Client, from uint64, to int) ([]indexer.Container, error) {
+func FetchContainerRangeFromIndexer(client IndexerClient, from uint64, numToFetch int) ([]indexer.Container, error) {
 	ctx, cancelCtx := context.WithTimeout(context.Background(), IndexerTimeout)
 	defer cancelCtx()
 
-	return client.GetContainerRange(ctx, from, to)
+	return client.GetContainerRange(ctx, from, numToFetch)
 }
 
 // Get last accepted container by calling "index.getLastAccepted"
-func FetchLastAcceptedContainer(client indexer.Client) (indexer.Container, uint64, error) {
+func FetchLastAcceptedContainer(client IndexerClient) (indexer.Container, uint64, error) {
 	ctx, cancelCtx := context.WithTimeout(context.Background(), IndexerTimeout)
 	defer cancelCtx()
 
@@ -31,7 +31,7 @@ func FetchLastAcceptedContainer(client indexer.Client) (indexer.Container, uint6
 
 // Get object by its id by calling "index.getIndex" and "index.getContainerByIndex" successively.
 // Returns nil, nil if getIndex failed with an error.
-func FetchContainerFromIndexer(client indexer.Client, id string) (*indexer.Container, error) {
+func FetchContainerFromIndexer(client IndexerClient, id string) (*indexer.Container, error) {
 	ctx, cancelCtx := context.WithTimeout(context.Background(), IndexerTimeout)
 	defer cancelCtx()
 

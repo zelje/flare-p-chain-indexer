@@ -5,6 +5,7 @@ import (
 	"flare-indexer/indexer/context"
 	"flare-indexer/indexer/shared"
 	"flare-indexer/utils"
+	"flare-indexer/utils/chain"
 	"fmt"
 	"time"
 
@@ -21,7 +22,7 @@ import (
 // Indexer for P-chain transactions. Implements ContainerBatchIndexer
 type txBatchIndexer struct {
 	db        *gorm.DB
-	client    indexer.Client
+	client    chain.IndexerClient
 	rpcClient jsonrpc.RPCClient
 
 	inOutIndexer *shared.InputOutputIndexer
@@ -30,7 +31,7 @@ type txBatchIndexer struct {
 
 func NewPChainBatchIndexer(
 	ctx context.IndexerContext,
-	client indexer.Client,
+	client chain.IndexerClient,
 	rpcClient jsonrpc.RPCClient,
 ) *txBatchIndexer {
 	updater := newPChainInputUpdater(ctx, rpcClient)
@@ -85,8 +86,9 @@ func (xi *txBatchIndexer) ProcessBatch() error {
 }
 
 func (xi *txBatchIndexer) addTx(container *indexer.Container, blockType database.PChainBlockType, height uint64, tx *txs.Tx) error {
+	txID := tx.ID().String()
 	dbTx := &database.PChainTx{}
-	dbTx.TxID = tx.ID().String()
+	dbTx.TxID = &txID
 	dbTx.BlockID = container.ID.String()
 	dbTx.BlockType = blockType
 	dbTx.BlockHeight = height
@@ -114,7 +116,7 @@ func (xi *txBatchIndexer) addTx(container *indexer.Container, blockType database
 	case *txs.CreateSubnetTx:
 		err = xi.updateGeneralBaseTx(dbTx, database.PChainCreateSubnetTx, &unsignedTx.BaseTx)
 	default:
-		err = fmt.Errorf("p-chain transaction %s with type %T in block %d is not indexed", dbTx.TxID, unsignedTx, height)
+		err = fmt.Errorf("p-chain transaction %v with type %T in block %d is not indexed", dbTx.TxID, unsignedTx, height)
 	}
 	return err
 }
@@ -126,6 +128,7 @@ func (xi *txBatchIndexer) addEmptyTx(container *indexer.Container, blockType dat
 	dbTx.BlockHeight = height
 	dbTx.Timestamp = time.Unix(container.Timestamp, 0)
 	dbTx.Bytes = container.Bytes
+	dbTx.TxID = nil
 
 	xi.newTxs = append(xi.newTxs, dbTx)
 }
@@ -157,14 +160,14 @@ func (xi *txBatchIndexer) updateImportTx(dbTx *database.PChainTx, tx *txs.Import
 	dbTx.Type = database.PChainImportTx
 	dbTx.ChainID = tx.SourceChain.String()
 	xi.newTxs = append(xi.newTxs, dbTx)
-	return xi.inOutIndexer.AddNewFromBaseTx(dbTx.TxID, &tx.BaseTx.BaseTx, PChainDefaultInputOutputCreator)
+	return xi.inOutIndexer.AddNewFromBaseTx(*dbTx.TxID, &tx.BaseTx.BaseTx, PChainDefaultInputOutputCreator)
 }
 
 func (xi *txBatchIndexer) updateExportTx(dbTx *database.PChainTx, tx *txs.ExportTx) error {
 	dbTx.Type = database.PChainExportTx
 	dbTx.ChainID = tx.DestinationChain.String()
 	xi.newTxs = append(xi.newTxs, dbTx)
-	return xi.inOutIndexer.AddNewFromBaseTx(dbTx.TxID, &tx.BaseTx.BaseTx, PChainDefaultInputOutputCreator)
+	return xi.inOutIndexer.AddNewFromBaseTx(*dbTx.TxID, &tx.BaseTx.BaseTx, PChainDefaultInputOutputCreator)
 }
 
 func (xi *txBatchIndexer) updateAdvanceTimeTx(dbTx *database.PChainTx, tx *txs.AdvanceTimeTx) {
@@ -176,7 +179,7 @@ func (xi *txBatchIndexer) updateAdvanceTimeTx(dbTx *database.PChainTx, tx *txs.A
 func (xi *txBatchIndexer) updateGeneralBaseTx(dbTx *database.PChainTx, txType database.PChainTxType, baseTx *txs.BaseTx) error {
 	dbTx.Type = txType
 	xi.newTxs = append(xi.newTxs, dbTx)
-	return xi.inOutIndexer.AddNewFromBaseTx(dbTx.TxID, &baseTx.BaseTx, PChainDefaultInputOutputCreator)
+	return xi.inOutIndexer.AddNewFromBaseTx(*dbTx.TxID, &baseTx.BaseTx, PChainDefaultInputOutputCreator)
 }
 
 // Persist all entities
@@ -210,11 +213,11 @@ func (xi *txBatchIndexer) updateAddStakerTx(
 	}
 	dbTx.RewardsOwner = ownerAddress
 
-	outs, err := getAddStakerTxOutputs(dbTx.TxID, tx)
+	outs, err := getAddStakerTxOutputs(*dbTx.TxID, tx)
 	if err != nil {
 		return err
 	}
-	ins := shared.InputsFromTxIns(dbTx.TxID, txIns, PChainDefaultInputOutputCreator)
+	ins := shared.InputsFromTxIns(*dbTx.TxID, txIns, PChainDefaultInputOutputCreator)
 
 	xi.newTxs = append(xi.newTxs, dbTx)
 	xi.inOutIndexer.Add(outs, ins)

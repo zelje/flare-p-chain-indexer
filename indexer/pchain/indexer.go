@@ -5,8 +5,8 @@ import (
 	"flare-indexer/indexer/context"
 	"flare-indexer/indexer/shared"
 	"flare-indexer/utils"
+	"flare-indexer/utils/chain"
 
-	"github.com/ava-labs/avalanchego/indexer"
 	"github.com/ybbus/jsonrpc/v3"
 )
 
@@ -40,8 +40,8 @@ func (xi *pChainBlockIndexer) Run() {
 	xi.ChainIndexerBase.Run()
 }
 
-func newIndexerClient(cfg *config.ChainConfig) indexer.Client {
-	return indexer.NewClient(utils.JoinPaths(cfg.NodeURL, "ext/index/P/block"))
+func newIndexerClient(cfg *config.ChainConfig) chain.IndexerClient {
+	return chain.NewAvalancheIndexerClient(utils.JoinPaths(cfg.NodeURL, "ext/index/P/block"))
 }
 
 func newJsonRpcClient(cfg *config.ChainConfig) jsonrpc.RPCClient {

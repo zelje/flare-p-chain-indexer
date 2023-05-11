@@ -5,8 +5,7 @@ import (
 	"flare-indexer/indexer/context"
 	"flare-indexer/indexer/shared"
 	"flare-indexer/utils"
-
-	"github.com/ava-labs/avalanchego/indexer"
+	"flare-indexer/utils/chain"
 )
 
 const (
@@ -39,10 +38,10 @@ func (xi *xChainTxIndexer) Run() {
 	xi.ChainIndexerBase.Run()
 }
 
-func newClient(cfg *config.ChainConfig) indexer.Client {
-	return indexer.NewClient(utils.JoinPaths(cfg.NodeURL, "ext/index/X/vtx"))
+func newClient(cfg *config.ChainConfig) chain.IndexerClient {
+	return chain.NewAvalancheIndexerClient(utils.JoinPaths(cfg.NodeURL, "ext/index/X/vtx"))
 }
 
-func newTxClient(cfg *config.ChainConfig) indexer.Client {
-	return indexer.NewClient(utils.JoinPaths(cfg.NodeURL, "ext/index/X/tx"))
+func newTxClient(cfg *config.ChainConfig) chain.IndexerClient {
+	return chain.NewAvalancheIndexerClient(utils.JoinPaths(cfg.NodeURL, "ext/index/X/tx"))
 }

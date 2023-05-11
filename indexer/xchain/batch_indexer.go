@@ -6,6 +6,7 @@ import (
 	"flare-indexer/indexer/shared"
 	"flare-indexer/logger"
 	"flare-indexer/utils"
+	"flare-indexer/utils/chain"
 	"fmt"
 	"time"
 
@@ -19,7 +20,7 @@ import (
 // Indexer for X-chain vertices (blocks). Implements ContainerBatchIndexer
 type txBatchIndexer struct {
 	db     *gorm.DB
-	client indexer.Client
+	client chain.IndexerClient
 
 	inOutIndexer *shared.InputOutputIndexer
 	newTxs       []*database.XChainTx
@@ -28,8 +29,8 @@ type txBatchIndexer struct {
 
 func NewXChainBatchIndexer(
 	ctx context.IndexerContext,
-	client indexer.Client,
-	txClient indexer.Client,
+	client chain.IndexerClient,
+	txClient chain.IndexerClient,
 ) *txBatchIndexer {
 	updater := newXChainInputUpdater(ctx, txClient)
 	return &txBatchIndexer{

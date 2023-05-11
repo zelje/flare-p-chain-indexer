@@ -61,12 +61,12 @@ func FetchPChainValidators(
 		return nil, err
 	}
 
-	return utils.Map(validatorTxs, func(t PChainTx) string { return t.TxID }), nil
+	return utils.Map(validatorTxs, func(t PChainTx) string { return *t.TxID }), nil
 }
 
 func FetchPChainTxFull(db *gorm.DB, txID string) (*PChainTx, []PChainTxInput, []PChainTxOutput, error) {
 	var tx PChainTx
-	err := db.Where(&PChainTx{TxID: txID}).First(&tx).Error
+	err := db.Where(&PChainTx{TxID: &txID}).First(&tx).Error
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -112,7 +112,7 @@ func FindPChainTxInBlockHeight(db *gorm.DB,
 		return nil, false, nil
 	}
 	tx := &txs[0]
-	if tx.TxID != txID {
+	if *tx.TxID != txID {
 		return nil, true, nil
 	}
 	return &txs[0], true, nil

@@ -7,12 +7,12 @@ import (
 // Table with indexed data for a P-chain transaction
 type PChainTx struct {
 	BaseEntity
-	Type         PChainTxType    `gorm:"type:varchar(20);index"`               // Transaction type
-	TxID         string          `gorm:"type:varchar(50);unique;default:null"` // Transaction ID
-	BlockID      string          `gorm:"type:varchar(50);not null"`            // Block ID
-	BlockType    PChainBlockType `gorm:"type:varchar(20)"`                     // Block type (proposal, accepted, rejected, etc.)
-	RewardTxID   string          `gorm:"type:varchar(50)"`                     // Referred transaction id in case of reward validator tx
-	BlockHeight  uint64          `gorm:"index"`                                // Block height
+	Type         PChainTxType    `gorm:"type:varchar(20);index"`    // Transaction type
+	TxID         *string         `gorm:"type:varchar(50);unique"`   // Transaction ID
+	BlockID      string          `gorm:"type:varchar(50);not null"` // Block ID
+	BlockType    PChainBlockType `gorm:"type:varchar(20)"`          // Block type (proposal, accepted, rejected, etc.)
+	RewardTxID   string          `gorm:"type:varchar(50)"`          // Referred transaction id in case of reward validator tx
+	BlockHeight  uint64          `gorm:"index"`                     // Block height
 	Timestamp    time.Time
 	ChainID      string    `gorm:"type:varchar(50)"` // Filled in case of export or import transaction
 	NodeID       string    `gorm:"type:varchar(50)"` // Filled in case of add delegator or validator transaction
