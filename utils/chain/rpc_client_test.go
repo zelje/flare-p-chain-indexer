@@ -7,7 +7,11 @@ import (
 )
 
 func TestRPCClient(t *testing.T) {
-	client := PChainTestRPCClient(t)
+	client, err := PChainTestRPCClient()
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	id1, _ := ids.FromString("22ewQXuJw8PKQPiqJxwDezQszrNT2GbLyh4oCpCyVCSjAaDp2o")
 	id2, _ := ids.FromString("oUpTu8TbYSWviCxV5mxuh2Wk9xSHRVrPXVKfPmFESPsRRdh2X")
 	id3, _ := ids.FromString("2VhbseqzJLTZ1wxBWzWqvgshmAqx8LshT2p8HJP7P6zwz4iZTg")
@@ -16,7 +20,7 @@ func TestRPCClient(t *testing.T) {
 		t.Fatal("Wrong ID")
 	}
 
-	_, err := client.GetTx(id1)
+	_, err = client.GetTx(id1)
 	if err != nil {
 		t.Fatal(err)
 	}

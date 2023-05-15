@@ -3,27 +3,26 @@ package chain
 import (
 	"path"
 	"runtime"
-	"testing"
 )
 
-func PChainTestClient(t *testing.T) *RecordedIndexerClient {
+func PChainTestClient() (*RecordedIndexerClient, error) {
 	_, filename, _, _ := runtime.Caller(0)
 	dir, _ := path.Split(filename)
 	blocksFile := path.Join(dir, "../../resources/test/p_chain_indexer_blocks.json")
 	client, err := NewRecordedIndexerClient(blocksFile)
 	if err != nil {
-		t.Fatal(err)
+		return nil, err
 	}
-	return client
+	return client, nil
 }
 
-func PChainTestRPCClient(t *testing.T) *RecordedRPCClient {
+func PChainTestRPCClient() (*RecordedRPCClient, error) {
 	_, filename, _, _ := runtime.Caller(0)
 	dir, _ := path.Split(filename)
 	blocksFile := path.Join(dir, "../../resources/test/p_chain_rpc_data.json")
 	client, err := NewRecordedRPCClient(blocksFile)
 	if err != nil {
-		t.Fatal(err)
+		return nil, err
 	}
-	return client
+	return client, nil
 }

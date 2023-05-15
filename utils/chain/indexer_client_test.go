@@ -6,10 +6,14 @@ import (
 )
 
 func TestIndexerClient(t *testing.T) {
-	client := PChainTestClient(t)
+	client, err := PChainTestClient()
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	ctx := context.TODO()
 
-	_, _, err := client.GetLastAccepted(ctx)
+	_, _, err = client.GetLastAccepted(ctx)
 	if err != nil {
 		t.Fatal(err)
 	}
