@@ -91,7 +91,7 @@ func (xi *txBatchIndexer) addTx(container *indexer.Container, blockType database
 	dbTx.BlockID = container.ID.String()
 	dbTx.BlockType = blockType
 	dbTx.BlockHeight = height
-	dbTx.Timestamp = time.Unix(container.Timestamp, 0)
+	dbTx.Timestamp = time.Unix(0, container.Timestamp)
 	dbTx.Bytes = container.Bytes
 
 	var err error = nil
@@ -125,7 +125,7 @@ func (xi *txBatchIndexer) addEmptyTx(container *indexer.Container, blockType dat
 	dbTx.BlockID = container.ID.String()
 	dbTx.BlockType = blockType
 	dbTx.BlockHeight = height
-	dbTx.Timestamp = time.Unix(container.Timestamp, 0)
+	dbTx.Timestamp = time.Unix(0, container.Timestamp)
 	dbTx.Bytes = container.Bytes
 	dbTx.TxID = nil
 
@@ -170,8 +170,9 @@ func (xi *txBatchIndexer) updateExportTx(dbTx *database.PChainTx, tx *txs.Export
 }
 
 func (xi *txBatchIndexer) updateAdvanceTimeTx(dbTx *database.PChainTx, tx *txs.AdvanceTimeTx) {
+	time := time.Unix(int64(tx.Time), 0)
 	dbTx.Type = database.PChainAdvanceTimeTx
-	dbTx.Time = time.Unix(int64(tx.Time), 0)
+	dbTx.Time = &time
 	xi.newTxs = append(xi.newTxs, dbTx)
 }
 
@@ -201,9 +202,11 @@ func (xi *txBatchIndexer) updateAddStakerTx(
 	txIns []*avax.TransferableInput,
 	rewardsOwner fx.Owner,
 ) error {
+	startTime := tx.StartTime()
+	endTime := tx.EndTime()
 	dbTx.NodeID = tx.NodeID().String()
-	dbTx.StartTime = tx.StartTime()
-	dbTx.EndTime = tx.EndTime()
+	dbTx.StartTime = &startTime
+	dbTx.EndTime = &endTime
 	dbTx.Weight = tx.Weight()
 
 	ownerAddress, err := shared.RewardsOwnerAddress(rewardsOwner)

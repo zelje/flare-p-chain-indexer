@@ -29,6 +29,7 @@ func executeMigration(db *gorm.DB, m migration) error {
 		Version:     m.version,
 		Description: m.description,
 		Status:      database.MigrationPending,
+		ExecutedAt:  time.Now(),
 	}
 	err := database.CreateMigration(db, &dbMigration)
 	if err != nil {
@@ -104,6 +105,7 @@ func (mc *migrationContainer) ExecuteAll(db *gorm.DB) error {
 	executedCount := 0
 	for _, m := range mc.migrations {
 		if !executedVersions.Contains(m.version) {
+
 			logger.Info("Executing migration %s (%s)", m.description, m.version)
 			err := executeMigration(db, m)
 			if err != nil {

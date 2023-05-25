@@ -69,7 +69,7 @@ func (xi *txBatchIndexer) AddContainer(index uint64, container indexer.Container
 		ParentID:  vtx.ParentIDs()[0].String(),
 		VtxIndex:  index,
 		Height:    vtx.Height(),
-		Timestamp: time.Unix(container.Timestamp, 0),
+		Timestamp: time.Unix(0, container.Timestamp),
 	})
 	return nil
 }

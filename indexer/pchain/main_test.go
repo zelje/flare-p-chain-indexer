@@ -2,6 +2,7 @@ package pchain
 
 import (
 	globalConfig "flare-indexer/config"
+	"flare-indexer/database"
 	"flare-indexer/indexer/config"
 	"flare-indexer/utils/chain"
 	"log"
@@ -44,6 +45,11 @@ func pchainIndexerTestConfig(batchSize int, startIndex uint64) *config.Config {
 			TimeoutSeconds: 60,
 		},
 		DB: globalConfig.DBConfig{
+			Username:   database.MysqlTestUser,
+			Password:   database.MysqlTestPassword,
+			Host:       database.MysqlTestHost,
+			Port:       database.MysqlTestPort,
+			Database:   "flare_indexer_indexer",
 			LogQueries: false,
 		},
 	}

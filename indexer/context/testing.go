@@ -14,7 +14,7 @@ func BuildTestContext(cfg *config.Config) (IndexerContext, error) {
 	ctx.config = cfg
 	globalConfig.GlobalConfigCallback.Call(cfg)
 
-	ctx.db, err = database.ConnectAndInitializeTestDB(&cfg.DB)
+	ctx.db, err = database.ConnectAndInitializeTestDB(&cfg.DB, true)
 	if err != nil {
 		return nil, err
 	}

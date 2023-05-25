@@ -13,16 +13,16 @@ type PChainTx struct {
 	BlockType    PChainBlockType `gorm:"type:varchar(20)"`          // Block type (proposal, accepted, rejected, etc.)
 	RewardTxID   string          `gorm:"type:varchar(50)"`          // Referred transaction id in case of reward validator tx
 	BlockHeight  uint64          `gorm:"index"`                     // Block height
-	Timestamp    time.Time
-	ChainID      string    `gorm:"type:varchar(50)"` // Filled in case of export or import transaction
-	NodeID       string    `gorm:"type:varchar(50)"` // Filled in case of add delegator or validator transaction
-	StartTime    time.Time // Start time of validator or delegator (when NodeID is not null)
-	EndTime      time.Time // End time of validator or delegator (when NodeID is not null)
-	Time         time.Time // Chain time (in case of advance time transaction)
-	Weight       uint64    // Weight (stake amount) (when NodeID is not null)
-	RewardsOwner string    `gorm:"type:varchar(60)"` // Rewards owner address (in case of add delegator or validator transaction)
-	Memo         string    `gorm:"type:varchar(256)"`
-	Bytes        []byte    `gorm:"type:mediumblob"`
+	Timestamp    time.Time       // Time when indexed
+	ChainID      string          `gorm:"type:varchar(50)"` // Filled in case of export or import transaction
+	NodeID       string          `gorm:"type:varchar(50)"` // Filled in case of add delegator or validator transaction
+	StartTime    *time.Time      // Start time of validator or delegator (when NodeID is not null)
+	EndTime      *time.Time      // End time of validator or delegator (when NodeID is not null)
+	Time         *time.Time      // Chain time (in case of advance time transaction)
+	Weight       uint64          // Weight (stake amount) (when NodeID is not null)
+	RewardsOwner string          `gorm:"type:varchar(60)"` // Rewards owner address (in case of add delegator or validator transaction)
+	Memo         string          `gorm:"type:varchar(256)"`
+	Bytes        []byte          `gorm:"type:mediumblob"`
 }
 
 type PChainTxInput struct {

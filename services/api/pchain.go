@@ -11,8 +11,8 @@ type ApiPChainTx struct {
 	BlockHeight uint64                `json:"blockHeight"`
 	ChainID     string                `json:"chainID"`
 	NodeID      string                `json:"nodeID"`
-	StartTime   time.Time             `json:"startTime"`
-	EndTime     time.Time             `json:"endTime"`
+	StartTime   *time.Time            `json:"startTime"`
+	EndTime     *time.Time            `json:"endTime"`
 	Weight      uint64                `json:"weight"`
 
 	Inputs  []ApiPChainTxInput  `json:"inputs"`
