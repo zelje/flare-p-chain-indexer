@@ -16,8 +16,8 @@ type PChainTx struct {
 	Timestamp    time.Time       // Time when indexed
 	ChainID      string          `gorm:"type:varchar(50)"` // Filled in case of export or import transaction
 	NodeID       string          `gorm:"type:varchar(50)"` // Filled in case of add delegator or validator transaction
-	StartTime    *time.Time      // Start time of validator or delegator (when NodeID is not null)
-	EndTime      *time.Time      // End time of validator or delegator (when NodeID is not null)
+	StartTime    *time.Time      `gorm:"index"`            // Start time of validator or delegator (when NodeID is not null)
+	EndTime      *time.Time      `gorm:"index"`            // End time of validator or delegator (when NodeID is not null)
 	Time         *time.Time      // Chain time (in case of advance time transaction)
 	Weight       uint64          // Weight (stake amount) (when NodeID is not null)
 	RewardsOwner string          `gorm:"type:varchar(60)"` // Rewards owner address (in case of add delegator or validator transaction)

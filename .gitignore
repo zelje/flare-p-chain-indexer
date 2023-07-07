@@ -15,7 +15,7 @@
 # vendor/
 
 # Local config file
-config.local.*
+config.*.toml
 
 # Logs
 /logs

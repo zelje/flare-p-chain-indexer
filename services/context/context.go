@@ -5,17 +5,21 @@ import (
 	"flare-indexer/database"
 	"flare-indexer/services/config"
 
+	"github.com/ethereum/go-ethereum/ethclient"
+
 	"gorm.io/gorm"
 )
 
 type ServicesContext interface {
 	Config() *config.Config
 	DB() *gorm.DB
+	EthRPCClient() *ethclient.Client
 }
 
 type servicesContext struct {
-	config *config.Config
-	db     *gorm.DB
+	config       *config.Config
+	db           *gorm.DB
+	ethRPCClient *ethclient.Client
 }
 
 func BuildContext() (ServicesContext, error) {
@@ -32,9 +36,17 @@ func BuildContext() (ServicesContext, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	ctx.ethRPCClient, err = ethclient.Dial(cfg.Chain.EthRPCURL)
+	if err != nil {
+		return nil, err
+	}
+
 	return &ctx, nil
 }
 
 func (c *servicesContext) Config() *config.Config { return c.config }
 
 func (c *servicesContext) DB() *gorm.DB { return c.db }
+
+func (c *servicesContext) EthRPCClient() *ethclient.Client { return c.ethRPCClient }

@@ -15,10 +15,16 @@ const (
 	addressChainSeparator = "-"
 )
 
+var (
+	errInvalidPrefixError        = errors.New("string does not have hex prefix")
+	errInvalidAddressLengthError = errors.New("address length is not 32")
+	errInvalidIdLengthError      = errors.New("id length is not 20")
+)
+
 // DecodeHexString decodes a string that is prefixed with "0x" into a byte slice
 func DecodeHexString(s string) ([]byte, error) {
 	if !strings.HasPrefix(s, hexPrefix) {
-		return nil, errors.New("string does not have hex prefix")
+		return nil, errInvalidPrefixError
 	}
 	return hex.DecodeString(s[len(hexPrefix):])
 }
@@ -98,7 +104,7 @@ func TransactionHexToBytes32(address string) (result [32]byte, err error) {
 		return result, err
 	}
 	if len(addressBytes) != 32 {
-		return result, errors.New("address length is not 32")
+		return result, errInvalidAddressLengthError
 	}
 	copy(result[:], addressBytes)
 	return
@@ -111,7 +117,7 @@ func Hex20ToBytes20(str string) (result [20]byte, err error) {
 		return result, err
 	}
 	if len(strBytes) != 20 {
-		return result, errors.New("id length is not 20")
+		return result, errInvalidIdLengthError
 	}
 	copy(result[:], strBytes)
 	return

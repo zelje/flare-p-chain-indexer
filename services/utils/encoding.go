@@ -23,6 +23,10 @@ var (
 	AbiTypeString, _  = abi.NewType("string", "string", nil)
 )
 
+var (
+	errEmptyRequestError = errors.New("request is empty")
+)
+
 func HashPChainStaking(request *api.ARPChainStaking, response *api.DHPChainStaking, salt string) (string, error) {
 	arguments := abi.Arguments{
 		abi.Argument{Type: AbiTypeUint16},  // AttestationType
@@ -74,7 +78,7 @@ func HashPChainStaking(request *api.ARPChainStaking, response *api.DHPChainStaki
 
 func PackPChainStakingRequest(request *api.ARPChainStaking) (string, error) {
 	if request == nil {
-		return "", errors.New("request is empty")
+		return "", errEmptyRequestError
 	}
 	miCode, err := utils.PadHexString(request.MessageIntegrityCode, 64)
 	if err != nil {

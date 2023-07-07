@@ -2,9 +2,14 @@ package database
 
 import (
 	"flare-indexer/utils"
+	"fmt"
 	"time"
 
 	"gorm.io/gorm"
+)
+
+var (
+	errInvalidTransactionType = fmt.Errorf("invalid transaction type")
 )
 
 func FetchPChainTxOutputs(db *gorm.DB, ids []string) ([]PChainTxOutput, error) {
@@ -32,24 +37,37 @@ func CreatePChainEntities(db *gorm.DB, txs []*PChainTx, ins []*PChainTxInput, ou
 	return nil
 }
 
-func FetchPChainValidators(
+// Returns a list of transaction ids initiating a create validator transaction or a create delegation transaction
+// - if address is not empty, only returns transactions where the given address is the sender of the transaction
+// - if time is not zero, only returns transactions where the validatot time or delegation time contains the given time
+// - if nodeID is not empty, only returns transactions where the given node ID is the validator node ID
+func FetchPChainStakingTransactions(
 	db *gorm.DB,
 	txType PChainTxType,
 	nodeID string,
 	address string,
-	startTime time.Time,
-	endTime time.Time,
+	time time.Time,
 	offset int,
 	limit int,
 ) ([]string, error) {
 	var validatorTxs []PChainTx
 
-	query := db.Where(&PChainTx{Type: txType, NodeID: nodeID})
-	if !startTime.IsZero() {
-		query = query.Where("start_time >= ?", startTime)
+	if txType != PChainAddValidatorTx && txType != PChainAddDelegatorTx {
+		return nil, errInvalidTransactionType
 	}
-	if !endTime.IsZero() {
-		query = query.Where("end_time <= ?", endTime)
+	if limit <= 0 {
+		limit = 100
+	}
+	if offset < 0 {
+		offset = 0
+	}
+
+	query := db.Where(&PChainTx{Type: txType})
+	if len(nodeID) > 0 {
+		query = query.Where("node_id = ?", nodeID)
+	}
+	if !time.IsZero() {
+		query = query.Where("start_time <= ?", time).Where("end_time >= ?", time)
 	}
 	if len(address) > 0 {
 		query = query.Joins("left join p_chain_tx_inputs as inputs on inputs.tx_id = p_chain_txes.tx_id").
@@ -62,6 +80,43 @@ func FetchPChainValidators(
 	}
 
 	return utils.Map(validatorTxs, func(t PChainTx) string { return *t.TxID }), nil
+}
+
+// Returns a list of transaction ids initiating transfers between chains (import/export transactions)
+func FetchPChainTransferTransactions(
+	db *gorm.DB,
+	txType PChainTxType,
+	address string,
+	offset int,
+	limit int,
+) ([]string, error) {
+	var txs []PChainTx
+	if txType != PChainImportTx && txType != PChainExportTx {
+		return nil, errInvalidTransactionType
+	}
+	if limit <= 0 {
+		limit = 100
+	}
+	if offset < 0 {
+		offset = 0
+	}
+	query := db.Where(&PChainTx{Type: txType})
+	if len(address) > 0 {
+		if txType == PChainImportTx {
+			query = query.Joins("left join p_chain_tx_outputs as outputs on outputs.tx_id = p_chain_txes.tx_id").
+				Where("outputs.address = ?", address)
+		} else {
+			query = query.Joins("left join p_chain_tx_inputs as inputs on inputs.tx_id = p_chain_txes.tx_id").
+				Where("inputs.address = ?", address)
+		}
+	}
+	err := query.Offset(offset).Limit(limit).Order("p_chain_txes.id").
+		Distinct().Select("p_chain_txes.tx_id").Find(&txs).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return utils.Map(txs, func(t PChainTx) string { return *t.TxID }), nil
 }
 
 func FetchPChainTxFull(db *gorm.DB, txID string) (*PChainTx, []PChainTxInput, []PChainTxOutput, error) {

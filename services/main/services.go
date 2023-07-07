@@ -18,7 +18,9 @@ func main() {
 	}
 
 	router := mux.NewRouter()
-	routes.AddValidatorRoutes(router, ctx)
+	routes.AddTransferRoutes(router, ctx)
+	routes.AddStakerRoutes(router, ctx)
+	routes.AddTransactionRoutes(router, ctx)
 	routes.AddQueryRoutes(router, ctx)
 
 	address := ctx.Config().Services.Address
