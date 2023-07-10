@@ -39,9 +39,11 @@ func (xi *xChainTxIndexer) Run() {
 }
 
 func newClient(cfg *config.ChainConfig) chain.IndexerClient {
-	return chain.NewAvalancheIndexerClient(utils.JoinPaths(cfg.NodeURL, "ext/index/X/vtx"))
+	return chain.NewAvalancheIndexerClient(utils.JoinPaths(cfg.NodeURL, "ext/index/X/vtx"),
+		chain.ClientOptions(cfg.ApiKey)...)
 }
 
 func newTxClient(cfg *config.ChainConfig) chain.IndexerClient {
-	return chain.NewAvalancheIndexerClient(utils.JoinPaths(cfg.NodeURL, "ext/index/X/tx"))
+	return chain.NewAvalancheIndexerClient(utils.JoinPaths(cfg.NodeURL, "ext/index/X/tx"),
+		chain.ClientOptions(cfg.ApiKey)...)
 }

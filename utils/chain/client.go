@@ -7,6 +7,7 @@ import (
 
 	"github.com/ava-labs/avalanchego/ids"
 	"github.com/ava-labs/avalanchego/indexer"
+	"github.com/ava-labs/avalanchego/utils/rpc"
 )
 
 const (
@@ -49,4 +50,20 @@ func FetchContainerFromIndexer(client IndexerClient, id string) (*indexer.Contai
 		return nil, err
 	}
 	return &container, nil
+}
+
+func ClientOptions(apiKey string) []rpc.Option {
+	if len(apiKey) == 0 {
+		return []rpc.Option{}
+	} else {
+		return []rpc.Option{rpc.WithQueryParam("x-apikey", apiKey)}
+	}
+}
+
+func RPCClientOptions(apiKey string) string {
+	if len(apiKey) == 0 {
+		return ""
+	} else {
+		return "?x-apikey=" + apiKey
+	}
 }

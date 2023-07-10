@@ -39,9 +39,10 @@ func (xi *pChainBlockIndexer) Run() {
 }
 
 func newIndexerClient(cfg *config.ChainConfig) chain.IndexerClient {
-	return chain.NewAvalancheIndexerClient(utils.JoinPaths(cfg.NodeURL, "ext/index/P/block"))
+	return chain.NewAvalancheIndexerClient(utils.JoinPaths(cfg.NodeURL, "ext/index/P/block"),
+		chain.ClientOptions(cfg.ApiKey)...)
 }
 
 func newJsonRpcClient(cfg *config.ChainConfig) chain.RPCClient {
-	return chain.NewAvalancheRPCClient(utils.JoinPaths(cfg.NodeURL, "ext/bc/P"))
+	return chain.NewAvalancheRPCClient(utils.JoinPaths(cfg.NodeURL, "ext/bc/P"+chain.RPCClientOptions(cfg.ApiKey)))
 }

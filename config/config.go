@@ -45,6 +45,7 @@ type ChainConfig struct {
 	ChainAddressHRP string `toml:"address_hrp" envconfig:"CHAIN_ADDRESS_HRP"`
 	ChainID         int    `toml:"chain_id" envconfig:"CHAIN_ID"`
 	EthRPCURL       string `toml:"eth_rpc_url" envconfig:"ETH_RPC_URL"`
+	ApiKey          string `toml:"api_key" envconfig:"API_KEY"`
 }
 
 func ParseConfigFile(cfg interface{}, fileName string, allowMissing bool) error {

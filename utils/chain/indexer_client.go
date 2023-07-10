@@ -11,6 +11,7 @@ import (
 	"github.com/ava-labs/avalanchego/ids"
 	"github.com/ava-labs/avalanchego/indexer"
 	"github.com/ava-labs/avalanchego/utils/formatting"
+	"github.com/ava-labs/avalanchego/utils/rpc"
 )
 
 type IndexerClient interface {
@@ -24,28 +25,29 @@ type IndexerClient interface {
 // Implement IndexerClientBase using Avalanche indexer
 //
 type AvalancheIndexerClient struct {
-	client indexer.Client
+	client     indexer.Client
+	rpcOptions []rpc.Option
 }
 
-func NewAvalancheIndexerClient(uri string) *AvalancheIndexerClient {
+func NewAvalancheIndexerClient(uri string, opts ...rpc.Option) *AvalancheIndexerClient {
 	client := indexer.NewClient(uri)
-	return &AvalancheIndexerClient{client: client}
+	return &AvalancheIndexerClient{client: client, rpcOptions: opts}
 }
 
 func (ic *AvalancheIndexerClient) GetLastAccepted(ctx context.Context) (indexer.Container, uint64, error) {
-	return ic.client.GetLastAccepted(ctx)
+	return ic.client.GetLastAccepted(ctx, ic.rpcOptions...)
 }
 
 func (ic *AvalancheIndexerClient) GetContainerByIndex(ctx context.Context, index uint64) (indexer.Container, error) {
-	return ic.client.GetContainerByIndex(ctx, index)
+	return ic.client.GetContainerByIndex(ctx, index, ic.rpcOptions...)
 }
 
 func (ic *AvalancheIndexerClient) GetContainerRange(ctx context.Context, from uint64, numToFetch int) ([]indexer.Container, error) {
-	return ic.client.GetContainerRange(ctx, from, numToFetch)
+	return ic.client.GetContainerRange(ctx, from, numToFetch, ic.rpcOptions...)
 }
 
 func (ic *AvalancheIndexerClient) GetIndex(ctx context.Context, id ids.ID) (uint64, error) {
-	return ic.client.GetIndex(ctx, id)
+	return ic.client.GetIndex(ctx, id, ic.rpcOptions...)
 }
 
 //
