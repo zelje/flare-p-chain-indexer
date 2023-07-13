@@ -4,6 +4,7 @@ import (
 	"flare-indexer/logger"
 	"flare-indexer/services/context"
 	"flare-indexer/services/routes"
+	"flare-indexer/services/utils"
 	"fmt"
 	"net/http"
 
@@ -17,15 +18,18 @@ func main() {
 		return
 	}
 
-	router := mux.NewRouter()
+	muxRouter := mux.NewRouter()
+	router := utils.NewSwaggerRouter(muxRouter, "Flare P-Chain Indexer", "0.1.0")
 	routes.AddTransferRoutes(router, ctx)
 	routes.AddStakerRoutes(router, ctx)
 	routes.AddTransactionRoutes(router, ctx)
 	routes.AddQueryRoutes(router, ctx)
 
+	router.Finalize()
+
 	address := ctx.Config().Services.Address
 	srv := &http.Server{
-		Handler: router,
+		Handler: muxRouter,
 		Addr:    address,
 		// Good practice: enforce timeouts for servers you create -- config?
 		// WriteTimeout: 15 * time.Second,

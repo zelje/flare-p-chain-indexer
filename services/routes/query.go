@@ -11,18 +11,17 @@ import (
 	"net/http"
 
 	"github.com/ava-labs/avalanchego/ids"
-	"github.com/gorilla/mux"
 	"gorm.io/gorm"
 )
 
-func AddQueryRoutes(router *mux.Router, ctx context.ServicesContext) {
+func AddQueryRoutes(router utils.Router, ctx context.ServicesContext) {
 	qr := newQueryRouteHandlers(ctx)
-	subrouter := router.PathPrefix("/query").Subrouter()
+	subrouter := router.WithPrefix("/query", "Query")
 
-	subrouter.HandleFunc("", qr.processAttestationRequest).Methods(http.MethodPost)
-	subrouter.HandleFunc("/prepare", qr.prepareRequest).Methods(http.MethodPost)
-	subrouter.HandleFunc("/integrity", qr.integrityRequest).Methods(http.MethodPost)
-	subrouter.HandleFunc("/prepareAttestation", qr.prepareAttestationRequest).Methods(http.MethodPost)
+	subrouter.AddRoute("", qr.processAttestationRequest())
+	subrouter.AddRoute("/prepare", qr.prepareRequest())
+	subrouter.AddRoute("/integrity", qr.integrityRequest())
+	subrouter.AddRoute("/prepareAttestation", qr.prepareAttestationRequest())
 }
 
 type queryRouteHandlers struct {
@@ -41,34 +40,26 @@ func newQueryRouteHandlers(ctx context.ServicesContext) *queryRouteHandlers {
 //
 // Request type: api.APIAttestationRequest
 // Response type: api.ApiResponseWrapper[api.APIVerification[api.ARPChainStaking, api.DHPChainStaking]]
-func (qr *queryRouteHandlers) processAttestationRequest(w http.ResponseWriter, r *http.Request) {
-	var request api.APIAttestationRequest
-	if !utils.DecodeBody(w, r, &request) {
-		return
+func (qr *queryRouteHandlers) processAttestationRequest() utils.RouteHandler {
+	handler := func(request api.APIAttestationRequest) (*api.APIVerification[api.ARPChainStaking, api.DHPChainStaking], *utils.ErrorHandler) {
+		unpackedReq, err := utils.UnpackPChainStakingRequest(request.Request)
+		if err != nil {
+			return nil, utils.ApiResponseErrorHandler(api.ApiResStatusInvalidRequest, "invalid request", err.Error())
+		}
+		return qr.processPChainStakingRequest(unpackedReq)
 	}
-
-	unpackedReq, err := utils.UnpackPChainStakingRequest(request.Request)
-	if err != nil {
-		utils.WriteApiResponseError(w, api.ApiResStatusInvalidRequest, "invalid request", err.Error())
-		return
-	}
-	if response := qr.processPChainStakingRequest(w, unpackedReq); response != nil {
-		utils.WriteApiResponseOk(w, response)
-	}
+	return utils.NewRouteHandler(handler, http.MethodPost, api.APIAttestationRequest{}, &api.APIVerification[api.ARPChainStaking, api.DHPChainStaking]{})
 }
 
 // Given parsed request in JSON with possibly invalid message integrity code it returns the verification object.
 //
 // Request type: api.ARPChainStaking
 // Response type: api.ApiResponseWrapper[api.APIVerification[api.ARPChainStaking, api.DHPChainStaking]]
-func (qr *queryRouteHandlers) prepareRequest(w http.ResponseWriter, r *http.Request) {
-	var request api.ARPChainStaking
-	if !utils.DecodeBody(w, r, &request) {
-		return
+func (qr *queryRouteHandlers) prepareRequest() utils.RouteHandler {
+	handler := func(request api.ARPChainStaking) (*api.APIVerification[api.ARPChainStaking, api.DHPChainStaking], *utils.ErrorHandler) {
+		return qr.processPChainStakingRequest(&request)
 	}
-	if response := qr.processPChainStakingRequest(w, &request); response != nil {
-		utils.WriteApiResponseOk(w, response)
-	}
+	return utils.NewRouteHandler(handler, http.MethodPost, api.ARPChainStaking{}, &api.APIVerification[api.ARPChainStaking, api.DHPChainStaking]{})
 }
 
 // Given parsed request in JSON with possibly invalid message integrity code it returns the message
@@ -76,19 +67,19 @@ func (qr *queryRouteHandlers) prepareRequest(w http.ResponseWriter, r *http.Requ
 //
 // Request type: api.ARPChainStaking
 // Response type: api.ApiResponseWrapper[string]
-func (qr *queryRouteHandlers) integrityRequest(w http.ResponseWriter, r *http.Request) {
-	var request api.ARPChainStaking
-	if !utils.DecodeBody(w, r, &request) {
-		return
-	}
-	if response := qr.processPChainStakingRequest(w, &request); response != nil {
+func (qr *queryRouteHandlers) integrityRequest() utils.RouteHandler {
+	handler := func(request api.ARPChainStaking) (string, *utils.ErrorHandler) {
+		response, errHandler := qr.processPChainStakingRequest(&request)
+		if errHandler != nil {
+			return "", errHandler
+		}
 		code, err := utils.HashPChainStaking(&request, response.Response, "")
 		if err != nil {
-			utils.WriteApiResponseError(w, api.ApiResStatusError, "internal error", err.Error())
-			return
+			return "", utils.ApiResponseErrorHandler(api.ApiResStatusError, "internal error", err.Error())
 		}
-		utils.WriteApiResponseOk(w, code)
+		return code, nil
 	}
+	return utils.NewRouteHandler(handler, http.MethodPost, api.ARPChainStaking{}, "")
 }
 
 // Given parsed @param request in JSON with possibly invalid message integrity code it returns the byte encoded
@@ -97,42 +88,38 @@ func (qr *queryRouteHandlers) integrityRequest(w http.ResponseWriter, r *http.Re
 //
 // Request type: api.ARPChainStaking
 // Response type: api.ApiResponseWrapper[string]
-func (qr *queryRouteHandlers) prepareAttestationRequest(w http.ResponseWriter, r *http.Request) {
-	var request api.ARPChainStaking
-	if !utils.DecodeBody(w, r, &request) {
-		return
-	}
-	if response := qr.processPChainStakingRequest(w, &request); response != nil {
+func (qr *queryRouteHandlers) prepareAttestationRequest() utils.RouteHandler {
+	handler := func(request api.ARPChainStaking) (string, *utils.ErrorHandler) {
+		response, errHandler := qr.processPChainStakingRequest(&request)
+		if errHandler != nil {
+			return "", errHandler
+		}
 		code, err := utils.HashPChainStaking(&request, response.Response, "")
 		if err != nil {
-			utils.WriteApiResponseError(w, api.ApiResStatusError, "internal error", err.Error())
-			return
+			return "", utils.ApiResponseErrorHandler(api.ApiResStatusError, "internal error", err.Error())
 		}
 		request.MessageIntegrityCode = code
 		packedRequest, err := utils.PackPChainStakingRequest(&request)
 		if err != nil {
-			utils.WriteApiResponseError(w, api.ApiResStatusError, "internal error", err.Error())
-			return
+			return "", utils.ApiResponseErrorHandler(api.ApiResStatusError, "internal error", err.Error())
 		}
-		utils.WriteApiResponseOk(w, packedRequest)
+		return packedRequest, nil
 	}
+	return utils.NewRouteHandler(handler, http.MethodPost, api.ARPChainStaking{}, "")
 }
 
-// Process attestation request. Write errors into w, if any, otherwise write the response.
+// Process attestation request. Write errors into w, if any, otherwise return the response.
 func (qr *queryRouteHandlers) processPChainStakingRequest(
-	w http.ResponseWriter,
 	request *api.ARPChainStaking,
-) *api.APIVerification[api.ARPChainStaking, api.DHPChainStaking] {
+) (*api.APIVerification[api.ARPChainStaking, api.DHPChainStaking], *utils.ErrorHandler) {
 	response, err1, err2 := qr.executePChainStakingRequest(request)
 	if err1 != nil {
-		utils.WriteApiResponseError(w, api.ApiResStatusInvalidRequest, "invalid request", err1.Error())
-		return nil
+		return nil, utils.ApiResponseErrorHandler(api.ApiResStatusInvalidRequest, "invalid request", err1.Error())
 	}
 	if err2 != nil {
-		utils.WriteApiResponseError(w, api.ApiResStatusError, "internal error", err2.Error())
-		return nil
+		return nil, utils.ApiResponseErrorHandler(api.ApiResStatusError, "internal error", err2.Error())
 	}
-	return response
+	return response, nil
 }
 
 // Execute attestation request and return attestation response.

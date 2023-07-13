@@ -94,7 +94,7 @@ func TestProcessAttestationRequest(t *testing.T) {
 	r.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 
-	qr.processAttestationRequest(w, r)
+	qr.processAttestationRequest().Handler(w, r)
 
 	if w.Result().StatusCode != http.StatusOK {
 		t.Errorf("Expected status code %d, got %d", http.StatusOK, w.Result().StatusCode)
@@ -109,7 +109,7 @@ func TestPrepareRequest(t *testing.T) {
 	r.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 
-	qr.prepareRequest(w, r)
+	qr.prepareRequest().Handler(w, r)
 
 	if w.Result().StatusCode != http.StatusOK {
 		t.Errorf("Expected status code %d, got %d", http.StatusOK, w.Result().StatusCode)
@@ -124,7 +124,7 @@ func TestIntegrityRequest(t *testing.T) {
 	r.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 
-	qr.integrityRequest(w, r)
+	qr.integrityRequest().Handler(w, r)
 
 	if w.Result().StatusCode != http.StatusOK {
 		t.Errorf("Expected status code %d, got %d", http.StatusOK, w.Result().StatusCode)
@@ -144,7 +144,7 @@ func TestPrepareAttestationRequest(t *testing.T) {
 	r.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 
-	qr.prepareAttestationRequest(w, r)
+	qr.prepareAttestationRequest().Handler(w, r)
 
 	if w.Result().StatusCode != http.StatusOK {
 		t.Errorf("Expected status code %d, got %d", http.StatusOK, w.Result().StatusCode)

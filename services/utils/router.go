@@ -1,0 +1,218 @@
+package utils
+
+import (
+	"flare-indexer/services/api"
+	"net/http"
+
+	swagger "github.com/davidebianchi/gswagger"
+	"github.com/davidebianchi/gswagger/support/gorilla"
+	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/gorilla/mux"
+	v3 "github.com/swaggest/swgui/v3"
+)
+
+type RouteHandler struct {
+	Handler            func(w http.ResponseWriter, r *http.Request)
+	SwaggerDefinitions swagger.Definitions
+	Method             string
+}
+
+type ErrorHandler struct {
+	Handler func(w http.ResponseWriter)
+}
+
+type Router interface {
+	AddRoute(path string, handler RouteHandler)
+	WithPrefix(prefix string, tag string) Router
+	Finalize()
+}
+
+// Default router implementation using gorilla/mux
+type defaultRouter struct {
+	router *mux.Router
+}
+
+func (r *defaultRouter) AddRoute(path string, handler RouteHandler) {
+	r.router.HandleFunc(path, handler.Handler).Methods(handler.Method)
+}
+
+func (r *defaultRouter) WithPrefix(prefix string, tag string) Router {
+	return &defaultRouter{
+		router: r.router.PathPrefix(prefix).Subrouter(),
+	}
+}
+
+func (r *defaultRouter) Finalize() {
+}
+
+func NewDefaultRouter(mRouter *mux.Router) Router {
+	return &defaultRouter{
+		router: mRouter,
+	}
+}
+
+// Router implementation with swagger support
+type swaggerRouter struct {
+	mRouter *mux.Router
+	router  *swagger.Router[gorilla.HandlerFunc, *mux.Route]
+	tag     string
+}
+
+func NewSwaggerRouter(mRouter *mux.Router, title string, version string) Router {
+	router, _ := swagger.NewRouter(gorilla.NewRouter(mRouter), swagger.Options{
+		Openapi: &openapi3.T{
+			Info: &openapi3.Info{
+				Title:   title,
+				Version: version,
+			},
+		},
+	})
+	return &swaggerRouter{
+		mRouter: mRouter,
+		router:  router,
+		tag:     "",
+	}
+}
+
+func (r *swaggerRouter) AddRoute(path string, handler RouteHandler) {
+	// TODO: remove after testing
+	//
+	// var requestBody *swagger.ContentValue = nil
+	// if request != nil {
+	// 	requestBody = &swagger.ContentValue{
+	// 		Content: swagger.Content{
+	// 			"application/json": {Value: request},
+	// 		},
+	// 	}
+	// }
+
+	// // Replace the generic Data field in ApiResponseWrapper with the actual response type to be able
+	// // to correctly generate the json schema
+	// wrapperValue := api.ApiResponseWrapper[interface{}]{}
+	// responseValue := utils.ReplaceStructField(wrapperValue, "Data", response)
+
+	swaggerDefinitions := handler.SwaggerDefinitions
+	swaggerDefinitions.Tags = []string{r.tag}
+	r.router.AddRoute(handler.Method, path, handler.Handler, swaggerDefinitions)
+}
+
+func (r *swaggerRouter) WithPrefix(prefix string, tag string) Router {
+	mSubRouter := r.mRouter.NewRoute().Subrouter()
+	subRouter, _ := r.router.SubRouter(gorilla.NewRouter(mSubRouter), swagger.SubRouterOptions{
+		PathPrefix: prefix,
+	})
+	return &swaggerRouter{
+		mRouter: mSubRouter,
+		router:  subRouter,
+		tag:     tag,
+	}
+}
+
+func (r *swaggerRouter) Finalize() {
+	r.router.GenerateAndExposeOpenapi()
+	handler := v3.NewHandler("Flare P-chain indexer API", "/documentation/json", "/swagger")
+	r.mRouter.PathPrefix("/swagger").HandlerFunc(handler.ServeHTTP)
+}
+
+// Route handler factory
+// Request passed to handler is the request body parsed to a struct of type R. The response of handler is wrapped to
+// an ApiResponseWrapper object and returned as json
+// Openapi definitions are generated from the request and response objects
+func NewRouteHandler[R interface{}, T interface{}](handler func(request R) (T, *ErrorHandler), method string, requestObject R, respObject T) RouteHandler {
+	routeHandler := func(w http.ResponseWriter, r *http.Request) {
+		var request R
+		if !DecodeBody(w, r, &request) {
+			return
+		}
+		resp, err := handler(request)
+		if err != nil {
+			err.Handler(w)
+			return
+		}
+		WriteApiResponseOk(w, resp)
+	}
+	wrappedRespObject := api.ApiResponseWrapper[T]{Data: respObject}
+	swaggerDefinitions := swagger.Definitions{
+		RequestBody: &swagger.ContentValue{
+			Content: swagger.Content{
+				"application/json": {Value: requestObject},
+			},
+		},
+		Responses: map[int]swagger.ContentValue{
+			200: {
+				Content: swagger.Content{
+					"application/json": {Value: wrappedRespObject},
+				},
+			},
+		},
+	}
+	return RouteHandler{
+		Handler:            routeHandler,
+		SwaggerDefinitions: swaggerDefinitions,
+		Method:             method,
+	}
+}
+
+// Route handler factory
+// The value passed to handler are the path parameters parsed to a map of string. The response of handler is wrapped to
+// an ApiResponseWrapper object and returned as json. Openapi definitionas for the path parameters are generated from the
+// paramDescriptions map, definitions for the response object are generated from the response object.
+func NewParamRouteHandler[T interface{}](
+	handler func(params map[string]string) (T, *ErrorHandler),
+	method string,
+	paramDescriptions map[string]string,
+	respObject T,
+) RouteHandler {
+	routeHandler := func(w http.ResponseWriter, r *http.Request) {
+		params := mux.Vars(r)
+		resp, err := handler(params)
+		if err != nil {
+			err.Handler(w)
+			return
+		}
+		WriteApiResponseOk(w, resp)
+	}
+	pathParams := make(map[string]swagger.Parameter)
+	for name, description := range paramDescriptions {
+		pathParams[name] = swagger.Parameter{
+			Schema:      &swagger.Schema{Value: ""},
+			Description: description,
+		}
+	}
+	wrappedRespObject := api.ApiResponseWrapper[T]{Data: respObject}
+	swaggerDefinitions := swagger.Definitions{
+		PathParams: pathParams,
+		Responses: map[int]swagger.ContentValue{
+			200: {
+				Content: swagger.Content{
+					"application/json": {Value: wrappedRespObject},
+				},
+			},
+		},
+	}
+	return RouteHandler{
+		Handler:            routeHandler,
+		SwaggerDefinitions: swaggerDefinitions,
+		Method:             method,
+	}
+}
+
+func InternalServerErrorHandler(err error) *ErrorHandler {
+	return &ErrorHandler{
+		Handler: func(w http.ResponseWriter) {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		},
+	}
+}
+
+func ApiResponseErrorHandler(
+	status api.ApiResStatusEnum,
+	errorMessage string,
+	errorDetails string,
+) *ErrorHandler {
+	return &ErrorHandler{
+		Handler: func(w http.ResponseWriter) {
+			WriteApiResponseError(w, status, errorMessage, errorDetails)
+		},
+	}
+}

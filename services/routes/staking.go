@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gorilla/mux"
 	"gorm.io/gorm"
 )
 
@@ -32,30 +31,24 @@ func newStakerRouteHandlers(ctx context.ServicesContext) *stakerRouteHandlers {
 	}
 }
 
-func (rh *stakerRouteHandlers) listStakingTransactions(w http.ResponseWriter, r *http.Request, txType database.PChainTxType) {
-	var request GetStakerRequest
-	if !utils.DecodeBody(w, r, &request) {
-		return
+func (rh *stakerRouteHandlers) listStakingTransactions(txType database.PChainTxType) utils.RouteHandler {
+	handler := func(request GetStakerRequest) (GetStakerResponse, *utils.ErrorHandler) {
+		txIDs, err := database.FetchPChainStakingTransactions(rh.db, txType, request.NodeID,
+			request.Address, request.Time, request.Offset, request.Limit)
+		if err != nil {
+			return GetStakerResponse{}, utils.InternalServerErrorHandler(err)
+		}
+		return GetStakerResponse{TxIDs: txIDs}, nil
 	}
-	txIDs, err := database.FetchPChainStakingTransactions(rh.db, txType, request.NodeID,
-		request.Address, request.Time, request.Offset, request.Limit)
-	if utils.HandleInternalServerError(w, err) {
-		return
-	}
-	utils.WriteApiResponseOk(w, GetStakerResponse{TxIDs: txIDs})
+	return utils.NewRouteHandler(handler, http.MethodPost, GetStakerRequest{}, GetStakerResponse{})
 }
 
-func AddStakerRoutes(router *mux.Router, ctx context.ServicesContext) {
+func AddStakerRoutes(router utils.Router, ctx context.ServicesContext) {
 	vr := newStakerRouteHandlers(ctx)
-	validatorSubrouter := router.PathPrefix("/validators").Subrouter()
 
-	validatorSubrouter.HandleFunc("/transactions", func(w http.ResponseWriter, r *http.Request) {
-		vr.listStakingTransactions(w, r, database.PChainAddValidatorTx)
-	}).Methods(http.MethodPost)
+	validatorSubrouter := router.WithPrefix("/validators", "Staking")
+	validatorSubrouter.AddRoute("/transactions", vr.listStakingTransactions(database.PChainAddValidatorTx))
 
-	delegatorSubrouter := router.PathPrefix("/delegators").Subrouter()
-
-	delegatorSubrouter.HandleFunc("/transactions", func(w http.ResponseWriter, r *http.Request) {
-		vr.listStakingTransactions(w, r, database.PChainAddDelegatorTx)
-	}).Methods(http.MethodPost)
+	delegatorSubrouter := router.WithPrefix("/delegators", "Staking")
+	delegatorSubrouter.AddRoute("/transactions", vr.listStakingTransactions(database.PChainAddDelegatorTx))
 }

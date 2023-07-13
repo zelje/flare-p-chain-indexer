@@ -5,6 +5,8 @@ import (
 	"flare-indexer/services/api"
 	"fmt"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 // Decode body from the request into value.
@@ -73,4 +75,15 @@ func HandleInternalServerError(w http.ResponseWriter, err error) bool {
 		return true
 	}
 	return false
+}
+
+// Add route to router with path, handler, method, request and response types
+func AddRoute(
+	router *mux.Router,
+	path string,
+	f func(http.ResponseWriter, *http.Request),
+	method string,
+	requestType any, responseType any,
+) {
+	router.HandleFunc(path, f).Methods(method)
 }

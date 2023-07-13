@@ -7,7 +7,6 @@ import (
 	"flare-indexer/services/utils"
 	"net/http"
 
-	"github.com/gorilla/mux"
 	"gorm.io/gorm"
 )
 
@@ -21,21 +20,29 @@ func newTransactionRouteHandlers(ctx context.ServicesContext) *transactionRouteH
 	}
 }
 
-func (rh *transactionRouteHandlers) getTransaction(w http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
-	txID := params["tx_id"]
-	err := database.DoInTransaction(rh.db, func(dbTx *gorm.DB) error {
-		tx, inputs, outputs, err := database.FetchPChainTxFull(rh.db, txID)
-		if err == nil {
-			utils.WriteApiResponseOk(w, api.NewApiPChainTx(tx, inputs, outputs))
+func (rh *transactionRouteHandlers) getTransaction() utils.RouteHandler {
+	handler := func(params map[string]string) (*api.ApiPChainTx, *utils.ErrorHandler) {
+		txID := params["tx_id"]
+		var resp *api.ApiPChainTx = nil
+		err := database.DoInTransaction(rh.db, func(dbTx *gorm.DB) error {
+			tx, inputs, outputs, err := database.FetchPChainTxFull(rh.db, txID)
+			if err == nil {
+				resp = api.NewApiPChainTx(tx, inputs, outputs)
+			}
+			return err
+		})
+		if err != nil {
+			return nil, utils.InternalServerErrorHandler(err)
 		}
-		return err
-	})
-	utils.HandleInternalServerError(w, err)
+		return resp, nil
+	}
+	return utils.NewParamRouteHandler(handler, http.MethodGet,
+		map[string]string{"tx_id:[0-9a-zA-Z]+": "Transaction ID"},
+		&api.ApiPChainTx{})
 }
 
-func AddTransactionRoutes(router *mux.Router, ctx context.ServicesContext) {
+func AddTransactionRoutes(router utils.Router, ctx context.ServicesContext) {
 	vr := newTransactionRouteHandlers(ctx)
-	subrouter := router.PathPrefix("/transactions").Subrouter()
-	subrouter.HandleFunc("/get/{tx_id:[0-9a-zA-Z]+}", vr.getTransaction).Methods(http.MethodGet)
+	subrouter := router.WithPrefix("/transactions", "Transactions")
+	subrouter.AddRoute("/get/{tx_id:[0-9a-zA-Z]+}", vr.getTransaction())
 }

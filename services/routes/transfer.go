@@ -6,7 +6,6 @@ import (
 	"flare-indexer/services/utils"
 	"net/http"
 
-	"github.com/gorilla/mux"
 	"gorm.io/gorm"
 )
 
@@ -29,30 +28,24 @@ func newTransferRouteHandlers(ctx context.ServicesContext) *transferRouteHandler
 	}
 }
 
-func (rh *transferRouteHandlers) listTransferTransactions(w http.ResponseWriter, r *http.Request, txType database.PChainTxType) {
-	var request GetStakerRequest
-	if !utils.DecodeBody(w, r, &request) {
-		return
+func (rh *transferRouteHandlers) listTransferTransactions(txType database.PChainTxType) utils.RouteHandler {
+	handler := func(request GetStakerRequest) (GetStakerResponse, *utils.ErrorHandler) {
+		txIDs, err := database.FetchPChainTransferTransactions(rh.db, txType,
+			request.Address, request.Offset, request.Limit)
+		if err != nil {
+			return GetStakerResponse{}, utils.InternalServerErrorHandler(err)
+		}
+		return GetStakerResponse{TxIDs: txIDs}, nil
 	}
-	txIDs, err := database.FetchPChainTransferTransactions(rh.db, txType,
-		request.Address, request.Offset, request.Limit)
-	if utils.HandleInternalServerError(w, err) {
-		return
-	}
-	utils.WriteApiResponseOk(w, GetStakerResponse{TxIDs: txIDs})
+	return utils.NewRouteHandler(handler, http.MethodPost, GetStakerRequest{}, GetStakerResponse{})
 }
 
-func AddTransferRoutes(router *mux.Router, ctx context.ServicesContext) {
+func AddTransferRoutes(router utils.Router, ctx context.ServicesContext) {
 	vr := newTransferRouteHandlers(ctx)
-	importSubrouter := router.PathPrefix("/imports").Subrouter()
 
-	importSubrouter.HandleFunc("/transactions", func(w http.ResponseWriter, r *http.Request) {
-		vr.listTransferTransactions(w, r, database.PChainImportTx)
-	}).Methods(http.MethodPost)
+	importSubrouter := router.WithPrefix("/imports", "Transfers")
+	importSubrouter.AddRoute("/transactions", vr.listTransferTransactions(database.PChainImportTx))
 
-	delegatorSubrouter := router.PathPrefix("/exports").Subrouter()
-
-	delegatorSubrouter.HandleFunc("/transactions", func(w http.ResponseWriter, r *http.Request) {
-		vr.listTransferTransactions(w, r, database.PChainExportTx)
-	}).Methods(http.MethodPost)
+	exportSubrouter := router.WithPrefix("/exports", "Transfers")
+	exportSubrouter.AddRoute("/transactions", vr.listTransferTransactions(database.PChainExportTx))
 }
