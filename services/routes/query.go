@@ -18,10 +18,14 @@ func AddQueryRoutes(router utils.Router, ctx context.ServicesContext) {
 	qr := newQueryRouteHandlers(ctx)
 	subrouter := router.WithPrefix("/query", "Query")
 
-	subrouter.AddRoute("", qr.processAttestationRequest())
-	subrouter.AddRoute("/prepare", qr.prepareRequest())
-	subrouter.AddRoute("/integrity", qr.integrityRequest())
-	subrouter.AddRoute("/prepareAttestation", qr.prepareAttestationRequest())
+	subrouter.AddRoute("", qr.processAttestationRequest(), "",
+		"Verifies attestation request")
+	subrouter.AddRoute("/prepare", qr.prepareRequest(), "",
+		"Given parsed request in JSON with possibly invalid message integrity code it returns the verification object")
+	subrouter.AddRoute("/integrity", qr.integrityRequest(), "",
+		"Given parsed request in JSON with possibly invalid message integrity code it returns the message integrity code.")
+	subrouter.AddRoute("/prepareAttestation", qr.prepareAttestationRequest(), "",
+		"Given parsed request in JSON with possibly invalid message integrity code it returns the byte encoded  attestation request with the correct message integrity code. The response can be directly used for submitting attestation request to StateConnector smart contract.")
 }
 
 type queryRouteHandlers struct {

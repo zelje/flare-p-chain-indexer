@@ -22,7 +22,7 @@ type ErrorHandler struct {
 }
 
 type Router interface {
-	AddRoute(path string, handler RouteHandler)
+	AddRoute(path string, handler RouteHandler, description ...string)
 	WithPrefix(prefix string, tag string) Router
 	Finalize()
 }
@@ -32,7 +32,7 @@ type defaultRouter struct {
 	router *mux.Router
 }
 
-func (r *defaultRouter) AddRoute(path string, handler RouteHandler) {
+func (r *defaultRouter) AddRoute(path string, handler RouteHandler, description ...string) {
 	r.router.HandleFunc(path, handler.Handler).Methods(handler.Method)
 }
 
@@ -74,25 +74,18 @@ func NewSwaggerRouter(mRouter *mux.Router, title string, version string) Router 
 	}
 }
 
-func (r *swaggerRouter) AddRoute(path string, handler RouteHandler) {
-	// TODO: remove after testing
-	//
-	// var requestBody *swagger.ContentValue = nil
-	// if request != nil {
-	// 	requestBody = &swagger.ContentValue{
-	// 		Content: swagger.Content{
-	// 			"application/json": {Value: request},
-	// 		},
-	// 	}
-	// }
-
-	// // Replace the generic Data field in ApiResponseWrapper with the actual response type to be able
-	// // to correctly generate the json schema
-	// wrapperValue := api.ApiResponseWrapper[interface{}]{}
-	// responseValue := utils.ReplaceStructField(wrapperValue, "Data", response)
-
+// Add a route to the router and generate openapi definitions from the handler
+// The first item in the description parameter is used to set the openapi summary field and
+// the second item is used to set the openapi description field
+func (r *swaggerRouter) AddRoute(path string, handler RouteHandler, description ...string) {
 	swaggerDefinitions := handler.SwaggerDefinitions
 	swaggerDefinitions.Tags = []string{r.tag}
+	if len(description) > 0 {
+		swaggerDefinitions.Summary = description[0]
+		if len(description) > 1 {
+			swaggerDefinitions.Description = description[1]
+		}
+	}
 	r.router.AddRoute(handler.Method, path, handler.Handler, swaggerDefinitions)
 }
 

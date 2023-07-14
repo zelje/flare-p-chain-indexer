@@ -1,9 +1,42 @@
+# This file serves as a template for the configuration file. Copy it and edit the values as needed.
+# Use --config parameter to specify the path to the configuration file.
+
 [db]
 host = "localhost"
 port = 3306
 database = "flare_indexer"
 username = "indexeruser"
 password = "P.a.s.s.W.O.R.D"
+log_queries = false
+
+[logger]
+level = "INFO"
+file = "./logs/flare-indexer.log"
+console = true
+
+[metrics]
+prometheus_address = "localhost:2112"
 
 [chain]
 node_url = "http://localhost:9650/"
+address_hrp = "localflare"
+chain_id = 162
+# eth_rpc_url is needed for services
+eth_rpc_url = "http://localhost:9650/ext/bc/C/rpc"
+# api key may be needed for access to production nodes
+api_key = ""
+
+[x_chain_indexer]
+enabled = false
+timeout_millis = 1000
+start_index = 5
+batch_size = 10
+
+[p_chain_indexer]
+enabled = true
+timeout_millis = 1000
+start_index = 0
+
+[uptime_cronjob]
+enabled = false
+timeout_seconds = 10
