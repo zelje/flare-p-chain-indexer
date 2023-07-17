@@ -5,6 +5,7 @@ import (
 	"flare-indexer/indexer/config"
 	"flare-indexer/indexer/context"
 	"flare-indexer/utils"
+	"flare-indexer/utils/chain"
 	"time"
 
 	"github.com/ybbus/jsonrpc/v3"
@@ -19,7 +20,7 @@ type uptimeCronjob struct {
 }
 
 func NewUptimeCronjob(ctx context.IndexerContext) Cronjob {
-	client := jsonrpc.NewClient(utils.JoinPaths(ctx.Config().Chain.NodeURL, "ext/bc/P"))
+	client := jsonrpc.NewClient(utils.JoinPaths(ctx.Config().Chain.NodeURL, "ext/bc/P"+chain.RPCClientOptions(ctx.Config().Chain.ApiKey)))
 	return &uptimeCronjob{
 		config: ctx.Config().UptimeCronjob,
 		db:     ctx.DB(),

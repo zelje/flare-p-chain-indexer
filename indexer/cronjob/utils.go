@@ -13,7 +13,7 @@ type PermissionedValidators struct {
 
 func CallPChainGetConnectedValidators(client jsonrpc.RPCClient) ([]*api.PermissionedValidator, error) {
 	ctx := context.Background()
-	response, err := client.Call(ctx, "platform.getConnectedValidators")
+	response, err := client.Call(ctx, "platform.getCurrentValidators")
 	if err != nil {
 		return nil, err
 	}
