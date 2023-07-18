@@ -3,6 +3,7 @@ package xchain
 import (
 	"flare-indexer/database"
 	"flare-indexer/indexer/migrations"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -16,5 +17,6 @@ func createXChainTxState(db *gorm.DB) error {
 		Name:           StateName,
 		NextDBIndex:    0,
 		LastChainIndex: 0,
+		Updated:        time.Now(),
 	})
 }
