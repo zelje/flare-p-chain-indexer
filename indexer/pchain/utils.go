@@ -41,7 +41,9 @@ func CallPChainGetTxApi(client chain.RPCClient, txID string) (*txs.Tx, error) {
 }
 
 // Copy-paste from
-// 	"github.com/ava-labs/avalanchego/vms/platformvm/service"
+//
+//	"github.com/ava-labs/avalanchego/vms/platformvm/service"
+//
 // To avoid an additional dependency
 type GetRewardUTXOsReply struct {
 	NumFetched json.Uint64         `json:"numFetched"`

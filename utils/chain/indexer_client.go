@@ -21,9 +21,7 @@ type IndexerClient interface {
 	GetIndex(ctx context.Context, id ids.ID) (uint64, error)
 }
 
-//
 // Implement IndexerClientBase using Avalanche indexer
-//
 type AvalancheIndexerClient struct {
 	client     indexer.Client
 	rpcOptions []rpc.Option

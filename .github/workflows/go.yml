@@ -21,6 +21,9 @@ jobs:
     - name: Download modules
       run: go mod download
 
+    - name: gofmt check
+      run: ./gofmt-check.sh
+
     - name: golangci-lint
       uses: golangci/golangci-lint-action@v2
       with:

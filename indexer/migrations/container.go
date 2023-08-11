@@ -70,9 +70,10 @@ func NewMigrationContainer() MigrationContainer {
 }
 
 // Adds a migration
-//   version - Migration version. Migrations are sorted by version and executed in that order.
-//   description - Description of the migration
-//   code - Migration code, function without parameters
+//
+//	version - Migration version. Migrations are sorted by version and executed in that order.
+//	description - Description of the migration
+//	code - Migration code, function without parameters
 func (mc *migrationContainer) Add(version string, description string, code func(*gorm.DB) error) {
 	mc.migrations = append(mc.migrations, migration{
 		version:     version,
