@@ -2,6 +2,7 @@ package logger
 
 import (
 	"flare-indexer/config"
+	"log"
 	"os"
 
 	"go.uber.org/zap"
@@ -43,7 +44,12 @@ func createSugaredLogger(config config.LoggerConfig) *zap.SugaredLogger {
 		zap.AddCaller(),
 		zap.AddCallerSkip(1),
 	)
-	defer logger.Sync()
+	defer func() {
+		err := logger.Sync()
+		if err != nil {
+			log.Print("Failed to sync logger", err)
+		}
+	}()
 
 	sugar = logger.Sugar()
 

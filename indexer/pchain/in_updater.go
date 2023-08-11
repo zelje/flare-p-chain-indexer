@@ -69,7 +69,7 @@ func (iu *pChainInputUpdater) updateFromChain(
 			continue
 		}
 
-		var outs []shared.Output = nil
+		var outs []shared.Output
 		switch unsignedTx := tx.Unsigned.(type) {
 		case *txs.AddValidatorTx:
 			outs, err = iu.getAddStakerTxAndRewardTxOutputs(txId, unsignedTx)

@@ -1,0 +1,34 @@
+name: Go Build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: "1.18"
+
+    - name: Download modules
+      run: go mod download
+
+    - name: golangci-lint
+      uses: golangci/golangci-lint-action@v2
+      with:
+        version: latest
+        args: --timeout 5m0s
+
+    - name: Build executables
+      run: go build ./...
+      env:
+        CGO_ENABLED: "0"
+
