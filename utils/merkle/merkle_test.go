@@ -105,9 +105,7 @@ func TestMultiLeafTree(t *testing.T) {
 		assert.Equal(t, hash, sortedHashes[i])
 	}
 
-	for i := range sortedHashes {
-		hash := sortedHashes[i]
-
+	for i, hash := range sortedHashes {
 		t.Run(fmt.Sprintf("Proof_%d", i), func(t *testing.T) {
 			proof, err := tree.GetProof(i)
 			require.NoError(t, err)
@@ -116,8 +114,6 @@ func TestMultiLeafTree(t *testing.T) {
 			verified := merkle.VerifyProof(hash, proof, root)
 			assert.True(t, verified)
 		})
-
-		t.Log("sortedHashes", sortedHashes)
 
 		t.Run(fmt.Sprintf("ProofFromHash_%d", i), func(t *testing.T) {
 			proof, err := tree.GetProofFromHash(hash)
