@@ -30,6 +30,9 @@ func TestEmptyTree(t *testing.T) {
 
 	_, err = tree.GetProof(0)
 	assert.Equal(t, err, merkle.ErrInvalidIndex)
+
+	_, err = tree.GetProofFromHash(common.HexToHash("0x01"))
+	assert.Equal(t, err, merkle.ErrEmptyTree)
 }
 
 func TestSingleLeafTree(t *testing.T) {
@@ -60,6 +63,13 @@ func TestSingleLeafTree(t *testing.T) {
 	require.Len(t, proof, 0)
 
 	verified := merkle.VerifyProof(val, proof, root)
+	assert.True(t, verified)
+
+	proof, err = tree.GetProofFromHash(val)
+	require.NoError(t, err)
+	require.Len(t, proof, 0)
+
+	verified = merkle.VerifyProof(val, proof, root)
 	assert.True(t, verified)
 }
 
@@ -96,12 +106,25 @@ func TestMultiLeafTree(t *testing.T) {
 	}
 
 	for i := range sortedHashes {
+		hash := sortedHashes[i]
+
 		t.Run(fmt.Sprintf("Proof_%d", i), func(t *testing.T) {
 			proof, err := tree.GetProof(i)
 			require.NoError(t, err)
 			cupaloy.SnapshotT(t, proof)
 
-			verified := merkle.VerifyProof(sortedHashes[i], proof, root)
+			verified := merkle.VerifyProof(hash, proof, root)
+			assert.True(t, verified)
+		})
+
+		t.Log("sortedHashes", sortedHashes)
+
+		t.Run(fmt.Sprintf("ProofFromHash_%d", i), func(t *testing.T) {
+			proof, err := tree.GetProofFromHash(hash)
+			require.NoError(t, err)
+			cupaloy.SnapshotT(t, proof)
+
+			verified := merkle.VerifyProof(hash, proof, root)
 			assert.True(t, verified)
 		})
 	}

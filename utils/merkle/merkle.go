@@ -11,6 +11,7 @@ import (
 var (
 	ErrEmptyTree    = errors.New("empty tree")
 	ErrInvalidIndex = errors.New("invalid index")
+	ErrHashNotFound = errors.New("hash not found")
 )
 
 // MerkleTree implementation with helper functions.
@@ -58,6 +59,11 @@ func BuildFromHex(hexValues []string, initialHash bool) MerkleTree {
 
 	if initialHash {
 		hashes = mapSingleHash(hashes)
+
+		// Hashes must be sorted to enable binary search.
+		sort.Slice(hashes, func(i, j int) bool {
+			return hashes[i].Hex() < hashes[j].Hex()
+		})
 	}
 
 	n := len(hashes)
@@ -154,6 +160,33 @@ func (t MerkleTree) GetProof(i int) ([]common.Hash, error) {
 // parent returns the index of the parent node.
 func parent(i int) int {
 	return (i - 1) / 2
+}
+
+func (t MerkleTree) GetProofFromHash(hash common.Hash) ([]common.Hash, error) {
+	i, err := t.binarySearch(hash)
+	if err != nil {
+		return nil, err
+	}
+
+	return t.GetProof(i)
+}
+
+func (t MerkleTree) binarySearch(hash common.Hash) (int, error) {
+	numLeaves := t.HashCount()
+	if numLeaves == 0 {
+		return 0, ErrEmptyTree
+	}
+
+	leaves := t.SortedHashes()
+	i := sort.Search(len(leaves), func(i int) bool {
+		return leaves[i].Hex() >= hash.Hex()
+	})
+
+	if i < len(leaves) && leaves[i] == hash {
+		return i, nil
+	}
+
+	return 0, ErrHashNotFound
 }
 
 // VerifyProof verifies a Merkle proof for a given leaf.
