@@ -32,7 +32,7 @@ func TestEmptyTree(t *testing.T) {
 	assert.Equal(t, err, merkle.ErrInvalidIndex)
 
 	_, err = tree.GetProofFromHash(common.HexToHash("0x01"))
-	assert.Equal(t, err, merkle.ErrEmptyTree)
+	assert.Equal(t, err, merkle.ErrHashNotFound)
 }
 
 func TestSingleLeafTree(t *testing.T) {

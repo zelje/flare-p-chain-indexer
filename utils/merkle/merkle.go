@@ -19,12 +19,14 @@ type MerkleTree struct {
 	tree []common.Hash
 }
 
-// New creates a new Merkle tree from the given hash values as bytes.
+// New creates a new Merkle tree from the given hash values as bytes. It is
+// required that the values are sorted by their hex representation.
 func New(values []common.Hash) MerkleTree {
 	return MerkleTree{tree: values}
 }
 
-// NewFromHex creates a new Merkle tree from the given hex values.
+// NewFromHex creates a new Merkle tree from the given hex values. It is
+// required that the values are sorted as strings.
 func NewFromHex(hexValues []string) MerkleTree {
 	values := make([]common.Hash, len(hexValues))
 
@@ -36,35 +38,15 @@ func NewFromHex(hexValues []string) MerkleTree {
 }
 
 // Given an array of leaf hashes, builds the Merkle tree.
-func Build(values []common.Hash, initialHash bool) MerkleTree {
-	hexValues := make([]string, len(values))
-
-	for i, value := range values {
-		hexValues[i] = value.Hex()
-	}
-
-	return BuildFromHex(hexValues, initialHash)
-}
-
-// Given an array of hex-encoded leaf hashes, builds the Merkle tree.
-func BuildFromHex(hexValues []string, initialHash bool) MerkleTree {
-	sort.Strings(hexValues)
-
-	var hashes []common.Hash
-	for i := range hexValues {
-		if i == 0 || hexValues[i] != hexValues[i-1] {
-			hashes = append(hashes, common.HexToHash(hexValues[i]))
-		}
-	}
-
+func Build(hashes []common.Hash, initialHash bool) MerkleTree {
 	if initialHash {
 		hashes = mapSingleHash(hashes)
-
-		// Hashes must be sorted to enable binary search.
-		sort.Slice(hashes, func(i, j int) bool {
-			return hashes[i].Hex() < hashes[j].Hex()
-		})
 	}
+
+	// Hashes must be sorted to enable binary search.
+	sort.Slice(hashes, func(i, j int) bool {
+		return hashes[i].Hex() < hashes[j].Hex()
+	})
 
 	n := len(hashes)
 	tree := make([]common.Hash, n-1, (2*n)-1)
@@ -75,6 +57,18 @@ func BuildFromHex(hexValues []string, initialHash bool) MerkleTree {
 	}
 
 	return New(tree)
+}
+
+// Given an array of hex-encoded leaf hashes, builds the Merkle tree.
+func BuildFromHex(hexValues []string, initialHash bool) MerkleTree {
+	var hashes []common.Hash
+	for i := range hexValues {
+		if i == 0 || hexValues[i] != hexValues[i-1] {
+			hashes = append(hashes, common.HexToHash(hexValues[i]))
+		}
+	}
+
+	return Build(hashes, initialHash)
 }
 
 func mapSingleHash(hashes []common.Hash) []common.Hash {
@@ -172,11 +166,6 @@ func (t MerkleTree) GetProofFromHash(hash common.Hash) ([]common.Hash, error) {
 }
 
 func (t MerkleTree) binarySearch(hash common.Hash) (int, error) {
-	numLeaves := t.HashCount()
-	if numLeaves == 0 {
-		return 0, ErrEmptyTree
-	}
-
 	leaves := t.SortedHashes()
 	i := sort.Search(len(leaves), func(i int) bool {
 		return leaves[i].Hex() >= hash.Hex()
