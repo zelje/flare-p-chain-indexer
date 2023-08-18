@@ -2,6 +2,7 @@ package utils
 
 import (
 	"flare-indexer/services/api"
+	"log"
 	"net/http"
 
 	swagger "github.com/davidebianchi/gswagger"
@@ -86,7 +87,11 @@ func (r *swaggerRouter) AddRoute(path string, handler RouteHandler, description 
 			swaggerDefinitions.Description = description[1]
 		}
 	}
-	r.router.AddRoute(handler.Method, path, handler.Handler, swaggerDefinitions)
+
+	_, err := r.router.AddRoute(handler.Method, path, handler.Handler, swaggerDefinitions)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func (r *swaggerRouter) WithPrefix(prefix string, tag string) Router {
@@ -102,7 +107,10 @@ func (r *swaggerRouter) WithPrefix(prefix string, tag string) Router {
 }
 
 func (r *swaggerRouter) Finalize() {
-	r.router.GenerateAndExposeOpenapi()
+	if err := r.router.GenerateAndExposeOpenapi(); err != nil {
+		log.Fatal(err)
+	}
+
 	handler := v3.NewHandler("Flare P-chain indexer API", "/documentation/json", "/swagger")
 	r.mRouter.PathPrefix("/swagger").HandlerFunc(handler.ServeHTTP)
 }

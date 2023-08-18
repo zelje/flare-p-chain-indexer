@@ -14,7 +14,9 @@ import (
 )
 
 // Copy-paste from
-// 	 "github.com/ava-labs/avalanchego/vms/platformvm/service"
+//
+//	"github.com/ava-labs/avalanchego/vms/platformvm/service"
+//
 // To avoid an additional dependency
 type GetRewardUTXOsReply struct {
 	NumFetched avaJson.Uint64      `json:"numFetched"`

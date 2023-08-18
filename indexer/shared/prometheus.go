@@ -2,6 +2,7 @@ package shared
 
 import (
 	"flare-indexer/indexer/config"
+	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -21,5 +22,8 @@ func InitMetricsServer(cfg *config.MetricsConfig) {
 		Addr:    cfg.PrometheusAddress,
 		Handler: r,
 	}
-	go srv.ListenAndServe()
+	go func() {
+		err := srv.ListenAndServe()
+		log.Fatal(err)
+	}()
 }

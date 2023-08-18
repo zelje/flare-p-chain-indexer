@@ -2,6 +2,7 @@ package utils
 
 import (
 	"flare-indexer/utils"
+	"log"
 
 	"github.com/ava-labs/avalanchego/ids"
 	"github.com/go-playground/validator/v10"
@@ -13,7 +14,9 @@ var (
 
 func init() {
 	validate = validator.New()
-	validate.RegisterValidation("tx-id", ValidateTxID)
+	if err := validate.RegisterValidation("tx-id", ValidateTxID); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func ValidateTxID(fl validator.FieldLevel) bool {

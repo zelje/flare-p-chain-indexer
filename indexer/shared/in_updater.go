@@ -49,8 +49,8 @@ func NewInputList(inputs []Input) InputList {
 }
 
 // Update input address from outputs
-//  - updated inputs will be removed from the list
-//  - return missing output tx ids
+//   - updated inputs will be removed from the list
+//   - return missing output tx ids
 func (il InputList) UpdateWithOutputs(outputs utils.CacheBase[IdIndexKey, Output]) mapset.Set[string] {
 	missingTxIds := mapset.NewSet[string]()
 	for e := il.inputs.Front(); e != nil; {
