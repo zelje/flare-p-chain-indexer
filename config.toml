@@ -5,8 +5,8 @@
 host = "localhost"
 port = 3306
 database = "flare_indexer"
-username = "indexeruser"
-password = "P.a.s.s.W.O.R.D"
+username = "indexuser"
+password = "password"
 log_queries = false
 
 [logger]
