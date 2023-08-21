@@ -2,6 +2,9 @@ package config
 
 import (
 	"flare-indexer/config"
+	"time"
+
+	"github.com/ethereum/go-ethereum/common"
 )
 
 type Config struct {
@@ -12,6 +15,7 @@ type Config struct {
 	XChainIndexer IndexerConfig       `toml:"x_chain_indexer"`
 	PChainIndexer IndexerConfig       `toml:"p_chain_indexer"`
 	UptimeCronjob CronjobConfig       `toml:"uptime_cronjob"`
+	Mirror        MirrorConfig        `toml:"mirror"`
 }
 
 type MetricsConfig struct {
@@ -29,6 +33,11 @@ type IndexerConfig struct {
 type CronjobConfig struct {
 	Enabled        bool `toml:"enabled"`
 	TimeoutSeconds int  `toml:"timeout_seconds"`
+}
+
+type MirrorConfig struct {
+	EpochPeriod       time.Duration  `toml:"epoch_period" envconfig:"EPOCH_PERIOD"`
+	MirroringContract common.Address `toml:"mirroring_contract" envconfig:"MIRRORING_CONTRACT"`
 }
 
 func newConfig() *Config {
