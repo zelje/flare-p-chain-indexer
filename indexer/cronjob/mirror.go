@@ -4,6 +4,7 @@ import (
 	"flare-indexer/database"
 	"flare-indexer/indexer/config"
 	"flare-indexer/indexer/context"
+	"flare-indexer/logger"
 	"flare-indexer/utils/contracts/mirroring"
 	"flare-indexer/utils/merkle"
 	"math/big"
@@ -26,7 +27,7 @@ type mirrorCronJob struct {
 	txOpts             *bind.TransactOpts
 }
 
-func NewMirrorCronJob(ctx context.IndexerContext) (Cronjob, error) {
+func NewMirrorCronjob(ctx context.IndexerContext) (Cronjob, error) {
 	cfg := ctx.Config()
 	mirroringContract, err := newMirroringContract(cfg)
 	if err != nil {
@@ -35,14 +36,14 @@ func NewMirrorCronJob(ctx context.IndexerContext) (Cronjob, error) {
 
 	privateKey, err := crypto.HexToECDSA(cfg.Mirror.PrivateKey)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "crypto.HextoECDSA")
 	}
 
 	opts, err := bind.NewKeyedTransactorWithChainID(
 		privateKey, big.NewInt(int64(cfg.Chain.ChainID)),
 	)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "bind.NewKeyedTransactorWithChainID")
 	}
 
 	return &mirrorCronJob{
@@ -87,14 +88,21 @@ func (c *mirrorCronJob) Call() error {
 	}
 
 	if len(txs) == 0 {
+		logger.Debug("no unmirrored txs found")
 		return nil
 	}
 
+	logger.Debug("mirroring %d txs", len(txs))
 	if err := c.mirrorTxs(txs, epoch); err != nil {
 		return err
 	}
 
-	return database.MarkTxsAsMirrored(c.db, txs)
+	if err := database.MarkTxsAsMirrored(c.db, txs); err != nil {
+		return err
+	}
+
+	logger.Debug("successfully mirrored %d txs", len(txs))
+	return nil
 }
 
 func (c *mirrorCronJob) getPreviousEpoch() int64 {
