@@ -12,6 +12,7 @@ import (
 	"github.com/ava-labs/avalanchego/ids"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
@@ -22,6 +23,7 @@ type mirrorCronJob struct {
 	epochPeriodSeconds int
 	epochTimeSeconds   int64
 	mirroringContract  *mirroring.Mirroring
+	txOpts             *bind.TransactOpts
 }
 
 func NewMirrorCronJob(ctx context.IndexerContext) (Cronjob, error) {
@@ -31,11 +33,24 @@ func NewMirrorCronJob(ctx context.IndexerContext) (Cronjob, error) {
 		return nil, err
 	}
 
+	privateKey, err := crypto.HexToECDSA(cfg.Mirror.PrivateKey)
+	if err != nil {
+		return nil, err
+	}
+
+	opts, err := bind.NewKeyedTransactorWithChainID(
+		privateKey, big.NewInt(int64(cfg.Chain.ChainID)),
+	)
+	if err != nil {
+		return nil, err
+	}
+
 	return &mirrorCronJob{
 		db:                 ctx.DB(),
 		epochPeriodSeconds: int(cfg.Mirror.EpochPeriod / time.Second),
 		epochTimeSeconds:   cfg.Mirror.EpochTime.Unix(),
 		mirroringContract:  mirroringContract,
+		txOpts:             opts,
 	}, nil
 }
 
@@ -113,14 +128,10 @@ func (c *mirrorCronJob) mirrorTxs(txs []database.PChainTx, epochID int64) error 
 		return err
 	}
 
-	// TODO
-	opts := &bind.TransactOpts{}
-
 	for i := range txs {
 		in := mirrorTxInput{
 			epochID:    big.NewInt(epochID),
 			merkleTree: merkleTree,
-			opts:       opts,
 			tx:         &txs[i],
 		}
 
@@ -156,7 +167,6 @@ func buildMerkleTree(txs []database.PChainTx) (merkle.MerkleTree, error) {
 type mirrorTxInput struct {
 	epochID    *big.Int
 	merkleTree merkle.MerkleTree
-	opts       *bind.TransactOpts
 	tx         *database.PChainTx
 }
 
@@ -176,7 +186,7 @@ func (c *mirrorCronJob) mirrorTx(in *mirrorTxInput) error {
 		return err
 	}
 
-	_, err = c.mirroringContract.VerifyStake(in.opts, *stakeData, merkleProof)
+	_, err = c.mirroringContract.VerifyStake(c.txOpts, *stakeData, merkleProof)
 	if err != nil {
 		return errors.Wrap(err, "mirroringContract.VerifyStake")
 	}
