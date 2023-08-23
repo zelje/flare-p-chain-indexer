@@ -34,7 +34,7 @@ func NewMirrorCronJob(ctx context.IndexerContext) (Cronjob, error) {
 	return &mirrorCronJob{
 		db:                 ctx.DB(),
 		epochPeriodSeconds: int(cfg.Mirror.EpochPeriod / time.Second),
-		epochTimeSeconds:   0, // Equivalent to the Unix epoch.
+		epochTimeSeconds:   cfg.Mirror.EpochTime.Unix(),
 		mirroringContract:  mirroringContract,
 	}, nil
 }
