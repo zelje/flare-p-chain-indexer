@@ -102,17 +102,20 @@ func (c *mirrorCronJob) getPreviousEpoch() int64 {
 	return currEpoch - 1
 }
 
-func (c *mirrorCronJob) getUnmirroredTxs(epoch int64) ([]database.PChainTx, error) {
+func (c *mirrorCronJob) getUnmirroredTxs(epoch int64) ([]database.PChainTxData, error) {
 	startTimestamp := time.Duration(c.epochTimeSeconds+(epoch*int64(c.epochPeriodSeconds))) * time.Second
 	endTimestamp := startTimestamp + (time.Duration(c.epochPeriodSeconds) * time.Second)
 
-	var txs []database.PChainTx
+	var txs []database.PChainTxData
 	err := c.db.
+		Table("p_chain_txes").
+		Joins("left join p_chain_tx_inputs as inputs on inputs.tx_id = p_chain_txes.tx_id").
 		Where("mirrored = ?", false).
 		Where("timestamp >= ?", startTimestamp).
 		Where("timestamp < ?", endTimestamp).
 		Where("type = ?", database.PChainAddDelegatorTx).
 		Or("type = ?", database.PChainAddValidatorTx).
+		Select("p_chain_txes.*, inputs.address as input_address").
 		Find(&txs).
 		Error
 	if err != nil {
@@ -122,7 +125,7 @@ func (c *mirrorCronJob) getUnmirroredTxs(epoch int64) ([]database.PChainTx, erro
 	return txs, nil
 }
 
-func (c *mirrorCronJob) mirrorTxs(txs []database.PChainTx, epochID int64) error {
+func (c *mirrorCronJob) mirrorTxs(txs []database.PChainTxData, epochID int64) error {
 	merkleTree, err := buildMerkleTree(txs)
 	if err != nil {
 		return err
@@ -143,7 +146,7 @@ func (c *mirrorCronJob) mirrorTxs(txs []database.PChainTx, epochID int64) error 
 	return nil
 }
 
-func buildMerkleTree(txs []database.PChainTx) (merkle.MerkleTree, error) {
+func buildMerkleTree(txs []database.PChainTxData) (merkle.MerkleTree, error) {
 	hashes := make([]common.Hash, len(txs))
 
 	for i := range txs {
@@ -167,7 +170,7 @@ func buildMerkleTree(txs []database.PChainTx) (merkle.MerkleTree, error) {
 type mirrorTxInput struct {
 	epochID    *big.Int
 	merkleTree merkle.MerkleTree
-	tx         *database.PChainTx
+	tx         *database.PChainTxData
 }
 
 func (c *mirrorCronJob) mirrorTx(in *mirrorTxInput) error {
@@ -195,7 +198,7 @@ func (c *mirrorCronJob) mirrorTx(in *mirrorTxInput) error {
 }
 
 func toStakeData(
-	tx *database.PChainTx, epochID *big.Int, txHash [32]byte,
+	tx *database.PChainTxData, epochID *big.Int, txHash [32]byte,
 ) (*mirroring.IIPChainStakeMirrorVerifierPChainStake, error) {
 	txType, err := getTxType(tx.Type)
 	if err != nil {
@@ -228,8 +231,8 @@ func toStakeData(
 		StartTime:       startTime,
 		EndTime:         endTime,
 		Weight:          tx.Weight,
-		//SourceAddress:   tx.SourceAddress,  TODO
-		FeePercentage: uint64(tx.FeePercentage),
+		SourceAddress:   [20]byte(common.HexToAddress(tx.InputAddress)),
+		FeePercentage:   uint64(tx.FeePercentage),
 	}, nil
 }
 
@@ -260,10 +263,13 @@ func getMerkleProof(merkleTree merkle.MerkleTree, txHash [32]byte) ([][32]byte, 
 	return proofBytes, nil
 }
 
-func (c *mirrorCronJob) markTxsAsMirrored(txs []database.PChainTx) error {
+func (c *mirrorCronJob) markTxsAsMirrored(txs []database.PChainTxData) error {
+	newTxs := make([]database.PChainTx, len(txs))
+
 	for i := range txs {
-		txs[i].Mirrored = true
+		newTxs[i] = txs[i].PChainTx
+		newTxs[i].Mirrored = true
 	}
 
-	return c.db.Save(&txs).Error
+	return c.db.Table("p_chain_txes").Save(&newTxs).Error
 }
