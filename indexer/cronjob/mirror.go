@@ -1,22 +1,27 @@
 package cronjob
 
 import (
-	"errors"
 	"flare-indexer/database"
 	"flare-indexer/indexer/config"
 	"flare-indexer/indexer/context"
 	"flare-indexer/utils/contracts/mirroring"
+	"flare-indexer/utils/merkle"
+	"math/big"
 	"time"
 
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/pkg/errors"
 	"gorm.io/gorm"
 )
 
 type mirrorCronJob struct {
 	db                 *gorm.DB
 	epochPeriodSeconds int
-	mirroringContract  *mirroring.Mirroring
 	epochTimeSeconds   int64
+	mirroringContract  *mirroring.Mirroring
 }
 
 func NewMirrorCronJob(ctx context.IndexerContext) (Cronjob, error) {
@@ -29,6 +34,7 @@ func NewMirrorCronJob(ctx context.IndexerContext) (Cronjob, error) {
 	return &mirrorCronJob{
 		db:                 ctx.DB(),
 		epochPeriodSeconds: int(cfg.Mirror.EpochPeriod / time.Second),
+		epochTimeSeconds:   0, // Equivalent to the Unix epoch.
 		mirroringContract:  mirroringContract,
 	}, nil
 }
@@ -69,7 +75,7 @@ func (c *mirrorCronJob) Call() error {
 		return nil
 	}
 
-	if err := c.mirrorTxs(txs); err != nil {
+	if err := c.mirrorTxs(txs, epoch); err != nil {
 		return err
 	}
 
@@ -90,6 +96,8 @@ func (c *mirrorCronJob) getUnmirroredTxs(epoch int64) ([]database.PChainTx, erro
 		Where("mirrored = ?", false).
 		Where("timestamp >= ?", startTimestamp).
 		Where("timestamp < ?", endTimestamp).
+		Where("type = ?", database.PChainAddDelegatorTx).
+		Or("type = ?", database.PChainAddValidatorTx).
 		Find(&txs).
 		Error
 	if err != nil {
@@ -99,8 +107,147 @@ func (c *mirrorCronJob) getUnmirroredTxs(epoch int64) ([]database.PChainTx, erro
 	return txs, nil
 }
 
-func (c *mirrorCronJob) mirrorTxs(txs []database.PChainTx) error {
-	return errors.New("not implemented")
+func (c *mirrorCronJob) mirrorTxs(txs []database.PChainTx, epochID int64) error {
+	merkleTree, err := buildMerkleTree(txs)
+	if err != nil {
+		return err
+	}
+
+	// TODO
+	opts := &bind.TransactOpts{}
+
+	for i := range txs {
+		in := mirrorTxInput{
+			epochID:    big.NewInt(epochID),
+			merkleTree: merkleTree,
+			opts:       opts,
+			tx:         &txs[i],
+		}
+
+		if err := c.mirrorTx(&in); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func buildMerkleTree(txs []database.PChainTx) (merkle.MerkleTree, error) {
+	hashes := make([]common.Hash, len(txs))
+
+	for i := range txs {
+		tx := &txs[i]
+
+		if tx.TxID == nil {
+			return merkle.MerkleTree{}, errors.New("tx.TxID is nil")
+		}
+
+		txHash, err := ids.FromString(*tx.TxID)
+		if err != nil {
+			return merkle.MerkleTree{}, errors.Wrap(err, "ids.FromString")
+		}
+
+		hashes[i] = common.Hash(txHash)
+	}
+
+	return merkle.Build(hashes, false), nil
+}
+
+type mirrorTxInput struct {
+	epochID    *big.Int
+	merkleTree merkle.MerkleTree
+	opts       *bind.TransactOpts
+	tx         *database.PChainTx
+}
+
+func (c *mirrorCronJob) mirrorTx(in *mirrorTxInput) error {
+	txHash, err := ids.FromString(*in.tx.TxID)
+	if err != nil {
+		return errors.Wrap(err, "ids.FromString")
+	}
+
+	stakeData, err := toStakeData(in.tx, in.epochID, txHash)
+	if err != nil {
+		return err
+	}
+
+	merkleProof, err := getMerkleProof(in.merkleTree, txHash)
+	if err != nil {
+		return err
+	}
+
+	_, err = c.mirroringContract.VerifyStake(in.opts, *stakeData, merkleProof)
+	if err != nil {
+		return errors.Wrap(err, "mirroringContract.VerifyStake")
+	}
+
+	return nil
+}
+
+func toStakeData(
+	tx *database.PChainTx, epochID *big.Int, txHash [32]byte,
+) (*mirroring.IIPChainStakeMirrorVerifierPChainStake, error) {
+	txType, err := getTxType(tx.Type)
+	if err != nil {
+		return nil, err
+	}
+
+	nodeID, err := ids.NodeIDFromString(tx.NodeID)
+	if err != nil {
+		return nil, errors.Wrap(err, "ids.NodeIDFromString")
+	}
+
+	if tx.StartTime == nil {
+		return nil, errors.New("tx.StartTime is nil")
+	}
+
+	startTime := uint64(tx.StartTime.Unix())
+
+	if tx.EndTime == nil {
+		return nil, errors.New("tx.EndTime is nil")
+	}
+
+	endTime := uint64(tx.EndTime.Unix())
+
+	return &mirroring.IIPChainStakeMirrorVerifierPChainStake{
+		EpochId:         epochID,
+		BlockNumber:     tx.BlockHeight,
+		TransactionHash: txHash,
+		TransactionType: txType,
+		NodeId:          nodeID,
+		StartTime:       startTime,
+		EndTime:         endTime,
+		Weight:          tx.Weight,
+		//SourceAddress:   tx.SourceAddress,  TODO
+		//FeePercentage:   tx.FeePercentage,  TODO
+	}, nil
+}
+
+func getTxType(txType database.PChainTxType) (uint8, error) {
+	switch txType {
+	case database.PChainAddValidatorTx:
+		return 0, nil
+
+	case database.PChainAddDelegatorTx:
+		return 1, nil
+
+	default:
+		return 0, errors.New("invalid tx type")
+	}
+}
+
+func getMerkleProof(merkleTree merkle.MerkleTree, txHash [32]byte) ([][32]byte, error) {
+	proof, err := merkleTree.GetProofFromHash(txHash)
+	if err != nil {
+		return nil, errors.Wrap(err, "merkleTree.GetProof")
+	}
+
+	proofBytes := make([][32]byte, len(proof))
+	for i := range proof {
+		proofBytes[i] = [32]byte(proof[i])
+	}
+
+	return proofBytes, nil
 }
 
 func (c *mirrorCronJob) markTxsAsMirrored(txs []database.PChainTx) error {
