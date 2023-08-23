@@ -63,6 +63,9 @@ func newConfig() *Config {
 		Chain: config.ChainConfig{
 			NodeURL: "http://localhost:9650/",
 		},
+		Mirror: MirrorConfig{
+			EpochPeriod: 90 * time.Second,
+		},
 	}
 }
 
