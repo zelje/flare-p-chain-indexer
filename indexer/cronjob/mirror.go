@@ -114,7 +114,7 @@ func (c *mirrorCronJob) getUnmirroredTxs(epoch int64) ([]database.PChainTxData, 
 }
 
 func (c *mirrorCronJob) mirrorTxs(txs []database.PChainTxData, epochID int64) error {
-	merkleTree, err := buildMerkleTree(txs)
+	merkleTree, err := buildTree(txs)
 	if err != nil {
 		return err
 	}
@@ -134,19 +134,19 @@ func (c *mirrorCronJob) mirrorTxs(txs []database.PChainTxData, epochID int64) er
 	return nil
 }
 
-func buildMerkleTree(txs []database.PChainTxData) (merkle.MerkleTree, error) {
+func buildTree(txs []database.PChainTxData) (merkle.Tree, error) {
 	hashes := make([]common.Hash, len(txs))
 
 	for i := range txs {
 		tx := &txs[i]
 
 		if tx.TxID == nil {
-			return merkle.MerkleTree{}, errors.New("tx.TxID is nil")
+			return merkle.Tree{}, errors.New("tx.TxID is nil")
 		}
 
 		txHash, err := ids.FromString(*tx.TxID)
 		if err != nil {
-			return merkle.MerkleTree{}, errors.Wrap(err, "ids.FromString")
+			return merkle.Tree{}, errors.Wrap(err, "ids.FromString")
 		}
 
 		hashes[i] = common.Hash(txHash)
@@ -157,7 +157,7 @@ func buildMerkleTree(txs []database.PChainTxData) (merkle.MerkleTree, error) {
 
 type mirrorTxInput struct {
 	epochID    *big.Int
-	merkleTree merkle.MerkleTree
+	merkleTree merkle.Tree
 	tx         *database.PChainTxData
 }
 
@@ -237,7 +237,7 @@ func getTxType(txType database.PChainTxType) (uint8, error) {
 	}
 }
 
-func getMerkleProof(merkleTree merkle.MerkleTree, txHash [32]byte) ([][32]byte, error) {
+func getMerkleProof(merkleTree merkle.Tree, txHash [32]byte) ([][32]byte, error) {
 	proof, err := merkleTree.GetProofFromHash(txHash)
 	if err != nil {
 		return nil, errors.Wrap(err, "merkleTree.GetProof")
