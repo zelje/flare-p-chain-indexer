@@ -172,3 +172,25 @@ func FindPChainTxInBlockHeight(db *gorm.DB,
 	}
 	return &txs[0], true, nil
 }
+
+type PChainVotingData struct {
+	TxID      string
+	Type      PChainTxType
+	NodeID    string
+	StartTime time.Time
+	EndTime   time.Time
+	Address   string
+	Amount    uint64
+}
+
+func FetchPChainVotingData(db *gorm.DB, from time.Time, to time.Time) ([]PChainVotingData, error) {
+	var data []PChainVotingData
+
+	query := db.Where(&PChainTx{}).
+		Where("(type = ? OR type = ?)", PChainAddValidatorTx, PChainAddDelegatorTx).
+		Where("start_time >= ?", from).Where("start_time < ?", to).
+		Joins("left join p_chain_tx_inputs as inputs on inputs.tx_id = p_chain_txes.tx_id").
+		Select("p_chain_txes.tx_id, p_chain_txes.type, p_chain_txes.node_id, p_chain_txes.start_time, p_chain_txes.end_time, inputs.address, inputs.amount").
+		Find(&data)
+	return data, query.Error
+}

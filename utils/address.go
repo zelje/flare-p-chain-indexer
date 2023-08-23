@@ -23,3 +23,7 @@ func init() {
 func FormatAddressBytes(addr []byte) (string, error) {
 	return address.FormatBech32(AddressHRP, addr)
 }
+
+func ParseAddress(addr string) (string, []byte, error) {
+	return address.ParseBech32(addr)
+}

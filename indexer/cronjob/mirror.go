@@ -47,7 +47,7 @@ func (c *mirrorCronJob) Name() string {
 }
 
 func (c *mirrorCronJob) Enabled() bool {
-	return true
+	return false
 }
 
 func (c *mirrorCronJob) TimeoutSeconds() int {
