@@ -219,7 +219,7 @@ func toStakeData(
 		EndTime:         endTime,
 		Weight:          tx.Weight,
 		//SourceAddress:   tx.SourceAddress,  TODO
-		//FeePercentage:   tx.FeePercentage,  TODO
+		FeePercentage: uint64(tx.FeePercentage),
 	}, nil
 }
 

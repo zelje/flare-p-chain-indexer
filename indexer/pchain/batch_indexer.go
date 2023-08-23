@@ -147,6 +147,7 @@ func (xi *txBatchIndexer) updateRewardValidatorTx(dbTx *database.PChainTx, tx *t
 
 func (xi *txBatchIndexer) updateAddValidatorTx(dbTx *database.PChainTx, tx *txs.AddValidatorTx) error {
 	dbTx.Type = database.PChainAddValidatorTx
+	dbTx.FeePercentage = tx.DelegationShares
 	return xi.updateAddStakerTx(dbTx, tx, tx.Ins, tx.RewardsOwner)
 }
 
