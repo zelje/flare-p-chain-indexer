@@ -94,7 +94,7 @@ func (c *mirrorCronJob) Call() error {
 		return err
 	}
 
-	return c.markTxsAsMirrored(txs)
+	return database.MarkTxsAsMirrored(c.db, txs)
 }
 
 func (c *mirrorCronJob) getPreviousEpoch() int64 {
@@ -103,26 +103,14 @@ func (c *mirrorCronJob) getPreviousEpoch() int64 {
 }
 
 func (c *mirrorCronJob) getUnmirroredTxs(epoch int64) ([]database.PChainTxData, error) {
-	startTimestamp := time.Duration(c.epochTimeSeconds+(epoch*int64(c.epochPeriodSeconds))) * time.Second
-	endTimestamp := startTimestamp + (time.Duration(c.epochPeriodSeconds) * time.Second)
+	startTimestamp := time.Unix(c.epochTimeSeconds+(epoch*int64(c.epochPeriodSeconds)), 0)
+	endTimestamp := startTimestamp.Add(time.Duration(c.epochPeriodSeconds) * time.Second)
 
-	var txs []database.PChainTxData
-	err := c.db.
-		Table("p_chain_txes").
-		Joins("left join p_chain_tx_inputs as inputs on inputs.tx_id = p_chain_txes.tx_id").
-		Where("mirrored = ?", false).
-		Where("timestamp >= ?", startTimestamp).
-		Where("timestamp < ?", endTimestamp).
-		Where("type = ?", database.PChainAddDelegatorTx).
-		Or("type = ?", database.PChainAddValidatorTx).
-		Select("p_chain_txes.*, inputs.address as input_address").
-		Find(&txs).
-		Error
-	if err != nil {
-		return nil, err
-	}
-
-	return txs, nil
+	return database.GetUnmirroredPChainTxs(&database.GetUnmirroredPChainTxsInput{
+		DB:             c.db,
+		StartTimestamp: startTimestamp,
+		EndTimestamp:   endTimestamp,
+	})
 }
 
 func (c *mirrorCronJob) mirrorTxs(txs []database.PChainTxData, epochID int64) error {
@@ -261,15 +249,4 @@ func getMerkleProof(merkleTree merkle.MerkleTree, txHash [32]byte) ([][32]byte, 
 	}
 
 	return proofBytes, nil
-}
-
-func (c *mirrorCronJob) markTxsAsMirrored(txs []database.PChainTxData) error {
-	newTxs := make([]database.PChainTx, len(txs))
-
-	for i := range txs {
-		newTxs[i] = txs[i].PChainTx
-		newTxs[i].Mirrored = true
-	}
-
-	return c.db.Table("p_chain_txes").Save(&newTxs).Error
 }

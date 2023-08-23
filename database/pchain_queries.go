@@ -172,3 +172,40 @@ func FindPChainTxInBlockHeight(db *gorm.DB,
 	}
 	return &txs[0], true, nil
 }
+
+type GetUnmirroredPChainTxsInput struct {
+	DB             *gorm.DB
+	StartTimestamp time.Time
+	EndTimestamp   time.Time
+}
+
+func GetUnmirroredPChainTxs(in *GetUnmirroredPChainTxsInput) ([]PChainTxData, error) {
+	var txs []PChainTxData
+	err := in.DB.
+		Table("p_chain_txes").
+		Joins("left join p_chain_tx_inputs as inputs on inputs.tx_id = p_chain_txes.tx_id").
+		Where("mirrored = ?", false).
+		Where("timestamp >= ?", in.StartTimestamp).
+		Where("timestamp < ?", in.EndTimestamp).
+		Where("type = ?", PChainAddDelegatorTx).
+		Or("type = ?", PChainAddValidatorTx).
+		Select("p_chain_txes.*, inputs.address as input_address").
+		Find(&txs).
+		Error
+	if err != nil {
+		return nil, err
+	}
+
+	return txs, nil
+}
+
+func MarkTxsAsMirrored(db *gorm.DB, txs []PChainTxData) error {
+	newTxs := make([]PChainTx, len(txs))
+
+	for i := range txs {
+		newTxs[i] = txs[i].PChainTx
+		newTxs[i].Mirrored = true
+	}
+
+	return db.Table("p_chain_txes").Save(&newTxs).Error
+}
