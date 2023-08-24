@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"gorm.io/gorm"
 )
@@ -140,6 +141,14 @@ func (c *votingCronjob) getEpochBounds(epoch int64) (start, end time.Time) {
 	return
 }
 
-func getMerkleRoot(votingData []database.PChainVotingData) ([32]byte, error) {
-	return [32]byte{}, nil
+func getMerkleRoot(votingData []database.PChainVotingData) (common.Hash, error) {
+	tree, err := buildTree(votingData)
+	if err != nil {
+		return [32]byte{}, err
+	}
+	hash, err := tree.GetHash(0)
+	if err != nil {
+		return [32]byte{}, err
+	}
+	return hash, nil
 }
