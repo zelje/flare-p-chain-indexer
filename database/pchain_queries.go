@@ -173,20 +173,14 @@ func FindPChainTxInBlockHeight(db *gorm.DB,
 	return &txs[0], true, nil
 }
 
-type PChainVotingData struct {
-	PChainTx
-	Address string
-	Amount  uint64
-}
-
-func FetchPChainVotingData(db *gorm.DB, from time.Time, to time.Time) ([]PChainVotingData, error) {
-	var data []PChainVotingData
+func FetchPChainVotingData(db *gorm.DB, from time.Time, to time.Time) ([]PChainTxData, error) {
+	var data []PChainTxData
 
 	query := db.Where(&PChainTx{}).
 		Where("(type = ? OR type = ?)", PChainAddValidatorTx, PChainAddDelegatorTx).
 		Where("start_time >= ?", from).Where("start_time < ?", to).
 		Joins("left join p_chain_tx_inputs as inputs on inputs.tx_id = p_chain_txes.tx_id").
-		Select("p_chain_txes.*, inputs.address as address, inputs.amount as amount").
+		Select("p_chain_txes.*, inputs.address as input_address").
 		Scan(&data)
 	return data, query.Error
 }
@@ -197,8 +191,8 @@ type GetUnmirroredPChainTxsInput struct {
 	EndTimestamp   time.Time
 }
 
-func GetUnmirroredPChainTxs(in *GetUnmirroredPChainTxsInput) ([]PChainVotingData, error) {
-	var txs []PChainVotingData
+func GetUnmirroredPChainTxs(in *GetUnmirroredPChainTxsInput) ([]PChainTxData, error) {
+	var txs []PChainTxData
 	err := in.DB.
 		Table("p_chain_txes").
 		Joins("left join p_chain_tx_inputs as inputs on inputs.tx_id = p_chain_txes.tx_id").
@@ -220,7 +214,7 @@ func GetUnmirroredPChainTxs(in *GetUnmirroredPChainTxsInput) ([]PChainVotingData
 	return txs, nil
 }
 
-func MarkTxsAsMirrored(db *gorm.DB, txs []PChainVotingData) error {
+func MarkTxsAsMirrored(db *gorm.DB, txs []PChainTxData) error {
 	newTxs := make([]PChainTx, len(txs))
 
 	for i := range txs {
