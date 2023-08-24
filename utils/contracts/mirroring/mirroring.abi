@@ -18,11 +18,6 @@
       },
       {
         "internalType": "uint256",
-        "name": "_minStakingVerificationAmountWei",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
         "name": "_maxUpdatesPerBlock",
         "type": "uint256"
       }
@@ -41,56 +36,6 @@
       }
     ],
     "name": "CreatedTotalSupplyCache",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "bytes20",
-        "name": "_owner",
-        "type": "bytes20"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "_blockNumber",
-        "type": "uint256"
-      }
-    ],
-    "name": "CreatedVotePowerCache",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "from",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "bytes20",
-        "name": "nodeId",
-        "type": "bytes20"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "priorVotePower",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "newVotePower",
-        "type": "uint256"
-      }
-    ],
-    "name": "DelegationChanged",
     "type": "event"
   },
   {
@@ -155,19 +100,6 @@
       }
     ],
     "name": "MaxUpdatesPerBlockSet",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "minStakingVerificationAmountWei",
-        "type": "uint256"
-      }
-    ],
-    "name": "MinStakingVerificationAmountSet",
     "type": "event"
   },
   {
@@ -271,6 +203,56 @@
     "type": "event"
   },
   {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "bytes20",
+        "name": "nodeId",
+        "type": "bytes20"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "blockNumber",
+        "type": "uint256"
+      }
+    ],
+    "name": "VotePowerCacheCreated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "bytes20",
+        "name": "nodeId",
+        "type": "bytes20"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "priorVotePower",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "newVotePower",
+        "type": "uint256"
+      }
+    ],
+    "name": "VotePowerChanged",
+    "type": "event"
+  },
+  {
     "inputs": [],
     "name": "activate",
     "outputs": [],
@@ -295,7 +277,7 @@
     "name": "addressBinder",
     "outputs": [
       {
-        "internalType": "contract AddressBinder",
+        "internalType": "contract IAddressBinder",
         "name": "",
         "type": "address"
       }
@@ -387,7 +369,7 @@
     "outputs": [
       {
         "internalType": "uint256[]",
-        "name": "",
+        "name": "_votePowers",
         "type": "uint256[]"
       }
     ],
@@ -585,32 +567,6 @@
   },
   {
     "inputs": [],
-    "name": "merkleProofVerifier",
-    "outputs": [
-      {
-        "internalType": "contract MerkleProofVerifier",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "minStakingVerificationAmountWei",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
     "name": "productionMode",
     "outputs": [
       {
@@ -664,14 +620,54 @@
   {
     "inputs": [
       {
+        "internalType": "address",
+        "name": "_owner",
+        "type": "address"
+      }
+    ],
+    "name": "stakesOf",
+    "outputs": [
+      {
+        "internalType": "bytes20[]",
+        "name": "_nodeIds",
+        "type": "bytes20[]"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "_amounts",
+        "type": "uint256[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_owner",
+        "type": "address"
+      },
+      {
         "internalType": "uint256",
-        "name": "_minStakingVerificationAmountWei",
+        "name": "_blockNumber",
         "type": "uint256"
       }
     ],
-    "name": "setMinStakingVerificationAmount",
-    "outputs": [],
-    "stateMutability": "nonpayable",
+    "name": "stakesOfAt",
+    "outputs": [
+      {
+        "internalType": "bytes20[]",
+        "name": "_nodeIds",
+        "type": "bytes20[]"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "_amounts",
+        "type": "uint256[]"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -858,6 +854,19 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "verifier",
+    "outputs": [
+      {
+        "internalType": "contract IIPChainStakeMirrorVerifier",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "components": [
@@ -865,11 +874,6 @@
             "internalType": "uint256",
             "name": "epochId",
             "type": "uint256"
-          },
-          {
-            "internalType": "bytes32[]",
-            "name": "merkleProof",
-            "type": "bytes32[]"
           },
           {
             "internalType": "uint64",
@@ -917,12 +921,17 @@
             "type": "uint64"
           }
         ],
-        "internalType": "struct MerkleProofVerifier.PChainStaking",
-        "name": "_stakingProof",
+        "internalType": "struct IIPChainStakeMirrorVerifier.PChainStake",
+        "name": "_stakeData",
         "type": "tuple"
+      },
+      {
+        "internalType": "bytes32[]",
+        "name": "_merkleProof",
+        "type": "bytes32[]"
       }
     ],
-    "name": "verifyStaking",
+    "name": "verifyStake",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -931,7 +940,7 @@
     "inputs": [
       {
         "internalType": "bytes20",
-        "name": "_owner",
+        "name": "_nodeId",
         "type": "bytes20"
       },
       {
@@ -955,7 +964,7 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "_from",
+        "name": "_owner",
         "type": "address"
       },
       {
@@ -968,7 +977,7 @@
     "outputs": [
       {
         "internalType": "uint256",
-        "name": "",
+        "name": "_votePower",
         "type": "uint256"
       }
     ],
@@ -979,7 +988,7 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "_from",
+        "name": "_owner",
         "type": "address"
       },
       {
@@ -997,7 +1006,7 @@
     "outputs": [
       {
         "internalType": "uint256",
-        "name": "",
+        "name": "_votePower",
         "type": "uint256"
       }
     ],
@@ -1008,7 +1017,7 @@
     "inputs": [
       {
         "internalType": "bytes20",
-        "name": "_owner",
+        "name": "_nodeId",
         "type": "bytes20"
       },
       {
@@ -1032,7 +1041,7 @@
     "inputs": [
       {
         "internalType": "bytes20",
-        "name": "_owner",
+        "name": "_nodeId",
         "type": "bytes20"
       }
     ],
@@ -1051,7 +1060,7 @@
     "inputs": [
       {
         "internalType": "bytes20",
-        "name": "_owner",
+        "name": "_nodeId",
         "type": "bytes20"
       },
       {
@@ -1075,7 +1084,7 @@
     "inputs": [
       {
         "internalType": "bytes20",
-        "name": "_owner",
+        "name": "_nodeId",
         "type": "bytes20"
       },
       {

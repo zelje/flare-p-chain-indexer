@@ -38,7 +38,9 @@ type CronjobConfig struct {
 
 type MirrorConfig struct {
 	EpochPeriod       time.Duration  `toml:"epoch_period" envconfig:"EPOCH_PERIOD"`
+	EpochTime         time.Time      `toml:"epoch_time" envconfig:"EPOCH_TIME"`
 	MirroringContract common.Address `toml:"mirroring_contract" envconfig:"MIRRORING_CONTRACT"`
+	PrivateKey        string         `toml:"private_key" envconfig:"PRIVATE_KEY"` // Hex encoded
 }
 
 type VotingConfig struct {
@@ -69,6 +71,9 @@ func newConfig() *Config {
 		},
 		Chain: config.ChainConfig{
 			NodeURL: "http://localhost:9650/",
+		},
+		Mirror: MirrorConfig{
+			EpochPeriod: 90 * time.Second,
 		},
 	}
 }

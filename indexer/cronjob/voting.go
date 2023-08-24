@@ -122,11 +122,10 @@ func (c *votingCronjob) Call() error {
 				return err
 			}
 			c.votingContract.SubmitVote(nil, big.NewInt(e), [32]byte(merkleRoot))
-			state.NextDBIndex = uint64(e + 1)
-
-			// Update state
-			database.UpdateState(c.db, &state)
 		}
+		// Update state
+		state.NextDBIndex = uint64(e + 1)
+		database.UpdateState(c.db, &state)
 	}
 	return nil
 }

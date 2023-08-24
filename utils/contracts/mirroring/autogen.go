@@ -29,10 +29,9 @@ var (
 	_ = abi.ConvertType
 )
 
-// MerkleProofVerifierPChainStaking is an auto generated low-level Go binding around an user-defined struct.
-type MerkleProofVerifierPChainStaking struct {
+// IIPChainStakeMirrorVerifierPChainStake is an auto generated low-level Go binding around an user-defined struct.
+type IIPChainStakeMirrorVerifierPChainStake struct {
 	EpochId         *big.Int
-	MerkleProof     [][32]byte
 	BlockNumber     uint64
 	TransactionHash [32]byte
 	TransactionType uint8
@@ -46,7 +45,7 @@ type MerkleProofVerifierPChainStaking struct {
 
 // MirroringMetaData contains all meta data concerning the Mirroring contract.
 var MirroringMetaData = &bind.MetaData{
-	ABI: "[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_governance\",\"type\":\"address\"},{\"internalType\":\"contractFlareDaemon\",\"name\":\"_flareDaemon\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_addressUpdater\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_minStakingVerificationAmountWei\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_maxUpdatesPerBlock\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"CreatedTotalSupplyCache\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes20\",\"name\":\"_owner\",\"type\":\"bytes20\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"CreatedVotePowerCache\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"bytes20\",\"name\":\"nodeId\",\"type\":\"bytes20\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"priorVotePower\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"newVotePower\",\"type\":\"uint256\"}],\"name\":\"DelegationChanged\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes4\",\"name\":\"selector\",\"type\":\"bytes4\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"allowedAfterTimestamp\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"encodedCall\",\"type\":\"bytes\"}],\"name\":\"GovernanceCallTimelocked\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"initialGovernance\",\"type\":\"address\"}],\"name\":\"GovernanceInitialised\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"governanceSettings\",\"type\":\"address\"}],\"name\":\"GovernedProductionModeEntered\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"maxUpdatesPerBlock\",\"type\":\"uint256\"}],\"name\":\"MaxUpdatesPerBlockSet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"minStakingVerificationAmountWei\",\"type\":\"uint256\"}],\"name\":\"MinStakingVerificationAmountSet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"bytes20\",\"name\":\"nodeId\",\"type\":\"bytes20\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"pChainTxHash\",\"type\":\"bytes32\"}],\"name\":\"StakingConfirmed\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"bytes20\",\"name\":\"nodeId\",\"type\":\"bytes20\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"pChainTxHash\",\"type\":\"bytes32\"}],\"name\":\"StakingEnded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes4\",\"name\":\"selector\",\"type\":\"bytes4\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"timestamp\",\"type\":\"uint256\"}],\"name\":\"TimelockedGovernanceCallCanceled\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes4\",\"name\":\"selector\",\"type\":\"bytes4\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"timestamp\",\"type\":\"uint256\"}],\"name\":\"TimelockedGovernanceCallExecuted\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"activate\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"active\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"addressBinder\",\"outputs\":[{\"internalType\":\"contractAddressBinder\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_owner\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_count\",\"type\":\"uint256\"}],\"name\":\"balanceHistoryCleanup\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_owner\",\"type\":\"address\"}],\"name\":\"balanceOf\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_owner\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"balanceOfAt\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes20[]\",\"name\":\"_owners\",\"type\":\"bytes20[]\"},{\"internalType\":\"uint256\",\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"batchVotePowerOfAt\",\"outputs\":[{\"internalType\":\"uint256[]\",\"name\":\"\",\"type\":\"uint256[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"_selector\",\"type\":\"bytes4\"}],\"name\":\"cancelGovernanceCall\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"cleanerContract\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"cleanupBlockNumber\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"cleanupBlockNumberManager\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"daemonize\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"deactivate\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"_selector\",\"type\":\"bytes4\"}],\"name\":\"executeGovernanceCall\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"flareDaemon\",\"outputs\":[{\"internalType\":\"contractFlareDaemon\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getAddressUpdater\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"_addressUpdater\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getContractName\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"governance\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"governanceSettings\",\"outputs\":[{\"internalType\":\"contractIGovernanceSettings\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_initialGovernance\",\"type\":\"address\"}],\"name\":\"initialise\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"lastTriggeredTimestamp\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"maxUpdatesPerBlock\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"merkleProofVerifier\",\"outputs\":[{\"internalType\":\"contractMerkleProofVerifier\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"minStakingVerificationAmountWei\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"productionMode\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_cleanerContract\",\"type\":\"address\"}],\"name\":\"setCleanerContract\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"setCleanupBlockNumber\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_maxUpdatesPerBlock\",\"type\":\"uint256\"}],\"name\":\"setMaxUpdatesPerBlock\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_minStakingVerificationAmountWei\",\"type\":\"uint256\"}],\"name\":\"setMinStakingVerificationAmount\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"switchToFallbackMode\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"switchToProductionMode\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"\",\"type\":\"bytes4\"}],\"name\":\"timelockedCalls\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"allowedAfterTimestamp\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"encodedCall\",\"type\":\"bytes\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"totalSupply\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"totalSupplyAt\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"totalSupplyCacheCleanup\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_count\",\"type\":\"uint256\"}],\"name\":\"totalSupplyHistoryCleanup\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"totalVotePower\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"totalVotePowerAt\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"totalVotePowerAtCached\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32[]\",\"name\":\"_contractNameHashes\",\"type\":\"bytes32[]\"},{\"internalType\":\"address[]\",\"name\":\"_contractAddresses\",\"type\":\"address[]\"}],\"name\":\"updateContractAddresses\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"epochId\",\"type\":\"uint256\"},{\"internalType\":\"bytes32[]\",\"name\":\"merkleProof\",\"type\":\"bytes32[]\"},{\"internalType\":\"uint64\",\"name\":\"blockNumber\",\"type\":\"uint64\"},{\"internalType\":\"bytes32\",\"name\":\"transactionHash\",\"type\":\"bytes32\"},{\"internalType\":\"uint8\",\"name\":\"transactionType\",\"type\":\"uint8\"},{\"internalType\":\"bytes20\",\"name\":\"nodeId\",\"type\":\"bytes20\"},{\"internalType\":\"uint64\",\"name\":\"startTime\",\"type\":\"uint64\"},{\"internalType\":\"uint64\",\"name\":\"endTime\",\"type\":\"uint64\"},{\"internalType\":\"uint64\",\"name\":\"weight\",\"type\":\"uint64\"},{\"internalType\":\"bytes20\",\"name\":\"sourceAddress\",\"type\":\"bytes20\"},{\"internalType\":\"uint64\",\"name\":\"feePercentage\",\"type\":\"uint64\"}],\"internalType\":\"structMerkleProofVerifier.PChainStaking\",\"name\":\"_stakingProof\",\"type\":\"tuple\"}],\"name\":\"verifyStaking\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes20\",\"name\":\"_owner\",\"type\":\"bytes20\"},{\"internalType\":\"uint256\",\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"votePowerCacheCleanup\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_from\",\"type\":\"address\"},{\"internalType\":\"bytes20\",\"name\":\"_nodeId\",\"type\":\"bytes20\"}],\"name\":\"votePowerFromTo\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_from\",\"type\":\"address\"},{\"internalType\":\"bytes20\",\"name\":\"_nodeId\",\"type\":\"bytes20\"},{\"internalType\":\"uint256\",\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"votePowerFromToAt\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes20\",\"name\":\"_owner\",\"type\":\"bytes20\"},{\"internalType\":\"uint256\",\"name\":\"_count\",\"type\":\"uint256\"}],\"name\":\"votePowerHistoryCleanup\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes20\",\"name\":\"_owner\",\"type\":\"bytes20\"}],\"name\":\"votePowerOf\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes20\",\"name\":\"_owner\",\"type\":\"bytes20\"},{\"internalType\":\"uint256\",\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"votePowerOfAt\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes20\",\"name\":\"_owner\",\"type\":\"bytes20\"},{\"internalType\":\"uint256\",\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"votePowerOfAtCached\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
+	ABI: "[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_governance\",\"type\":\"address\"},{\"internalType\":\"contractFlareDaemon\",\"name\":\"_flareDaemon\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_addressUpdater\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_maxUpdatesPerBlock\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"CreatedTotalSupplyCache\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes4\",\"name\":\"selector\",\"type\":\"bytes4\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"allowedAfterTimestamp\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"encodedCall\",\"type\":\"bytes\"}],\"name\":\"GovernanceCallTimelocked\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"initialGovernance\",\"type\":\"address\"}],\"name\":\"GovernanceInitialised\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"governanceSettings\",\"type\":\"address\"}],\"name\":\"GovernedProductionModeEntered\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"maxUpdatesPerBlock\",\"type\":\"uint256\"}],\"name\":\"MaxUpdatesPerBlockSet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"bytes20\",\"name\":\"nodeId\",\"type\":\"bytes20\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"pChainTxHash\",\"type\":\"bytes32\"}],\"name\":\"StakingConfirmed\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"bytes20\",\"name\":\"nodeId\",\"type\":\"bytes20\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"pChainTxHash\",\"type\":\"bytes32\"}],\"name\":\"StakingEnded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes4\",\"name\":\"selector\",\"type\":\"bytes4\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"timestamp\",\"type\":\"uint256\"}],\"name\":\"TimelockedGovernanceCallCanceled\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes4\",\"name\":\"selector\",\"type\":\"bytes4\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"timestamp\",\"type\":\"uint256\"}],\"name\":\"TimelockedGovernanceCallExecuted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes20\",\"name\":\"nodeId\",\"type\":\"bytes20\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"blockNumber\",\"type\":\"uint256\"}],\"name\":\"VotePowerCacheCreated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"bytes20\",\"name\":\"nodeId\",\"type\":\"bytes20\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"priorVotePower\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"newVotePower\",\"type\":\"uint256\"}],\"name\":\"VotePowerChanged\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"activate\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"active\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"addressBinder\",\"outputs\":[{\"internalType\":\"contractIAddressBinder\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_owner\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_count\",\"type\":\"uint256\"}],\"name\":\"balanceHistoryCleanup\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_owner\",\"type\":\"address\"}],\"name\":\"balanceOf\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_owner\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"balanceOfAt\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes20[]\",\"name\":\"_owners\",\"type\":\"bytes20[]\"},{\"internalType\":\"uint256\",\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"batchVotePowerOfAt\",\"outputs\":[{\"internalType\":\"uint256[]\",\"name\":\"_votePowers\",\"type\":\"uint256[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"_selector\",\"type\":\"bytes4\"}],\"name\":\"cancelGovernanceCall\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"cleanerContract\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"cleanupBlockNumber\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"cleanupBlockNumberManager\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"daemonize\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"deactivate\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"_selector\",\"type\":\"bytes4\"}],\"name\":\"executeGovernanceCall\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"flareDaemon\",\"outputs\":[{\"internalType\":\"contractFlareDaemon\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getAddressUpdater\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"_addressUpdater\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getContractName\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"governance\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"governanceSettings\",\"outputs\":[{\"internalType\":\"contractIGovernanceSettings\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_initialGovernance\",\"type\":\"address\"}],\"name\":\"initialise\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"lastTriggeredTimestamp\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"maxUpdatesPerBlock\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"productionMode\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_cleanerContract\",\"type\":\"address\"}],\"name\":\"setCleanerContract\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"setCleanupBlockNumber\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_maxUpdatesPerBlock\",\"type\":\"uint256\"}],\"name\":\"setMaxUpdatesPerBlock\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_owner\",\"type\":\"address\"}],\"name\":\"stakesOf\",\"outputs\":[{\"internalType\":\"bytes20[]\",\"name\":\"_nodeIds\",\"type\":\"bytes20[]\"},{\"internalType\":\"uint256[]\",\"name\":\"_amounts\",\"type\":\"uint256[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_owner\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"stakesOfAt\",\"outputs\":[{\"internalType\":\"bytes20[]\",\"name\":\"_nodeIds\",\"type\":\"bytes20[]\"},{\"internalType\":\"uint256[]\",\"name\":\"_amounts\",\"type\":\"uint256[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"switchToFallbackMode\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"switchToProductionMode\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"\",\"type\":\"bytes4\"}],\"name\":\"timelockedCalls\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"allowedAfterTimestamp\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"encodedCall\",\"type\":\"bytes\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"totalSupply\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"totalSupplyAt\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"totalSupplyCacheCleanup\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_count\",\"type\":\"uint256\"}],\"name\":\"totalSupplyHistoryCleanup\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"totalVotePower\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"totalVotePowerAt\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"totalVotePowerAtCached\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32[]\",\"name\":\"_contractNameHashes\",\"type\":\"bytes32[]\"},{\"internalType\":\"address[]\",\"name\":\"_contractAddresses\",\"type\":\"address[]\"}],\"name\":\"updateContractAddresses\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"verifier\",\"outputs\":[{\"internalType\":\"contractIIPChainStakeMirrorVerifier\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"epochId\",\"type\":\"uint256\"},{\"internalType\":\"uint64\",\"name\":\"blockNumber\",\"type\":\"uint64\"},{\"internalType\":\"bytes32\",\"name\":\"transactionHash\",\"type\":\"bytes32\"},{\"internalType\":\"uint8\",\"name\":\"transactionType\",\"type\":\"uint8\"},{\"internalType\":\"bytes20\",\"name\":\"nodeId\",\"type\":\"bytes20\"},{\"internalType\":\"uint64\",\"name\":\"startTime\",\"type\":\"uint64\"},{\"internalType\":\"uint64\",\"name\":\"endTime\",\"type\":\"uint64\"},{\"internalType\":\"uint64\",\"name\":\"weight\",\"type\":\"uint64\"},{\"internalType\":\"bytes20\",\"name\":\"sourceAddress\",\"type\":\"bytes20\"},{\"internalType\":\"uint64\",\"name\":\"feePercentage\",\"type\":\"uint64\"}],\"internalType\":\"structIIPChainStakeMirrorVerifier.PChainStake\",\"name\":\"_stakeData\",\"type\":\"tuple\"},{\"internalType\":\"bytes32[]\",\"name\":\"_merkleProof\",\"type\":\"bytes32[]\"}],\"name\":\"verifyStake\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes20\",\"name\":\"_nodeId\",\"type\":\"bytes20\"},{\"internalType\":\"uint256\",\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"votePowerCacheCleanup\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_owner\",\"type\":\"address\"},{\"internalType\":\"bytes20\",\"name\":\"_nodeId\",\"type\":\"bytes20\"}],\"name\":\"votePowerFromTo\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"_votePower\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_owner\",\"type\":\"address\"},{\"internalType\":\"bytes20\",\"name\":\"_nodeId\",\"type\":\"bytes20\"},{\"internalType\":\"uint256\",\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"votePowerFromToAt\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"_votePower\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes20\",\"name\":\"_nodeId\",\"type\":\"bytes20\"},{\"internalType\":\"uint256\",\"name\":\"_count\",\"type\":\"uint256\"}],\"name\":\"votePowerHistoryCleanup\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes20\",\"name\":\"_nodeId\",\"type\":\"bytes20\"}],\"name\":\"votePowerOf\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes20\",\"name\":\"_nodeId\",\"type\":\"bytes20\"},{\"internalType\":\"uint256\",\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"votePowerOfAt\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes20\",\"name\":\"_nodeId\",\"type\":\"bytes20\"},{\"internalType\":\"uint256\",\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"votePowerOfAtCached\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
 }
 
 // MirroringABI is the input ABI used to generate the binding from.
@@ -321,7 +320,7 @@ func (_Mirroring *MirroringCallerSession) BalanceOfAt(_owner common.Address, _bl
 
 // BatchVotePowerOfAt is a free data retrieval call binding the contract method 0xa9e70199.
 //
-// Solidity: function batchVotePowerOfAt(bytes20[] _owners, uint256 _blockNumber) view returns(uint256[])
+// Solidity: function batchVotePowerOfAt(bytes20[] _owners, uint256 _blockNumber) view returns(uint256[] _votePowers)
 func (_Mirroring *MirroringCaller) BatchVotePowerOfAt(opts *bind.CallOpts, _owners [][20]byte, _blockNumber *big.Int) ([]*big.Int, error) {
 	var out []interface{}
 	err := _Mirroring.contract.Call(opts, &out, "batchVotePowerOfAt", _owners, _blockNumber)
@@ -338,14 +337,14 @@ func (_Mirroring *MirroringCaller) BatchVotePowerOfAt(opts *bind.CallOpts, _owne
 
 // BatchVotePowerOfAt is a free data retrieval call binding the contract method 0xa9e70199.
 //
-// Solidity: function batchVotePowerOfAt(bytes20[] _owners, uint256 _blockNumber) view returns(uint256[])
+// Solidity: function batchVotePowerOfAt(bytes20[] _owners, uint256 _blockNumber) view returns(uint256[] _votePowers)
 func (_Mirroring *MirroringSession) BatchVotePowerOfAt(_owners [][20]byte, _blockNumber *big.Int) ([]*big.Int, error) {
 	return _Mirroring.Contract.BatchVotePowerOfAt(&_Mirroring.CallOpts, _owners, _blockNumber)
 }
 
 // BatchVotePowerOfAt is a free data retrieval call binding the contract method 0xa9e70199.
 //
-// Solidity: function batchVotePowerOfAt(bytes20[] _owners, uint256 _blockNumber) view returns(uint256[])
+// Solidity: function batchVotePowerOfAt(bytes20[] _owners, uint256 _blockNumber) view returns(uint256[] _votePowers)
 func (_Mirroring *MirroringCallerSession) BatchVotePowerOfAt(_owners [][20]byte, _blockNumber *big.Int) ([]*big.Int, error) {
 	return _Mirroring.Contract.BatchVotePowerOfAt(&_Mirroring.CallOpts, _owners, _blockNumber)
 }
@@ -660,68 +659,6 @@ func (_Mirroring *MirroringCallerSession) MaxUpdatesPerBlock() (*big.Int, error)
 	return _Mirroring.Contract.MaxUpdatesPerBlock(&_Mirroring.CallOpts)
 }
 
-// MerkleProofVerifier is a free data retrieval call binding the contract method 0xa0a09815.
-//
-// Solidity: function merkleProofVerifier() view returns(address)
-func (_Mirroring *MirroringCaller) MerkleProofVerifier(opts *bind.CallOpts) (common.Address, error) {
-	var out []interface{}
-	err := _Mirroring.contract.Call(opts, &out, "merkleProofVerifier")
-
-	if err != nil {
-		return *new(common.Address), err
-	}
-
-	out0 := *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
-
-	return out0, err
-
-}
-
-// MerkleProofVerifier is a free data retrieval call binding the contract method 0xa0a09815.
-//
-// Solidity: function merkleProofVerifier() view returns(address)
-func (_Mirroring *MirroringSession) MerkleProofVerifier() (common.Address, error) {
-	return _Mirroring.Contract.MerkleProofVerifier(&_Mirroring.CallOpts)
-}
-
-// MerkleProofVerifier is a free data retrieval call binding the contract method 0xa0a09815.
-//
-// Solidity: function merkleProofVerifier() view returns(address)
-func (_Mirroring *MirroringCallerSession) MerkleProofVerifier() (common.Address, error) {
-	return _Mirroring.Contract.MerkleProofVerifier(&_Mirroring.CallOpts)
-}
-
-// MinStakingVerificationAmountWei is a free data retrieval call binding the contract method 0x9172b663.
-//
-// Solidity: function minStakingVerificationAmountWei() view returns(uint256)
-func (_Mirroring *MirroringCaller) MinStakingVerificationAmountWei(opts *bind.CallOpts) (*big.Int, error) {
-	var out []interface{}
-	err := _Mirroring.contract.Call(opts, &out, "minStakingVerificationAmountWei")
-
-	if err != nil {
-		return *new(*big.Int), err
-	}
-
-	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
-
-	return out0, err
-
-}
-
-// MinStakingVerificationAmountWei is a free data retrieval call binding the contract method 0x9172b663.
-//
-// Solidity: function minStakingVerificationAmountWei() view returns(uint256)
-func (_Mirroring *MirroringSession) MinStakingVerificationAmountWei() (*big.Int, error) {
-	return _Mirroring.Contract.MinStakingVerificationAmountWei(&_Mirroring.CallOpts)
-}
-
-// MinStakingVerificationAmountWei is a free data retrieval call binding the contract method 0x9172b663.
-//
-// Solidity: function minStakingVerificationAmountWei() view returns(uint256)
-func (_Mirroring *MirroringCallerSession) MinStakingVerificationAmountWei() (*big.Int, error) {
-	return _Mirroring.Contract.MinStakingVerificationAmountWei(&_Mirroring.CallOpts)
-}
-
 // ProductionMode is a free data retrieval call binding the contract method 0xe17f212e.
 //
 // Solidity: function productionMode() view returns(bool)
@@ -751,6 +688,96 @@ func (_Mirroring *MirroringSession) ProductionMode() (bool, error) {
 // Solidity: function productionMode() view returns(bool)
 func (_Mirroring *MirroringCallerSession) ProductionMode() (bool, error) {
 	return _Mirroring.Contract.ProductionMode(&_Mirroring.CallOpts)
+}
+
+// StakesOf is a free data retrieval call binding the contract method 0x33b69c4c.
+//
+// Solidity: function stakesOf(address _owner) view returns(bytes20[] _nodeIds, uint256[] _amounts)
+func (_Mirroring *MirroringCaller) StakesOf(opts *bind.CallOpts, _owner common.Address) (struct {
+	NodeIds [][20]byte
+	Amounts []*big.Int
+}, error) {
+	var out []interface{}
+	err := _Mirroring.contract.Call(opts, &out, "stakesOf", _owner)
+
+	outstruct := new(struct {
+		NodeIds [][20]byte
+		Amounts []*big.Int
+	})
+	if err != nil {
+		return *outstruct, err
+	}
+
+	outstruct.NodeIds = *abi.ConvertType(out[0], new([][20]byte)).(*[][20]byte)
+	outstruct.Amounts = *abi.ConvertType(out[1], new([]*big.Int)).(*[]*big.Int)
+
+	return *outstruct, err
+
+}
+
+// StakesOf is a free data retrieval call binding the contract method 0x33b69c4c.
+//
+// Solidity: function stakesOf(address _owner) view returns(bytes20[] _nodeIds, uint256[] _amounts)
+func (_Mirroring *MirroringSession) StakesOf(_owner common.Address) (struct {
+	NodeIds [][20]byte
+	Amounts []*big.Int
+}, error) {
+	return _Mirroring.Contract.StakesOf(&_Mirroring.CallOpts, _owner)
+}
+
+// StakesOf is a free data retrieval call binding the contract method 0x33b69c4c.
+//
+// Solidity: function stakesOf(address _owner) view returns(bytes20[] _nodeIds, uint256[] _amounts)
+func (_Mirroring *MirroringCallerSession) StakesOf(_owner common.Address) (struct {
+	NodeIds [][20]byte
+	Amounts []*big.Int
+}, error) {
+	return _Mirroring.Contract.StakesOf(&_Mirroring.CallOpts, _owner)
+}
+
+// StakesOfAt is a free data retrieval call binding the contract method 0x4be91f32.
+//
+// Solidity: function stakesOfAt(address _owner, uint256 _blockNumber) view returns(bytes20[] _nodeIds, uint256[] _amounts)
+func (_Mirroring *MirroringCaller) StakesOfAt(opts *bind.CallOpts, _owner common.Address, _blockNumber *big.Int) (struct {
+	NodeIds [][20]byte
+	Amounts []*big.Int
+}, error) {
+	var out []interface{}
+	err := _Mirroring.contract.Call(opts, &out, "stakesOfAt", _owner, _blockNumber)
+
+	outstruct := new(struct {
+		NodeIds [][20]byte
+		Amounts []*big.Int
+	})
+	if err != nil {
+		return *outstruct, err
+	}
+
+	outstruct.NodeIds = *abi.ConvertType(out[0], new([][20]byte)).(*[][20]byte)
+	outstruct.Amounts = *abi.ConvertType(out[1], new([]*big.Int)).(*[]*big.Int)
+
+	return *outstruct, err
+
+}
+
+// StakesOfAt is a free data retrieval call binding the contract method 0x4be91f32.
+//
+// Solidity: function stakesOfAt(address _owner, uint256 _blockNumber) view returns(bytes20[] _nodeIds, uint256[] _amounts)
+func (_Mirroring *MirroringSession) StakesOfAt(_owner common.Address, _blockNumber *big.Int) (struct {
+	NodeIds [][20]byte
+	Amounts []*big.Int
+}, error) {
+	return _Mirroring.Contract.StakesOfAt(&_Mirroring.CallOpts, _owner, _blockNumber)
+}
+
+// StakesOfAt is a free data retrieval call binding the contract method 0x4be91f32.
+//
+// Solidity: function stakesOfAt(address _owner, uint256 _blockNumber) view returns(bytes20[] _nodeIds, uint256[] _amounts)
+func (_Mirroring *MirroringCallerSession) StakesOfAt(_owner common.Address, _blockNumber *big.Int) (struct {
+	NodeIds [][20]byte
+	Amounts []*big.Int
+}, error) {
+	return _Mirroring.Contract.StakesOfAt(&_Mirroring.CallOpts, _owner, _blockNumber)
 }
 
 // TimelockedCalls is a free data retrieval call binding the contract method 0x74e6310e.
@@ -922,12 +949,43 @@ func (_Mirroring *MirroringCallerSession) TotalVotePowerAt(_blockNumber *big.Int
 	return _Mirroring.Contract.TotalVotePowerAt(&_Mirroring.CallOpts, _blockNumber)
 }
 
+// Verifier is a free data retrieval call binding the contract method 0x2b7ac3f3.
+//
+// Solidity: function verifier() view returns(address)
+func (_Mirroring *MirroringCaller) Verifier(opts *bind.CallOpts) (common.Address, error) {
+	var out []interface{}
+	err := _Mirroring.contract.Call(opts, &out, "verifier")
+
+	if err != nil {
+		return *new(common.Address), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
+
+	return out0, err
+
+}
+
+// Verifier is a free data retrieval call binding the contract method 0x2b7ac3f3.
+//
+// Solidity: function verifier() view returns(address)
+func (_Mirroring *MirroringSession) Verifier() (common.Address, error) {
+	return _Mirroring.Contract.Verifier(&_Mirroring.CallOpts)
+}
+
+// Verifier is a free data retrieval call binding the contract method 0x2b7ac3f3.
+//
+// Solidity: function verifier() view returns(address)
+func (_Mirroring *MirroringCallerSession) Verifier() (common.Address, error) {
+	return _Mirroring.Contract.Verifier(&_Mirroring.CallOpts)
+}
+
 // VotePowerFromTo is a free data retrieval call binding the contract method 0x59c345f5.
 //
-// Solidity: function votePowerFromTo(address _from, bytes20 _nodeId) view returns(uint256)
-func (_Mirroring *MirroringCaller) VotePowerFromTo(opts *bind.CallOpts, _from common.Address, _nodeId [20]byte) (*big.Int, error) {
+// Solidity: function votePowerFromTo(address _owner, bytes20 _nodeId) view returns(uint256 _votePower)
+func (_Mirroring *MirroringCaller) VotePowerFromTo(opts *bind.CallOpts, _owner common.Address, _nodeId [20]byte) (*big.Int, error) {
 	var out []interface{}
-	err := _Mirroring.contract.Call(opts, &out, "votePowerFromTo", _from, _nodeId)
+	err := _Mirroring.contract.Call(opts, &out, "votePowerFromTo", _owner, _nodeId)
 
 	if err != nil {
 		return *new(*big.Int), err
@@ -941,24 +999,24 @@ func (_Mirroring *MirroringCaller) VotePowerFromTo(opts *bind.CallOpts, _from co
 
 // VotePowerFromTo is a free data retrieval call binding the contract method 0x59c345f5.
 //
-// Solidity: function votePowerFromTo(address _from, bytes20 _nodeId) view returns(uint256)
-func (_Mirroring *MirroringSession) VotePowerFromTo(_from common.Address, _nodeId [20]byte) (*big.Int, error) {
-	return _Mirroring.Contract.VotePowerFromTo(&_Mirroring.CallOpts, _from, _nodeId)
+// Solidity: function votePowerFromTo(address _owner, bytes20 _nodeId) view returns(uint256 _votePower)
+func (_Mirroring *MirroringSession) VotePowerFromTo(_owner common.Address, _nodeId [20]byte) (*big.Int, error) {
+	return _Mirroring.Contract.VotePowerFromTo(&_Mirroring.CallOpts, _owner, _nodeId)
 }
 
 // VotePowerFromTo is a free data retrieval call binding the contract method 0x59c345f5.
 //
-// Solidity: function votePowerFromTo(address _from, bytes20 _nodeId) view returns(uint256)
-func (_Mirroring *MirroringCallerSession) VotePowerFromTo(_from common.Address, _nodeId [20]byte) (*big.Int, error) {
-	return _Mirroring.Contract.VotePowerFromTo(&_Mirroring.CallOpts, _from, _nodeId)
+// Solidity: function votePowerFromTo(address _owner, bytes20 _nodeId) view returns(uint256 _votePower)
+func (_Mirroring *MirroringCallerSession) VotePowerFromTo(_owner common.Address, _nodeId [20]byte) (*big.Int, error) {
+	return _Mirroring.Contract.VotePowerFromTo(&_Mirroring.CallOpts, _owner, _nodeId)
 }
 
 // VotePowerFromToAt is a free data retrieval call binding the contract method 0x1f7ff2c7.
 //
-// Solidity: function votePowerFromToAt(address _from, bytes20 _nodeId, uint256 _blockNumber) view returns(uint256)
-func (_Mirroring *MirroringCaller) VotePowerFromToAt(opts *bind.CallOpts, _from common.Address, _nodeId [20]byte, _blockNumber *big.Int) (*big.Int, error) {
+// Solidity: function votePowerFromToAt(address _owner, bytes20 _nodeId, uint256 _blockNumber) view returns(uint256 _votePower)
+func (_Mirroring *MirroringCaller) VotePowerFromToAt(opts *bind.CallOpts, _owner common.Address, _nodeId [20]byte, _blockNumber *big.Int) (*big.Int, error) {
 	var out []interface{}
-	err := _Mirroring.contract.Call(opts, &out, "votePowerFromToAt", _from, _nodeId, _blockNumber)
+	err := _Mirroring.contract.Call(opts, &out, "votePowerFromToAt", _owner, _nodeId, _blockNumber)
 
 	if err != nil {
 		return *new(*big.Int), err
@@ -972,24 +1030,24 @@ func (_Mirroring *MirroringCaller) VotePowerFromToAt(opts *bind.CallOpts, _from 
 
 // VotePowerFromToAt is a free data retrieval call binding the contract method 0x1f7ff2c7.
 //
-// Solidity: function votePowerFromToAt(address _from, bytes20 _nodeId, uint256 _blockNumber) view returns(uint256)
-func (_Mirroring *MirroringSession) VotePowerFromToAt(_from common.Address, _nodeId [20]byte, _blockNumber *big.Int) (*big.Int, error) {
-	return _Mirroring.Contract.VotePowerFromToAt(&_Mirroring.CallOpts, _from, _nodeId, _blockNumber)
+// Solidity: function votePowerFromToAt(address _owner, bytes20 _nodeId, uint256 _blockNumber) view returns(uint256 _votePower)
+func (_Mirroring *MirroringSession) VotePowerFromToAt(_owner common.Address, _nodeId [20]byte, _blockNumber *big.Int) (*big.Int, error) {
+	return _Mirroring.Contract.VotePowerFromToAt(&_Mirroring.CallOpts, _owner, _nodeId, _blockNumber)
 }
 
 // VotePowerFromToAt is a free data retrieval call binding the contract method 0x1f7ff2c7.
 //
-// Solidity: function votePowerFromToAt(address _from, bytes20 _nodeId, uint256 _blockNumber) view returns(uint256)
-func (_Mirroring *MirroringCallerSession) VotePowerFromToAt(_from common.Address, _nodeId [20]byte, _blockNumber *big.Int) (*big.Int, error) {
-	return _Mirroring.Contract.VotePowerFromToAt(&_Mirroring.CallOpts, _from, _nodeId, _blockNumber)
+// Solidity: function votePowerFromToAt(address _owner, bytes20 _nodeId, uint256 _blockNumber) view returns(uint256 _votePower)
+func (_Mirroring *MirroringCallerSession) VotePowerFromToAt(_owner common.Address, _nodeId [20]byte, _blockNumber *big.Int) (*big.Int, error) {
+	return _Mirroring.Contract.VotePowerFromToAt(&_Mirroring.CallOpts, _owner, _nodeId, _blockNumber)
 }
 
 // VotePowerOf is a free data retrieval call binding the contract method 0xb4eb2a81.
 //
-// Solidity: function votePowerOf(bytes20 _owner) view returns(uint256)
-func (_Mirroring *MirroringCaller) VotePowerOf(opts *bind.CallOpts, _owner [20]byte) (*big.Int, error) {
+// Solidity: function votePowerOf(bytes20 _nodeId) view returns(uint256)
+func (_Mirroring *MirroringCaller) VotePowerOf(opts *bind.CallOpts, _nodeId [20]byte) (*big.Int, error) {
 	var out []interface{}
-	err := _Mirroring.contract.Call(opts, &out, "votePowerOf", _owner)
+	err := _Mirroring.contract.Call(opts, &out, "votePowerOf", _nodeId)
 
 	if err != nil {
 		return *new(*big.Int), err
@@ -1003,24 +1061,24 @@ func (_Mirroring *MirroringCaller) VotePowerOf(opts *bind.CallOpts, _owner [20]b
 
 // VotePowerOf is a free data retrieval call binding the contract method 0xb4eb2a81.
 //
-// Solidity: function votePowerOf(bytes20 _owner) view returns(uint256)
-func (_Mirroring *MirroringSession) VotePowerOf(_owner [20]byte) (*big.Int, error) {
-	return _Mirroring.Contract.VotePowerOf(&_Mirroring.CallOpts, _owner)
+// Solidity: function votePowerOf(bytes20 _nodeId) view returns(uint256)
+func (_Mirroring *MirroringSession) VotePowerOf(_nodeId [20]byte) (*big.Int, error) {
+	return _Mirroring.Contract.VotePowerOf(&_Mirroring.CallOpts, _nodeId)
 }
 
 // VotePowerOf is a free data retrieval call binding the contract method 0xb4eb2a81.
 //
-// Solidity: function votePowerOf(bytes20 _owner) view returns(uint256)
-func (_Mirroring *MirroringCallerSession) VotePowerOf(_owner [20]byte) (*big.Int, error) {
-	return _Mirroring.Contract.VotePowerOf(&_Mirroring.CallOpts, _owner)
+// Solidity: function votePowerOf(bytes20 _nodeId) view returns(uint256)
+func (_Mirroring *MirroringCallerSession) VotePowerOf(_nodeId [20]byte) (*big.Int, error) {
+	return _Mirroring.Contract.VotePowerOf(&_Mirroring.CallOpts, _nodeId)
 }
 
 // VotePowerOfAt is a free data retrieval call binding the contract method 0x46431374.
 //
-// Solidity: function votePowerOfAt(bytes20 _owner, uint256 _blockNumber) view returns(uint256)
-func (_Mirroring *MirroringCaller) VotePowerOfAt(opts *bind.CallOpts, _owner [20]byte, _blockNumber *big.Int) (*big.Int, error) {
+// Solidity: function votePowerOfAt(bytes20 _nodeId, uint256 _blockNumber) view returns(uint256)
+func (_Mirroring *MirroringCaller) VotePowerOfAt(opts *bind.CallOpts, _nodeId [20]byte, _blockNumber *big.Int) (*big.Int, error) {
 	var out []interface{}
-	err := _Mirroring.contract.Call(opts, &out, "votePowerOfAt", _owner, _blockNumber)
+	err := _Mirroring.contract.Call(opts, &out, "votePowerOfAt", _nodeId, _blockNumber)
 
 	if err != nil {
 		return *new(*big.Int), err
@@ -1034,16 +1092,16 @@ func (_Mirroring *MirroringCaller) VotePowerOfAt(opts *bind.CallOpts, _owner [20
 
 // VotePowerOfAt is a free data retrieval call binding the contract method 0x46431374.
 //
-// Solidity: function votePowerOfAt(bytes20 _owner, uint256 _blockNumber) view returns(uint256)
-func (_Mirroring *MirroringSession) VotePowerOfAt(_owner [20]byte, _blockNumber *big.Int) (*big.Int, error) {
-	return _Mirroring.Contract.VotePowerOfAt(&_Mirroring.CallOpts, _owner, _blockNumber)
+// Solidity: function votePowerOfAt(bytes20 _nodeId, uint256 _blockNumber) view returns(uint256)
+func (_Mirroring *MirroringSession) VotePowerOfAt(_nodeId [20]byte, _blockNumber *big.Int) (*big.Int, error) {
+	return _Mirroring.Contract.VotePowerOfAt(&_Mirroring.CallOpts, _nodeId, _blockNumber)
 }
 
 // VotePowerOfAt is a free data retrieval call binding the contract method 0x46431374.
 //
-// Solidity: function votePowerOfAt(bytes20 _owner, uint256 _blockNumber) view returns(uint256)
-func (_Mirroring *MirroringCallerSession) VotePowerOfAt(_owner [20]byte, _blockNumber *big.Int) (*big.Int, error) {
-	return _Mirroring.Contract.VotePowerOfAt(&_Mirroring.CallOpts, _owner, _blockNumber)
+// Solidity: function votePowerOfAt(bytes20 _nodeId, uint256 _blockNumber) view returns(uint256)
+func (_Mirroring *MirroringCallerSession) VotePowerOfAt(_nodeId [20]byte, _blockNumber *big.Int) (*big.Int, error) {
+	return _Mirroring.Contract.VotePowerOfAt(&_Mirroring.CallOpts, _nodeId, _blockNumber)
 }
 
 // Activate is a paid mutator transaction binding the contract method 0x0f15f4c0.
@@ -1256,27 +1314,6 @@ func (_Mirroring *MirroringTransactorSession) SetMaxUpdatesPerBlock(_maxUpdatesP
 	return _Mirroring.Contract.SetMaxUpdatesPerBlock(&_Mirroring.TransactOpts, _maxUpdatesPerBlock)
 }
 
-// SetMinStakingVerificationAmount is a paid mutator transaction binding the contract method 0x750a173f.
-//
-// Solidity: function setMinStakingVerificationAmount(uint256 _minStakingVerificationAmountWei) returns()
-func (_Mirroring *MirroringTransactor) SetMinStakingVerificationAmount(opts *bind.TransactOpts, _minStakingVerificationAmountWei *big.Int) (*types.Transaction, error) {
-	return _Mirroring.contract.Transact(opts, "setMinStakingVerificationAmount", _minStakingVerificationAmountWei)
-}
-
-// SetMinStakingVerificationAmount is a paid mutator transaction binding the contract method 0x750a173f.
-//
-// Solidity: function setMinStakingVerificationAmount(uint256 _minStakingVerificationAmountWei) returns()
-func (_Mirroring *MirroringSession) SetMinStakingVerificationAmount(_minStakingVerificationAmountWei *big.Int) (*types.Transaction, error) {
-	return _Mirroring.Contract.SetMinStakingVerificationAmount(&_Mirroring.TransactOpts, _minStakingVerificationAmountWei)
-}
-
-// SetMinStakingVerificationAmount is a paid mutator transaction binding the contract method 0x750a173f.
-//
-// Solidity: function setMinStakingVerificationAmount(uint256 _minStakingVerificationAmountWei) returns()
-func (_Mirroring *MirroringTransactorSession) SetMinStakingVerificationAmount(_minStakingVerificationAmountWei *big.Int) (*types.Transaction, error) {
-	return _Mirroring.Contract.SetMinStakingVerificationAmount(&_Mirroring.TransactOpts, _minStakingVerificationAmountWei)
-}
-
 // SwitchToFallbackMode is a paid mutator transaction binding the contract method 0xe22fdece.
 //
 // Solidity: function switchToFallbackMode() returns(bool)
@@ -1403,88 +1440,88 @@ func (_Mirroring *MirroringTransactorSession) UpdateContractAddresses(_contractN
 	return _Mirroring.Contract.UpdateContractAddresses(&_Mirroring.TransactOpts, _contractNameHashes, _contractAddresses)
 }
 
-// VerifyStaking is a paid mutator transaction binding the contract method 0x1fbff7b6.
+// VerifyStake is a paid mutator transaction binding the contract method 0x9a762ebe.
 //
-// Solidity: function verifyStaking((uint256,bytes32[],uint64,bytes32,uint8,bytes20,uint64,uint64,uint64,bytes20,uint64) _stakingProof) returns()
-func (_Mirroring *MirroringTransactor) VerifyStaking(opts *bind.TransactOpts, _stakingProof MerkleProofVerifierPChainStaking) (*types.Transaction, error) {
-	return _Mirroring.contract.Transact(opts, "verifyStaking", _stakingProof)
+// Solidity: function verifyStake((uint256,uint64,bytes32,uint8,bytes20,uint64,uint64,uint64,bytes20,uint64) _stakeData, bytes32[] _merkleProof) returns()
+func (_Mirroring *MirroringTransactor) VerifyStake(opts *bind.TransactOpts, _stakeData IIPChainStakeMirrorVerifierPChainStake, _merkleProof [][32]byte) (*types.Transaction, error) {
+	return _Mirroring.contract.Transact(opts, "verifyStake", _stakeData, _merkleProof)
 }
 
-// VerifyStaking is a paid mutator transaction binding the contract method 0x1fbff7b6.
+// VerifyStake is a paid mutator transaction binding the contract method 0x9a762ebe.
 //
-// Solidity: function verifyStaking((uint256,bytes32[],uint64,bytes32,uint8,bytes20,uint64,uint64,uint64,bytes20,uint64) _stakingProof) returns()
-func (_Mirroring *MirroringSession) VerifyStaking(_stakingProof MerkleProofVerifierPChainStaking) (*types.Transaction, error) {
-	return _Mirroring.Contract.VerifyStaking(&_Mirroring.TransactOpts, _stakingProof)
+// Solidity: function verifyStake((uint256,uint64,bytes32,uint8,bytes20,uint64,uint64,uint64,bytes20,uint64) _stakeData, bytes32[] _merkleProof) returns()
+func (_Mirroring *MirroringSession) VerifyStake(_stakeData IIPChainStakeMirrorVerifierPChainStake, _merkleProof [][32]byte) (*types.Transaction, error) {
+	return _Mirroring.Contract.VerifyStake(&_Mirroring.TransactOpts, _stakeData, _merkleProof)
 }
 
-// VerifyStaking is a paid mutator transaction binding the contract method 0x1fbff7b6.
+// VerifyStake is a paid mutator transaction binding the contract method 0x9a762ebe.
 //
-// Solidity: function verifyStaking((uint256,bytes32[],uint64,bytes32,uint8,bytes20,uint64,uint64,uint64,bytes20,uint64) _stakingProof) returns()
-func (_Mirroring *MirroringTransactorSession) VerifyStaking(_stakingProof MerkleProofVerifierPChainStaking) (*types.Transaction, error) {
-	return _Mirroring.Contract.VerifyStaking(&_Mirroring.TransactOpts, _stakingProof)
-}
-
-// VotePowerCacheCleanup is a paid mutator transaction binding the contract method 0xa2e96264.
-//
-// Solidity: function votePowerCacheCleanup(bytes20 _owner, uint256 _blockNumber) returns(uint256)
-func (_Mirroring *MirroringTransactor) VotePowerCacheCleanup(opts *bind.TransactOpts, _owner [20]byte, _blockNumber *big.Int) (*types.Transaction, error) {
-	return _Mirroring.contract.Transact(opts, "votePowerCacheCleanup", _owner, _blockNumber)
+// Solidity: function verifyStake((uint256,uint64,bytes32,uint8,bytes20,uint64,uint64,uint64,bytes20,uint64) _stakeData, bytes32[] _merkleProof) returns()
+func (_Mirroring *MirroringTransactorSession) VerifyStake(_stakeData IIPChainStakeMirrorVerifierPChainStake, _merkleProof [][32]byte) (*types.Transaction, error) {
+	return _Mirroring.Contract.VerifyStake(&_Mirroring.TransactOpts, _stakeData, _merkleProof)
 }
 
 // VotePowerCacheCleanup is a paid mutator transaction binding the contract method 0xa2e96264.
 //
-// Solidity: function votePowerCacheCleanup(bytes20 _owner, uint256 _blockNumber) returns(uint256)
-func (_Mirroring *MirroringSession) VotePowerCacheCleanup(_owner [20]byte, _blockNumber *big.Int) (*types.Transaction, error) {
-	return _Mirroring.Contract.VotePowerCacheCleanup(&_Mirroring.TransactOpts, _owner, _blockNumber)
+// Solidity: function votePowerCacheCleanup(bytes20 _nodeId, uint256 _blockNumber) returns(uint256)
+func (_Mirroring *MirroringTransactor) VotePowerCacheCleanup(opts *bind.TransactOpts, _nodeId [20]byte, _blockNumber *big.Int) (*types.Transaction, error) {
+	return _Mirroring.contract.Transact(opts, "votePowerCacheCleanup", _nodeId, _blockNumber)
 }
 
 // VotePowerCacheCleanup is a paid mutator transaction binding the contract method 0xa2e96264.
 //
-// Solidity: function votePowerCacheCleanup(bytes20 _owner, uint256 _blockNumber) returns(uint256)
-func (_Mirroring *MirroringTransactorSession) VotePowerCacheCleanup(_owner [20]byte, _blockNumber *big.Int) (*types.Transaction, error) {
-	return _Mirroring.Contract.VotePowerCacheCleanup(&_Mirroring.TransactOpts, _owner, _blockNumber)
+// Solidity: function votePowerCacheCleanup(bytes20 _nodeId, uint256 _blockNumber) returns(uint256)
+func (_Mirroring *MirroringSession) VotePowerCacheCleanup(_nodeId [20]byte, _blockNumber *big.Int) (*types.Transaction, error) {
+	return _Mirroring.Contract.VotePowerCacheCleanup(&_Mirroring.TransactOpts, _nodeId, _blockNumber)
+}
+
+// VotePowerCacheCleanup is a paid mutator transaction binding the contract method 0xa2e96264.
+//
+// Solidity: function votePowerCacheCleanup(bytes20 _nodeId, uint256 _blockNumber) returns(uint256)
+func (_Mirroring *MirroringTransactorSession) VotePowerCacheCleanup(_nodeId [20]byte, _blockNumber *big.Int) (*types.Transaction, error) {
+	return _Mirroring.Contract.VotePowerCacheCleanup(&_Mirroring.TransactOpts, _nodeId, _blockNumber)
 }
 
 // VotePowerHistoryCleanup is a paid mutator transaction binding the contract method 0x119b923a.
 //
-// Solidity: function votePowerHistoryCleanup(bytes20 _owner, uint256 _count) returns(uint256)
-func (_Mirroring *MirroringTransactor) VotePowerHistoryCleanup(opts *bind.TransactOpts, _owner [20]byte, _count *big.Int) (*types.Transaction, error) {
-	return _Mirroring.contract.Transact(opts, "votePowerHistoryCleanup", _owner, _count)
+// Solidity: function votePowerHistoryCleanup(bytes20 _nodeId, uint256 _count) returns(uint256)
+func (_Mirroring *MirroringTransactor) VotePowerHistoryCleanup(opts *bind.TransactOpts, _nodeId [20]byte, _count *big.Int) (*types.Transaction, error) {
+	return _Mirroring.contract.Transact(opts, "votePowerHistoryCleanup", _nodeId, _count)
 }
 
 // VotePowerHistoryCleanup is a paid mutator transaction binding the contract method 0x119b923a.
 //
-// Solidity: function votePowerHistoryCleanup(bytes20 _owner, uint256 _count) returns(uint256)
-func (_Mirroring *MirroringSession) VotePowerHistoryCleanup(_owner [20]byte, _count *big.Int) (*types.Transaction, error) {
-	return _Mirroring.Contract.VotePowerHistoryCleanup(&_Mirroring.TransactOpts, _owner, _count)
+// Solidity: function votePowerHistoryCleanup(bytes20 _nodeId, uint256 _count) returns(uint256)
+func (_Mirroring *MirroringSession) VotePowerHistoryCleanup(_nodeId [20]byte, _count *big.Int) (*types.Transaction, error) {
+	return _Mirroring.Contract.VotePowerHistoryCleanup(&_Mirroring.TransactOpts, _nodeId, _count)
 }
 
 // VotePowerHistoryCleanup is a paid mutator transaction binding the contract method 0x119b923a.
 //
-// Solidity: function votePowerHistoryCleanup(bytes20 _owner, uint256 _count) returns(uint256)
-func (_Mirroring *MirroringTransactorSession) VotePowerHistoryCleanup(_owner [20]byte, _count *big.Int) (*types.Transaction, error) {
-	return _Mirroring.Contract.VotePowerHistoryCleanup(&_Mirroring.TransactOpts, _owner, _count)
+// Solidity: function votePowerHistoryCleanup(bytes20 _nodeId, uint256 _count) returns(uint256)
+func (_Mirroring *MirroringTransactorSession) VotePowerHistoryCleanup(_nodeId [20]byte, _count *big.Int) (*types.Transaction, error) {
+	return _Mirroring.Contract.VotePowerHistoryCleanup(&_Mirroring.TransactOpts, _nodeId, _count)
 }
 
 // VotePowerOfAtCached is a paid mutator transaction binding the contract method 0xbd61ffee.
 //
-// Solidity: function votePowerOfAtCached(bytes20 _owner, uint256 _blockNumber) returns(uint256)
-func (_Mirroring *MirroringTransactor) VotePowerOfAtCached(opts *bind.TransactOpts, _owner [20]byte, _blockNumber *big.Int) (*types.Transaction, error) {
-	return _Mirroring.contract.Transact(opts, "votePowerOfAtCached", _owner, _blockNumber)
+// Solidity: function votePowerOfAtCached(bytes20 _nodeId, uint256 _blockNumber) returns(uint256)
+func (_Mirroring *MirroringTransactor) VotePowerOfAtCached(opts *bind.TransactOpts, _nodeId [20]byte, _blockNumber *big.Int) (*types.Transaction, error) {
+	return _Mirroring.contract.Transact(opts, "votePowerOfAtCached", _nodeId, _blockNumber)
 }
 
 // VotePowerOfAtCached is a paid mutator transaction binding the contract method 0xbd61ffee.
 //
-// Solidity: function votePowerOfAtCached(bytes20 _owner, uint256 _blockNumber) returns(uint256)
-func (_Mirroring *MirroringSession) VotePowerOfAtCached(_owner [20]byte, _blockNumber *big.Int) (*types.Transaction, error) {
-	return _Mirroring.Contract.VotePowerOfAtCached(&_Mirroring.TransactOpts, _owner, _blockNumber)
+// Solidity: function votePowerOfAtCached(bytes20 _nodeId, uint256 _blockNumber) returns(uint256)
+func (_Mirroring *MirroringSession) VotePowerOfAtCached(_nodeId [20]byte, _blockNumber *big.Int) (*types.Transaction, error) {
+	return _Mirroring.Contract.VotePowerOfAtCached(&_Mirroring.TransactOpts, _nodeId, _blockNumber)
 }
 
 // VotePowerOfAtCached is a paid mutator transaction binding the contract method 0xbd61ffee.
 //
-// Solidity: function votePowerOfAtCached(bytes20 _owner, uint256 _blockNumber) returns(uint256)
-func (_Mirroring *MirroringTransactorSession) VotePowerOfAtCached(_owner [20]byte, _blockNumber *big.Int) (*types.Transaction, error) {
-	return _Mirroring.Contract.VotePowerOfAtCached(&_Mirroring.TransactOpts, _owner, _blockNumber)
+// Solidity: function votePowerOfAtCached(bytes20 _nodeId, uint256 _blockNumber) returns(uint256)
+func (_Mirroring *MirroringTransactorSession) VotePowerOfAtCached(_nodeId [20]byte, _blockNumber *big.Int) (*types.Transaction, error) {
+	return _Mirroring.Contract.VotePowerOfAtCached(&_Mirroring.TransactOpts, _nodeId, _blockNumber)
 }
 
 // MirroringCreatedTotalSupplyCacheIterator is returned from FilterCreatedTotalSupplyCache and is used to iterate over the raw logs and unpacked data for CreatedTotalSupplyCache events raised by the Mirroring contract.
@@ -1615,296 +1652,6 @@ func (_Mirroring *MirroringFilterer) WatchCreatedTotalSupplyCache(opts *bind.Wat
 func (_Mirroring *MirroringFilterer) ParseCreatedTotalSupplyCache(log types.Log) (*MirroringCreatedTotalSupplyCache, error) {
 	event := new(MirroringCreatedTotalSupplyCache)
 	if err := _Mirroring.contract.UnpackLog(event, "CreatedTotalSupplyCache", log); err != nil {
-		return nil, err
-	}
-	event.Raw = log
-	return event, nil
-}
-
-// MirroringCreatedVotePowerCacheIterator is returned from FilterCreatedVotePowerCache and is used to iterate over the raw logs and unpacked data for CreatedVotePowerCache events raised by the Mirroring contract.
-type MirroringCreatedVotePowerCacheIterator struct {
-	Event *MirroringCreatedVotePowerCache // Event containing the contract specifics and raw log
-
-	contract *bind.BoundContract // Generic contract to use for unpacking event data
-	event    string              // Event name to use for unpacking event data
-
-	logs chan types.Log        // Log channel receiving the found contract events
-	sub  ethereum.Subscription // Subscription for errors, completion and termination
-	done bool                  // Whether the subscription completed delivering logs
-	fail error                 // Occurred error to stop iteration
-}
-
-// Next advances the iterator to the subsequent event, returning whether there
-// are any more events found. In case of a retrieval or parsing error, false is
-// returned and Error() can be queried for the exact failure.
-func (it *MirroringCreatedVotePowerCacheIterator) Next() bool {
-	// If the iterator failed, stop iterating
-	if it.fail != nil {
-		return false
-	}
-	// If the iterator completed, deliver directly whatever's available
-	if it.done {
-		select {
-		case log := <-it.logs:
-			it.Event = new(MirroringCreatedVotePowerCache)
-			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-				it.fail = err
-				return false
-			}
-			it.Event.Raw = log
-			return true
-
-		default:
-			return false
-		}
-	}
-	// Iterator still in progress, wait for either a data or an error event
-	select {
-	case log := <-it.logs:
-		it.Event = new(MirroringCreatedVotePowerCache)
-		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-			it.fail = err
-			return false
-		}
-		it.Event.Raw = log
-		return true
-
-	case err := <-it.sub.Err():
-		it.done = true
-		it.fail = err
-		return it.Next()
-	}
-}
-
-// Error returns any retrieval or parsing error occurred during filtering.
-func (it *MirroringCreatedVotePowerCacheIterator) Error() error {
-	return it.fail
-}
-
-// Close terminates the iteration process, releasing any pending underlying
-// resources.
-func (it *MirroringCreatedVotePowerCacheIterator) Close() error {
-	it.sub.Unsubscribe()
-	return nil
-}
-
-// MirroringCreatedVotePowerCache represents a CreatedVotePowerCache event raised by the Mirroring contract.
-type MirroringCreatedVotePowerCache struct {
-	Owner       [20]byte
-	BlockNumber *big.Int
-	Raw         types.Log // Blockchain specific contextual infos
-}
-
-// FilterCreatedVotePowerCache is a free log retrieval operation binding the contract event 0x15baf7b27197e52b8fa6888d706e11af9d71fc430c84a1f8c788646f762a3c97.
-//
-// Solidity: event CreatedVotePowerCache(bytes20 _owner, uint256 _blockNumber)
-func (_Mirroring *MirroringFilterer) FilterCreatedVotePowerCache(opts *bind.FilterOpts) (*MirroringCreatedVotePowerCacheIterator, error) {
-
-	logs, sub, err := _Mirroring.contract.FilterLogs(opts, "CreatedVotePowerCache")
-	if err != nil {
-		return nil, err
-	}
-	return &MirroringCreatedVotePowerCacheIterator{contract: _Mirroring.contract, event: "CreatedVotePowerCache", logs: logs, sub: sub}, nil
-}
-
-// WatchCreatedVotePowerCache is a free log subscription operation binding the contract event 0x15baf7b27197e52b8fa6888d706e11af9d71fc430c84a1f8c788646f762a3c97.
-//
-// Solidity: event CreatedVotePowerCache(bytes20 _owner, uint256 _blockNumber)
-func (_Mirroring *MirroringFilterer) WatchCreatedVotePowerCache(opts *bind.WatchOpts, sink chan<- *MirroringCreatedVotePowerCache) (event.Subscription, error) {
-
-	logs, sub, err := _Mirroring.contract.WatchLogs(opts, "CreatedVotePowerCache")
-	if err != nil {
-		return nil, err
-	}
-	return event.NewSubscription(func(quit <-chan struct{}) error {
-		defer sub.Unsubscribe()
-		for {
-			select {
-			case log := <-logs:
-				// New log arrived, parse the event and forward to the user
-				event := new(MirroringCreatedVotePowerCache)
-				if err := _Mirroring.contract.UnpackLog(event, "CreatedVotePowerCache", log); err != nil {
-					return err
-				}
-				event.Raw = log
-
-				select {
-				case sink <- event:
-				case err := <-sub.Err():
-					return err
-				case <-quit:
-					return nil
-				}
-			case err := <-sub.Err():
-				return err
-			case <-quit:
-				return nil
-			}
-		}
-	}), nil
-}
-
-// ParseCreatedVotePowerCache is a log parse operation binding the contract event 0x15baf7b27197e52b8fa6888d706e11af9d71fc430c84a1f8c788646f762a3c97.
-//
-// Solidity: event CreatedVotePowerCache(bytes20 _owner, uint256 _blockNumber)
-func (_Mirroring *MirroringFilterer) ParseCreatedVotePowerCache(log types.Log) (*MirroringCreatedVotePowerCache, error) {
-	event := new(MirroringCreatedVotePowerCache)
-	if err := _Mirroring.contract.UnpackLog(event, "CreatedVotePowerCache", log); err != nil {
-		return nil, err
-	}
-	event.Raw = log
-	return event, nil
-}
-
-// MirroringDelegationChangedIterator is returned from FilterDelegationChanged and is used to iterate over the raw logs and unpacked data for DelegationChanged events raised by the Mirroring contract.
-type MirroringDelegationChangedIterator struct {
-	Event *MirroringDelegationChanged // Event containing the contract specifics and raw log
-
-	contract *bind.BoundContract // Generic contract to use for unpacking event data
-	event    string              // Event name to use for unpacking event data
-
-	logs chan types.Log        // Log channel receiving the found contract events
-	sub  ethereum.Subscription // Subscription for errors, completion and termination
-	done bool                  // Whether the subscription completed delivering logs
-	fail error                 // Occurred error to stop iteration
-}
-
-// Next advances the iterator to the subsequent event, returning whether there
-// are any more events found. In case of a retrieval or parsing error, false is
-// returned and Error() can be queried for the exact failure.
-func (it *MirroringDelegationChangedIterator) Next() bool {
-	// If the iterator failed, stop iterating
-	if it.fail != nil {
-		return false
-	}
-	// If the iterator completed, deliver directly whatever's available
-	if it.done {
-		select {
-		case log := <-it.logs:
-			it.Event = new(MirroringDelegationChanged)
-			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-				it.fail = err
-				return false
-			}
-			it.Event.Raw = log
-			return true
-
-		default:
-			return false
-		}
-	}
-	// Iterator still in progress, wait for either a data or an error event
-	select {
-	case log := <-it.logs:
-		it.Event = new(MirroringDelegationChanged)
-		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-			it.fail = err
-			return false
-		}
-		it.Event.Raw = log
-		return true
-
-	case err := <-it.sub.Err():
-		it.done = true
-		it.fail = err
-		return it.Next()
-	}
-}
-
-// Error returns any retrieval or parsing error occurred during filtering.
-func (it *MirroringDelegationChangedIterator) Error() error {
-	return it.fail
-}
-
-// Close terminates the iteration process, releasing any pending underlying
-// resources.
-func (it *MirroringDelegationChangedIterator) Close() error {
-	it.sub.Unsubscribe()
-	return nil
-}
-
-// MirroringDelegationChanged represents a DelegationChanged event raised by the Mirroring contract.
-type MirroringDelegationChanged struct {
-	From           common.Address
-	NodeId         [20]byte
-	PriorVotePower *big.Int
-	NewVotePower   *big.Int
-	Raw            types.Log // Blockchain specific contextual infos
-}
-
-// FilterDelegationChanged is a free log retrieval operation binding the contract event 0x89433a27b9ec3e18ff889108b7b9103ae9218ff53bdd6520d28d479045235783.
-//
-// Solidity: event DelegationChanged(address indexed from, bytes20 indexed nodeId, uint256 priorVotePower, uint256 newVotePower)
-func (_Mirroring *MirroringFilterer) FilterDelegationChanged(opts *bind.FilterOpts, from []common.Address, nodeId [][20]byte) (*MirroringDelegationChangedIterator, error) {
-
-	var fromRule []interface{}
-	for _, fromItem := range from {
-		fromRule = append(fromRule, fromItem)
-	}
-	var nodeIdRule []interface{}
-	for _, nodeIdItem := range nodeId {
-		nodeIdRule = append(nodeIdRule, nodeIdItem)
-	}
-
-	logs, sub, err := _Mirroring.contract.FilterLogs(opts, "DelegationChanged", fromRule, nodeIdRule)
-	if err != nil {
-		return nil, err
-	}
-	return &MirroringDelegationChangedIterator{contract: _Mirroring.contract, event: "DelegationChanged", logs: logs, sub: sub}, nil
-}
-
-// WatchDelegationChanged is a free log subscription operation binding the contract event 0x89433a27b9ec3e18ff889108b7b9103ae9218ff53bdd6520d28d479045235783.
-//
-// Solidity: event DelegationChanged(address indexed from, bytes20 indexed nodeId, uint256 priorVotePower, uint256 newVotePower)
-func (_Mirroring *MirroringFilterer) WatchDelegationChanged(opts *bind.WatchOpts, sink chan<- *MirroringDelegationChanged, from []common.Address, nodeId [][20]byte) (event.Subscription, error) {
-
-	var fromRule []interface{}
-	for _, fromItem := range from {
-		fromRule = append(fromRule, fromItem)
-	}
-	var nodeIdRule []interface{}
-	for _, nodeIdItem := range nodeId {
-		nodeIdRule = append(nodeIdRule, nodeIdItem)
-	}
-
-	logs, sub, err := _Mirroring.contract.WatchLogs(opts, "DelegationChanged", fromRule, nodeIdRule)
-	if err != nil {
-		return nil, err
-	}
-	return event.NewSubscription(func(quit <-chan struct{}) error {
-		defer sub.Unsubscribe()
-		for {
-			select {
-			case log := <-logs:
-				// New log arrived, parse the event and forward to the user
-				event := new(MirroringDelegationChanged)
-				if err := _Mirroring.contract.UnpackLog(event, "DelegationChanged", log); err != nil {
-					return err
-				}
-				event.Raw = log
-
-				select {
-				case sink <- event:
-				case err := <-sub.Err():
-					return err
-				case <-quit:
-					return nil
-				}
-			case err := <-sub.Err():
-				return err
-			case <-quit:
-				return nil
-			}
-		}
-	}), nil
-}
-
-// ParseDelegationChanged is a log parse operation binding the contract event 0x89433a27b9ec3e18ff889108b7b9103ae9218ff53bdd6520d28d479045235783.
-//
-// Solidity: event DelegationChanged(address indexed from, bytes20 indexed nodeId, uint256 priorVotePower, uint256 newVotePower)
-func (_Mirroring *MirroringFilterer) ParseDelegationChanged(log types.Log) (*MirroringDelegationChanged, error) {
-	event := new(MirroringDelegationChanged)
-	if err := _Mirroring.contract.UnpackLog(event, "DelegationChanged", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log
@@ -2443,140 +2190,6 @@ func (_Mirroring *MirroringFilterer) WatchMaxUpdatesPerBlockSet(opts *bind.Watch
 func (_Mirroring *MirroringFilterer) ParseMaxUpdatesPerBlockSet(log types.Log) (*MirroringMaxUpdatesPerBlockSet, error) {
 	event := new(MirroringMaxUpdatesPerBlockSet)
 	if err := _Mirroring.contract.UnpackLog(event, "MaxUpdatesPerBlockSet", log); err != nil {
-		return nil, err
-	}
-	event.Raw = log
-	return event, nil
-}
-
-// MirroringMinStakingVerificationAmountSetIterator is returned from FilterMinStakingVerificationAmountSet and is used to iterate over the raw logs and unpacked data for MinStakingVerificationAmountSet events raised by the Mirroring contract.
-type MirroringMinStakingVerificationAmountSetIterator struct {
-	Event *MirroringMinStakingVerificationAmountSet // Event containing the contract specifics and raw log
-
-	contract *bind.BoundContract // Generic contract to use for unpacking event data
-	event    string              // Event name to use for unpacking event data
-
-	logs chan types.Log        // Log channel receiving the found contract events
-	sub  ethereum.Subscription // Subscription for errors, completion and termination
-	done bool                  // Whether the subscription completed delivering logs
-	fail error                 // Occurred error to stop iteration
-}
-
-// Next advances the iterator to the subsequent event, returning whether there
-// are any more events found. In case of a retrieval or parsing error, false is
-// returned and Error() can be queried for the exact failure.
-func (it *MirroringMinStakingVerificationAmountSetIterator) Next() bool {
-	// If the iterator failed, stop iterating
-	if it.fail != nil {
-		return false
-	}
-	// If the iterator completed, deliver directly whatever's available
-	if it.done {
-		select {
-		case log := <-it.logs:
-			it.Event = new(MirroringMinStakingVerificationAmountSet)
-			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-				it.fail = err
-				return false
-			}
-			it.Event.Raw = log
-			return true
-
-		default:
-			return false
-		}
-	}
-	// Iterator still in progress, wait for either a data or an error event
-	select {
-	case log := <-it.logs:
-		it.Event = new(MirroringMinStakingVerificationAmountSet)
-		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-			it.fail = err
-			return false
-		}
-		it.Event.Raw = log
-		return true
-
-	case err := <-it.sub.Err():
-		it.done = true
-		it.fail = err
-		return it.Next()
-	}
-}
-
-// Error returns any retrieval or parsing error occurred during filtering.
-func (it *MirroringMinStakingVerificationAmountSetIterator) Error() error {
-	return it.fail
-}
-
-// Close terminates the iteration process, releasing any pending underlying
-// resources.
-func (it *MirroringMinStakingVerificationAmountSetIterator) Close() error {
-	it.sub.Unsubscribe()
-	return nil
-}
-
-// MirroringMinStakingVerificationAmountSet represents a MinStakingVerificationAmountSet event raised by the Mirroring contract.
-type MirroringMinStakingVerificationAmountSet struct {
-	MinStakingVerificationAmountWei *big.Int
-	Raw                             types.Log // Blockchain specific contextual infos
-}
-
-// FilterMinStakingVerificationAmountSet is a free log retrieval operation binding the contract event 0x6b56566d4dcb349b643dfcfcde7b9f3b8f227f9b5d5c9113b0de57d203e27339.
-//
-// Solidity: event MinStakingVerificationAmountSet(uint256 minStakingVerificationAmountWei)
-func (_Mirroring *MirroringFilterer) FilterMinStakingVerificationAmountSet(opts *bind.FilterOpts) (*MirroringMinStakingVerificationAmountSetIterator, error) {
-
-	logs, sub, err := _Mirroring.contract.FilterLogs(opts, "MinStakingVerificationAmountSet")
-	if err != nil {
-		return nil, err
-	}
-	return &MirroringMinStakingVerificationAmountSetIterator{contract: _Mirroring.contract, event: "MinStakingVerificationAmountSet", logs: logs, sub: sub}, nil
-}
-
-// WatchMinStakingVerificationAmountSet is a free log subscription operation binding the contract event 0x6b56566d4dcb349b643dfcfcde7b9f3b8f227f9b5d5c9113b0de57d203e27339.
-//
-// Solidity: event MinStakingVerificationAmountSet(uint256 minStakingVerificationAmountWei)
-func (_Mirroring *MirroringFilterer) WatchMinStakingVerificationAmountSet(opts *bind.WatchOpts, sink chan<- *MirroringMinStakingVerificationAmountSet) (event.Subscription, error) {
-
-	logs, sub, err := _Mirroring.contract.WatchLogs(opts, "MinStakingVerificationAmountSet")
-	if err != nil {
-		return nil, err
-	}
-	return event.NewSubscription(func(quit <-chan struct{}) error {
-		defer sub.Unsubscribe()
-		for {
-			select {
-			case log := <-logs:
-				// New log arrived, parse the event and forward to the user
-				event := new(MirroringMinStakingVerificationAmountSet)
-				if err := _Mirroring.contract.UnpackLog(event, "MinStakingVerificationAmountSet", log); err != nil {
-					return err
-				}
-				event.Raw = log
-
-				select {
-				case sink <- event:
-				case err := <-sub.Err():
-					return err
-				case <-quit:
-					return nil
-				}
-			case err := <-sub.Err():
-				return err
-			case <-quit:
-				return nil
-			}
-		}
-	}), nil
-}
-
-// ParseMinStakingVerificationAmountSet is a log parse operation binding the contract event 0x6b56566d4dcb349b643dfcfcde7b9f3b8f227f9b5d5c9113b0de57d203e27339.
-//
-// Solidity: event MinStakingVerificationAmountSet(uint256 minStakingVerificationAmountWei)
-func (_Mirroring *MirroringFilterer) ParseMinStakingVerificationAmountSet(log types.Log) (*MirroringMinStakingVerificationAmountSet, error) {
-	event := new(MirroringMinStakingVerificationAmountSet)
-	if err := _Mirroring.contract.UnpackLog(event, "MinStakingVerificationAmountSet", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log
@@ -3157,6 +2770,296 @@ func (_Mirroring *MirroringFilterer) WatchTimelockedGovernanceCallExecuted(opts 
 func (_Mirroring *MirroringFilterer) ParseTimelockedGovernanceCallExecuted(log types.Log) (*MirroringTimelockedGovernanceCallExecuted, error) {
 	event := new(MirroringTimelockedGovernanceCallExecuted)
 	if err := _Mirroring.contract.UnpackLog(event, "TimelockedGovernanceCallExecuted", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
+}
+
+// MirroringVotePowerCacheCreatedIterator is returned from FilterVotePowerCacheCreated and is used to iterate over the raw logs and unpacked data for VotePowerCacheCreated events raised by the Mirroring contract.
+type MirroringVotePowerCacheCreatedIterator struct {
+	Event *MirroringVotePowerCacheCreated // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *MirroringVotePowerCacheCreatedIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(MirroringVotePowerCacheCreated)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(MirroringVotePowerCacheCreated)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *MirroringVotePowerCacheCreatedIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *MirroringVotePowerCacheCreatedIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// MirroringVotePowerCacheCreated represents a VotePowerCacheCreated event raised by the Mirroring contract.
+type MirroringVotePowerCacheCreated struct {
+	NodeId      [20]byte
+	BlockNumber *big.Int
+	Raw         types.Log // Blockchain specific contextual infos
+}
+
+// FilterVotePowerCacheCreated is a free log retrieval operation binding the contract event 0xb34d3f5bc1f5b60002062672fcc0a956db7b59b3416f8c5343e9aef5adc7b971.
+//
+// Solidity: event VotePowerCacheCreated(bytes20 nodeId, uint256 blockNumber)
+func (_Mirroring *MirroringFilterer) FilterVotePowerCacheCreated(opts *bind.FilterOpts) (*MirroringVotePowerCacheCreatedIterator, error) {
+
+	logs, sub, err := _Mirroring.contract.FilterLogs(opts, "VotePowerCacheCreated")
+	if err != nil {
+		return nil, err
+	}
+	return &MirroringVotePowerCacheCreatedIterator{contract: _Mirroring.contract, event: "VotePowerCacheCreated", logs: logs, sub: sub}, nil
+}
+
+// WatchVotePowerCacheCreated is a free log subscription operation binding the contract event 0xb34d3f5bc1f5b60002062672fcc0a956db7b59b3416f8c5343e9aef5adc7b971.
+//
+// Solidity: event VotePowerCacheCreated(bytes20 nodeId, uint256 blockNumber)
+func (_Mirroring *MirroringFilterer) WatchVotePowerCacheCreated(opts *bind.WatchOpts, sink chan<- *MirroringVotePowerCacheCreated) (event.Subscription, error) {
+
+	logs, sub, err := _Mirroring.contract.WatchLogs(opts, "VotePowerCacheCreated")
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(MirroringVotePowerCacheCreated)
+				if err := _Mirroring.contract.UnpackLog(event, "VotePowerCacheCreated", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParseVotePowerCacheCreated is a log parse operation binding the contract event 0xb34d3f5bc1f5b60002062672fcc0a956db7b59b3416f8c5343e9aef5adc7b971.
+//
+// Solidity: event VotePowerCacheCreated(bytes20 nodeId, uint256 blockNumber)
+func (_Mirroring *MirroringFilterer) ParseVotePowerCacheCreated(log types.Log) (*MirroringVotePowerCacheCreated, error) {
+	event := new(MirroringVotePowerCacheCreated)
+	if err := _Mirroring.contract.UnpackLog(event, "VotePowerCacheCreated", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
+}
+
+// MirroringVotePowerChangedIterator is returned from FilterVotePowerChanged and is used to iterate over the raw logs and unpacked data for VotePowerChanged events raised by the Mirroring contract.
+type MirroringVotePowerChangedIterator struct {
+	Event *MirroringVotePowerChanged // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *MirroringVotePowerChangedIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(MirroringVotePowerChanged)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(MirroringVotePowerChanged)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *MirroringVotePowerChangedIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *MirroringVotePowerChangedIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// MirroringVotePowerChanged represents a VotePowerChanged event raised by the Mirroring contract.
+type MirroringVotePowerChanged struct {
+	Owner          common.Address
+	NodeId         [20]byte
+	PriorVotePower *big.Int
+	NewVotePower   *big.Int
+	Raw            types.Log // Blockchain specific contextual infos
+}
+
+// FilterVotePowerChanged is a free log retrieval operation binding the contract event 0xe03ab1522dc81fa0410fe7c9668da7d7b8b9be42ea6011d936e90deda8c0aea1.
+//
+// Solidity: event VotePowerChanged(address indexed owner, bytes20 indexed nodeId, uint256 priorVotePower, uint256 newVotePower)
+func (_Mirroring *MirroringFilterer) FilterVotePowerChanged(opts *bind.FilterOpts, owner []common.Address, nodeId [][20]byte) (*MirroringVotePowerChangedIterator, error) {
+
+	var ownerRule []interface{}
+	for _, ownerItem := range owner {
+		ownerRule = append(ownerRule, ownerItem)
+	}
+	var nodeIdRule []interface{}
+	for _, nodeIdItem := range nodeId {
+		nodeIdRule = append(nodeIdRule, nodeIdItem)
+	}
+
+	logs, sub, err := _Mirroring.contract.FilterLogs(opts, "VotePowerChanged", ownerRule, nodeIdRule)
+	if err != nil {
+		return nil, err
+	}
+	return &MirroringVotePowerChangedIterator{contract: _Mirroring.contract, event: "VotePowerChanged", logs: logs, sub: sub}, nil
+}
+
+// WatchVotePowerChanged is a free log subscription operation binding the contract event 0xe03ab1522dc81fa0410fe7c9668da7d7b8b9be42ea6011d936e90deda8c0aea1.
+//
+// Solidity: event VotePowerChanged(address indexed owner, bytes20 indexed nodeId, uint256 priorVotePower, uint256 newVotePower)
+func (_Mirroring *MirroringFilterer) WatchVotePowerChanged(opts *bind.WatchOpts, sink chan<- *MirroringVotePowerChanged, owner []common.Address, nodeId [][20]byte) (event.Subscription, error) {
+
+	var ownerRule []interface{}
+	for _, ownerItem := range owner {
+		ownerRule = append(ownerRule, ownerItem)
+	}
+	var nodeIdRule []interface{}
+	for _, nodeIdItem := range nodeId {
+		nodeIdRule = append(nodeIdRule, nodeIdItem)
+	}
+
+	logs, sub, err := _Mirroring.contract.WatchLogs(opts, "VotePowerChanged", ownerRule, nodeIdRule)
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(MirroringVotePowerChanged)
+				if err := _Mirroring.contract.UnpackLog(event, "VotePowerChanged", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParseVotePowerChanged is a log parse operation binding the contract event 0xe03ab1522dc81fa0410fe7c9668da7d7b8b9be42ea6011d936e90deda8c0aea1.
+//
+// Solidity: event VotePowerChanged(address indexed owner, bytes20 indexed nodeId, uint256 priorVotePower, uint256 newVotePower)
+func (_Mirroring *MirroringFilterer) ParseVotePowerChanged(log types.Log) (*MirroringVotePowerChanged, error) {
+	event := new(MirroringVotePowerChanged)
+	if err := _Mirroring.contract.UnpackLog(event, "VotePowerChanged", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log

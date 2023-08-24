@@ -14,20 +14,20 @@ var (
 	ErrHashNotFound = errors.New("hash not found")
 )
 
-// MerkleTree implementation with helper functions.
-type MerkleTree struct {
+// Tree implementation with helper functions.
+type Tree struct {
 	tree []common.Hash
 }
 
 // New creates a new Merkle tree from the given hash values as bytes. It is
 // required that the values are sorted by their hex representation.
-func New(values []common.Hash) MerkleTree {
-	return MerkleTree{tree: values}
+func New(values []common.Hash) Tree {
+	return Tree{tree: values}
 }
 
 // NewFromHex creates a new Merkle tree from the given hex values. It is
 // required that the values are sorted as strings.
-func NewFromHex(hexValues []string) MerkleTree {
+func NewFromHex(hexValues []string) Tree {
 	values := make([]common.Hash, len(hexValues))
 
 	for i, hexValue := range hexValues {
@@ -38,7 +38,7 @@ func NewFromHex(hexValues []string) MerkleTree {
 }
 
 // Given an array of leaf hashes, builds the Merkle tree.
-func Build(hashes []common.Hash, initialHash bool) MerkleTree {
+func Build(hashes []common.Hash, initialHash bool) Tree {
 	if initialHash {
 		hashes = mapSingleHash(hashes)
 	}
@@ -60,7 +60,7 @@ func Build(hashes []common.Hash, initialHash bool) MerkleTree {
 }
 
 // Given an array of hex-encoded leaf hashes, builds the Merkle tree.
-func BuildFromHex(hexValues []string, initialHash bool) MerkleTree {
+func BuildFromHex(hexValues []string, initialHash bool) Tree {
 	var hashes []common.Hash
 	for i := range hexValues {
 		if i == 0 || hexValues[i] != hexValues[i-1] {
@@ -91,7 +91,7 @@ func SortedHashPair(x, y common.Hash) common.Hash {
 }
 
 // Root returns the Merkle root of the tree.
-func (t MerkleTree) Root() (common.Hash, error) {
+func (t Tree) Root() (common.Hash, error) {
 	if len(t.tree) == 0 {
 		return common.Hash{}, ErrEmptyTree
 	}
@@ -100,12 +100,12 @@ func (t MerkleTree) Root() (common.Hash, error) {
 }
 
 // Tree returns the a slice representing the full tree.
-func (t MerkleTree) Tree() []common.Hash {
+func (t Tree) Tree() []common.Hash {
 	return t.tree
 }
 
 // HashCount returns the number of leaves in the tree.
-func (t MerkleTree) HashCount() int {
+func (t Tree) HashCount() int {
 	if len(t.tree) == 0 {
 		return 0
 	}
@@ -114,7 +114,7 @@ func (t MerkleTree) HashCount() int {
 }
 
 // SortedHashes returns all leaves in a slice.
-func (t MerkleTree) SortedHashes() []common.Hash {
+func (t Tree) SortedHashes() []common.Hash {
 	numLeaves := t.HashCount()
 	if numLeaves == 0 {
 		return nil
@@ -124,7 +124,7 @@ func (t MerkleTree) SortedHashes() []common.Hash {
 }
 
 // GetHash returns the hash of the `i`th leaf.
-func (t MerkleTree) GetHash(i int) (common.Hash, error) {
+func (t Tree) GetHash(i int) (common.Hash, error) {
 	numLeaves := t.HashCount()
 	if numLeaves == 0 || i < 0 || i >= numLeaves {
 		return common.Hash{}, ErrInvalidIndex
@@ -135,7 +135,7 @@ func (t MerkleTree) GetHash(i int) (common.Hash, error) {
 }
 
 // GetProof returns the Merkle proof for the `i`th leaf.
-func (t MerkleTree) GetProof(i int) ([]common.Hash, error) {
+func (t Tree) GetProof(i int) ([]common.Hash, error) {
 	numLeaves := t.HashCount()
 	if numLeaves == 0 || i < 0 || i >= numLeaves {
 		return nil, ErrInvalidIndex
@@ -156,7 +156,7 @@ func parent(i int) int {
 	return (i - 1) / 2
 }
 
-func (t MerkleTree) GetProofFromHash(hash common.Hash) ([]common.Hash, error) {
+func (t Tree) GetProofFromHash(hash common.Hash) ([]common.Hash, error) {
 	i, err := t.binarySearch(hash)
 	if err != nil {
 		return nil, err
@@ -165,7 +165,7 @@ func (t MerkleTree) GetProofFromHash(hash common.Hash) ([]common.Hash, error) {
 	return t.GetProof(i)
 }
 
-func (t MerkleTree) binarySearch(hash common.Hash) (int, error) {
+func (t Tree) binarySearch(hash common.Hash) (int, error) {
 	leaves := t.SortedHashes()
 	i := sort.Search(len(leaves), func(i int) bool {
 		return leaves[i].Hex() >= hash.Hex()
