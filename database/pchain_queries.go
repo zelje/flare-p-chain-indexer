@@ -202,11 +202,14 @@ func GetUnmirroredPChainTxs(in *GetUnmirroredPChainTxsInput) ([]PChainVotingData
 	err := in.DB.
 		Table("p_chain_txes").
 		Joins("left join p_chain_tx_inputs as inputs on inputs.tx_id = p_chain_txes.tx_id").
-		Where("mirrored = ?", false).
-		Where("timestamp >= ?", in.StartTimestamp).
-		Where("timestamp < ?", in.EndTimestamp).
-		Where("type = ?", PChainAddDelegatorTx).
-		Or("type = ?", PChainAddValidatorTx).
+		Where("p_chain_txes.block_type = ?", PChainStandardBlock).
+		Where("p_chain_txes.mirrored = ?", false).
+		Where("p_chain_txes.start_time >= ?", in.StartTimestamp).
+		Where("p_chain_txes.start_time < ?", in.EndTimestamp).
+		Where(
+			in.DB.Where("p_chain_txes.type = ?", PChainAddDelegatorTx).
+				Or("p_chain_txes.type = ?", PChainAddValidatorTx),
+		).
 		Select("p_chain_txes.*, inputs.address as input_address").
 		Find(&txs).
 		Error
