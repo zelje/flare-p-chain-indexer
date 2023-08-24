@@ -1,15 +1,16 @@
 package cronjob
 
 import (
+	"context"
 	"flare-indexer/database"
 	"flare-indexer/indexer/config"
-	"flare-indexer/indexer/context"
-	"flare-indexer/utils"
+	idxCtx "flare-indexer/indexer/context"
+	"flare-indexer/indexer/pchain"
 	"flare-indexer/utils/contracts/voting"
 	"math/big"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"gorm.io/gorm"
 )
@@ -18,7 +19,7 @@ const (
 	StateName string = "voting_cronjob"
 )
 
-type votingCronJob struct {
+type votingCronjob struct {
 	enabled bool
 	timeout int
 
@@ -33,21 +34,21 @@ type votingCronJob struct {
 
 	db             *gorm.DB
 	votingContract *voting.Voting
-	voterAddress   common.Address
+	txOpts         *bind.TransactOpts
 }
 
-func NewVotingCronJob(ctx context.IndexerContext) (Cronjob, error) {
+func NewVotingCronjob(ctx idxCtx.IndexerContext) (Cronjob, error) {
 	cfg := ctx.Config()
 	votingContract, err := newVotingContract(cfg)
 	if err != nil {
 		return nil, err
 	}
-	voterAddress, err := newVoterAddress(cfg)
+	txOpts, err := TransactOptsFromPrivateKey(cfg.VotingCronjob.PrivateKey, cfg.Chain.ChainID)
 	if err != nil {
 		return nil, err
 	}
 
-	return &votingCronJob{
+	return &votingCronjob{
 		enabled:        cfg.VotingCronjob.Enabled,
 		timeout:        cfg.VotingCronjob.TimeoutSeconds,
 		running:        false,
@@ -55,7 +56,7 @@ func NewVotingCronJob(ctx context.IndexerContext) (Cronjob, error) {
 		start:          cfg.VotingCronjob.EpochStart,
 		interval:       cfg.VotingCronjob.EpochPeriod,
 		votingContract: votingContract,
-		voterAddress:   voterAddress,
+		txOpts:         txOpts,
 	}, nil
 }
 
@@ -64,46 +65,54 @@ func newVotingContract(cfg *config.Config) (*voting.Voting, error) {
 	if err != nil {
 		return nil, err
 	}
-	addr := common.HexToAddress(cfg.VotingCronjob.ContractAddress)
-	return voting.NewVoting(addr, eth)
+	return voting.NewVoting(cfg.VotingCronjob.ContractAddress, eth)
 }
 
-func newVoterAddress(cfg *config.Config) (common.Address, error) {
-	_, addressBytes, err := utils.ParseAddress(cfg.VotingCronjob.VoterAddress)
-	if err != nil {
-		return common.Address{}, err
-	}
-	return common.BytesToAddress(addressBytes), nil
-}
-
-func (c *votingCronJob) Name() string {
+func (c *votingCronjob) Name() string {
 	return "mirror"
 }
 
-func (c *votingCronJob) Enabled() bool {
+func (c *votingCronjob) Enabled() bool {
 	return c.enabled
 }
 
-func (c *votingCronJob) TimeoutSeconds() int {
+func (c *votingCronjob) TimeoutSeconds() int {
 	return c.timeout
 }
 
-func (c *votingCronJob) Call() error {
+func (c *votingCronjob) Call() error {
+	idxState, err := database.FetchState(c.db, pchain.StateName)
+	if err != nil {
+		return err
+	}
+
+	now := time.Now()
+
+	// Skip updating if indexer is behind
+	if now.After(idxState.Updated) {
+		return nil
+	}
+
 	state, err := database.FetchState(c.db, StateName)
 	if err != nil {
 		return err
 	}
 
+	callOpts := &bind.CallOpts{
+		From:    c.txOpts.From,
+		Context: context.Background(),
+	}
+
 	// Last epoch that was submitted to the contract
 	nextEpochToSubmit := state.NextDBIndex
-	lastEpochToSubmit := c.getEpochIndex(time.Now()) - 1
+	lastEpochToSubmit := c.getEpochIndex(now) - 1
 	for e := int64(nextEpochToSubmit); e <= lastEpochToSubmit; e++ {
 		start, end := c.getEpochBounds(e)
 		votingData, err := database.FetchPChainVotingData(c.db, start, end)
 		if err != nil {
 			return err
 		}
-		shouldVote, err := c.votingContract.ShouldVote(nil, big.NewInt(e), c.voterAddress)
+		shouldVote, err := c.votingContract.ShouldVote(callOpts, big.NewInt(e), c.txOpts.From)
 		if err != nil {
 			return err
 		}
@@ -122,11 +131,11 @@ func (c *votingCronJob) Call() error {
 	return nil
 }
 
-func (c *votingCronJob) getEpochIndex(t time.Time) int64 {
+func (c *votingCronjob) getEpochIndex(t time.Time) int64 {
 	return (t.Unix() - c.start) / c.interval
 }
 
-func (c *votingCronJob) getEpochBounds(epoch int64) (start, end time.Time) {
+func (c *votingCronjob) getEpochBounds(epoch int64) (start, end time.Time) {
 	start = time.Unix(c.start+(epoch*c.interval), 0)
 	end = start.Add(time.Duration(c.interval) * time.Second)
 	return

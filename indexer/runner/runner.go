@@ -15,6 +15,8 @@ func Start(ctx context.IndexerContext) {
 	go pIndexer.Run()
 
 	uptimeCronjob := cronjob.NewUptimeCronjob(ctx)
+	votingCronjob, _ := cronjob.NewVotingCronjob(ctx)
 
 	go cronjob.RunCronjob(uptimeCronjob)
+	go cronjob.RunCronjob(votingCronjob)
 }

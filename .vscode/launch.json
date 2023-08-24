@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Launch Indexer",
+            "name": "Launch Indexer (costwo)",
             "type": "go",
             "request": "launch",
             "mode": "auto",
@@ -14,12 +14,30 @@
             "cwd": "${workspaceFolder}"
         },
         {
-            "name": "Launch Services",
+            "name": "Launch Services (costwo)",
             "type": "go",
             "request": "launch",
             "mode": "auto",
             "program": "${workspaceFolder}/services/main/services.go",
             "args": ["--config", "${workspaceFolder}/config.costwo.toml"],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "name": "Launch Indexer (localflare)",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/indexer/main/indexer.go",
+            "args": ["--config", "${workspaceFolder}/config.local.toml"],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "name": "Launch Services (localflare)",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/services/main/services.go",
+            "args": ["--config", "${workspaceFolder}/config.local.toml"],
             "cwd": "${workspaceFolder}"
         }
     ]

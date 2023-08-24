@@ -43,10 +43,10 @@ type MirrorConfig struct {
 
 type VotingConfig struct {
 	CronjobConfig
-	EpochStart      int64  `toml:"epoch_start" envconfig:"VOTING_EPOCH_START"`
-	EpochPeriod     int64  `toml:"epoch_period" envconfig:"VOTING_EPOCH_PERIOD"`
-	ContractAddress string `toml:"contract_address" envconfig:"VOTING_CONTRACT_ADDRESS"`
-	VoterAddress    string `toml:"voter_address"` // TODO: from private key
+	EpochStart      int64          `toml:"epoch_start" envconfig:"VOTING_EPOCH_START"`
+	EpochPeriod     int64          `toml:"epoch_period" envconfig:"VOTING_EPOCH_PERIOD"`
+	ContractAddress common.Address `toml:"contract_address" envconfig:"VOTING_CONTRACT_ADDRESS"`
+	PrivateKey      string         `toml:"private_key"`
 }
 
 func newConfig() *Config {
