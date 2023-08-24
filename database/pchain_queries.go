@@ -186,8 +186,8 @@ func GetUnmirroredPChainTxs(in *GetUnmirroredPChainTxsInput) ([]PChainTxData, er
 		Joins("left join p_chain_tx_inputs as inputs on inputs.tx_id = p_chain_txes.tx_id").
 		Where("p_chain_txes.block_type = ?", PChainStandardBlock).
 		Where("p_chain_txes.mirrored = ?", false).
-		Where("p_chain_txes.timestamp >= ?", in.StartTimestamp).
-		Where("p_chain_txes.timestamp < ?", in.EndTimestamp).
+		Where("p_chain_txes.start_time >= ?", in.StartTimestamp).
+		Where("p_chain_txes.start_time < ?", in.EndTimestamp).
 		Where(
 			in.DB.Where("p_chain_txes.type = ?", PChainAddDelegatorTx).
 				Or("p_chain_txes.type = ?", PChainAddValidatorTx),
