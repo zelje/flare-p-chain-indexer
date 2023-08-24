@@ -141,7 +141,7 @@ func (c *votingCronjob) getEpochBounds(epoch int64) (start, end time.Time) {
 	return
 }
 
-func getMerkleRoot(votingData []database.PChainVotingData) (common.Hash, error) {
+func getMerkleRoot(votingData []database.PChainTxData) (common.Hash, error) {
 	tree, err := buildTree(votingData)
 	if err != nil {
 		return [32]byte{}, err

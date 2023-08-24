@@ -102,7 +102,7 @@ func (c *mirrorCronJob) getPreviousEpoch() int64 {
 	return currEpoch - 1
 }
 
-func (c *mirrorCronJob) getUnmirroredTxs(epoch int64) ([]database.PChainVotingData, error) {
+func (c *mirrorCronJob) getUnmirroredTxs(epoch int64) ([]database.PChainTxData, error) {
 	startTimestamp := time.Unix(c.epochTimeSeconds+(epoch*int64(c.epochPeriodSeconds)), 0)
 	endTimestamp := startTimestamp.Add(time.Duration(c.epochPeriodSeconds) * time.Second)
 
@@ -113,7 +113,7 @@ func (c *mirrorCronJob) getUnmirroredTxs(epoch int64) ([]database.PChainVotingDa
 	})
 }
 
-func (c *mirrorCronJob) mirrorTxs(txs []database.PChainVotingData, epochID int64) error {
+func (c *mirrorCronJob) mirrorTxs(txs []database.PChainTxData, epochID int64) error {
 	merkleTree, err := buildTree(txs)
 	if err != nil {
 		return err
@@ -134,7 +134,7 @@ func (c *mirrorCronJob) mirrorTxs(txs []database.PChainVotingData, epochID int64
 	return nil
 }
 
-func buildTree(txs []database.PChainVotingData) (merkle.Tree, error) {
+func buildTree(txs []database.PChainTxData) (merkle.Tree, error) {
 	hashes := make([]common.Hash, len(txs))
 
 	for i := range txs {
@@ -158,7 +158,7 @@ func buildTree(txs []database.PChainVotingData) (merkle.Tree, error) {
 type mirrorTxInput struct {
 	epochID    *big.Int
 	merkleTree merkle.Tree
-	tx         *database.PChainVotingData
+	tx         *database.PChainTxData
 }
 
 func (c *mirrorCronJob) mirrorTx(in *mirrorTxInput) error {
@@ -186,7 +186,7 @@ func (c *mirrorCronJob) mirrorTx(in *mirrorTxInput) error {
 }
 
 func toStakeData(
-	tx *database.PChainVotingData, epochID *big.Int, txHash [32]byte,
+	tx *database.PChainTxData, epochID *big.Int, txHash [32]byte,
 ) (*mirroring.IIPChainStakeMirrorVerifierPChainStake, error) {
 	txType, err := getTxType(tx.Type)
 	if err != nil {
@@ -219,7 +219,7 @@ func toStakeData(
 		StartTime:       startTime,
 		EndTime:         endTime,
 		Weight:          tx.Weight,
-		SourceAddress:   [20]byte(common.HexToAddress(tx.Address)),
+		SourceAddress:   [20]byte(common.HexToAddress(tx.InputAddress)),
 		FeePercentage:   uint64(tx.FeePercentage),
 	}, nil
 }
