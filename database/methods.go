@@ -8,6 +8,10 @@ func (s *State) Update(nextIndex, lastIndex uint64) {
 	s.Updated = time.Now()
 }
 
+func (s *State) UpdateTime() {
+	s.Updated = time.Now()
+}
+
 func (out TxOutput) Addr() string {
 	return out.Address
 }

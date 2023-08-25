@@ -176,10 +176,11 @@ func FindPChainTxInBlockHeight(db *gorm.DB,
 func FetchPChainVotingData(db *gorm.DB, from time.Time, to time.Time) ([]PChainTxData, error) {
 	var data []PChainTxData
 
-	query := db.Where(&PChainTx{}).
-		Where("(type = ? OR type = ?)", PChainAddValidatorTx, PChainAddDelegatorTx).
-		Where("start_time >= ?", from).Where("start_time < ?", to).
+	query := db.
+		Table("p_chain_txes").
 		Joins("left join p_chain_tx_inputs as inputs on inputs.tx_id = p_chain_txes.tx_id").
+		Where("type = ? OR type = ?", PChainAddValidatorTx, PChainAddDelegatorTx).
+		Where("start_time >= ?", from).Where("start_time < ?", to).
 		Select("p_chain_txes.*, inputs.address as input_address").
 		Scan(&data)
 	return data, query.Error
