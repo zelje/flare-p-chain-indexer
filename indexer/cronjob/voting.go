@@ -49,7 +49,7 @@ func NewVotingCronjob(ctx idxCtx.IndexerContext) (Cronjob, error) {
 	if err != nil {
 		return nil, err
 	}
-	txOpts, err := TransactOptsFromPrivateKey(cfg.VotingCronjob.PrivateKey, cfg.Chain.ChainID)
+	txOpts, err := TransactOptsFromPrivateKey(cfg.Chain.PrivateKey, cfg.Chain.ChainID)
 	if err != nil {
 		return nil, err
 	}

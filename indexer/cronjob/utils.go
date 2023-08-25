@@ -29,6 +29,10 @@ func CallPChainGetConnectedValidators(client jsonrpc.RPCClient) ([]*api.Permissi
 }
 
 func TransactOptsFromPrivateKey(privateKey string, chainID int) (*bind.TransactOpts, error) {
+	if privateKey[:2] == "0x" {
+		privateKey = privateKey[2:]
+	}
+
 	pk, err := crypto.HexToECDSA(privateKey)
 	if err != nil {
 		return nil, errors.Wrap(err, "crypto.HexToECDSA")

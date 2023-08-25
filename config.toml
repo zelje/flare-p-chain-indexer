@@ -5,12 +5,12 @@
 host = "localhost"
 port = 3306
 database = "flare_indexer"
-username = "indexuser"
-password = "password"
+username = "indexeruser"
+password = "P.a.s.s.W.O.R.D"
 log_queries = false
 
 [logger]
-level = "DEBUG"
+level = "INFO"
 file = "./logs/flare-indexer.log"
 console = true
 
@@ -40,6 +40,3 @@ start_index = 0
 [uptime_cronjob]
 enabled = false
 timeout_seconds = 10
-
-[mirror]
-private_key = "a885cb80b6704d9d0bdb2eaa453003705a2ab5eac4e7c78a1e58a322625e7d71"
