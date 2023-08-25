@@ -26,6 +26,7 @@ const jobStateName = "mirror_cronjob"
 
 type mirrorCronJob struct {
 	db                 *gorm.DB
+	enabled            bool
 	epochPeriodSeconds int
 	epochTimeSeconds   int64
 	mirroringContract  *mirroring.Mirroring
@@ -47,6 +48,7 @@ func NewMirrorCronjob(ctx indexerctx.IndexerContext) (Cronjob, error) {
 
 	return &mirrorCronJob{
 		db:                 ctx.DB(),
+		enabled:            cfg.Mirror.Enabled,
 		epochPeriodSeconds: int(cfg.Mirror.EpochPeriod / time.Second),
 		epochTimeSeconds:   cfg.Mirror.EpochTime.Unix(),
 		mirroringContract:  contracts.mirroring,
@@ -87,7 +89,7 @@ func (c *mirrorCronJob) Name() string {
 }
 
 func (c *mirrorCronJob) Enabled() bool {
-	return false
+	return c.enabled
 }
 
 func (c *mirrorCronJob) TimeoutSeconds() int {

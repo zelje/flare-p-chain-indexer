@@ -16,6 +16,9 @@ func RunCronjob(c Cronjob) {
 	if !c.Enabled() {
 		return
 	}
+
+	logger.Debug("starting %s cronjob", c.Name())
+
 	ticker := time.NewTicker(time.Duration(c.TimeoutSeconds() * int(time.Second)))
 	for range ticker.C {
 		err := c.Call()

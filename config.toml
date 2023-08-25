@@ -5,12 +5,12 @@
 host = "localhost"
 port = 3306
 database = "flare_indexer"
-username = "indexuser"
-password = "password"
+username = "indexeruser"
+password = "P.a.s.s.W.O.R.D"
 log_queries = false
 
 [logger]
-level = "DEBUG"
+level = "INFO"
 file = "./logs/flare-indexer.log"
 console = true
 
@@ -18,13 +18,13 @@ console = true
 prometheus_address = "localhost:2112"
 
 [chain]
-node_url = "https://coston2-api-tracer.flare.network"
-address_hrp = "costwo"
-chain_id = 114
+node_url = "http://localhost:9650/"
+address_hrp = "localflare"
+chain_id = 162
 # eth_rpc_url is needed for services
 eth_rpc_url = "http://localhost:9650/ext/bc/C/rpc"
-private_key = "0xfd985f2d732cbd4bc8c036f8ef0ba948762134363d52bf1ae8968c10a001db53"
-api_key = "1dca7af7-2447-46a0-b845-c8af1728299f"
+# api key may be needed for access to production nodes
+api_key = ""
 
 [x_chain_indexer]
 enabled = false
@@ -40,4 +40,3 @@ start_index = 0
 [uptime_cronjob]
 enabled = false
 timeout_seconds = 10
-

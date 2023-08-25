@@ -37,6 +37,7 @@ type CronjobConfig struct {
 }
 
 type MirrorConfig struct {
+	Enabled           bool           `toml:"enabled"`
 	EpochPeriod       time.Duration  `toml:"epoch_period" envconfig:"EPOCH_PERIOD"`
 	EpochTime         time.Time      `toml:"epoch_time" envconfig:"EPOCH_TIME"`
 	MirroringContract common.Address `toml:"mirroring_contract" envconfig:"MIRRORING_CONTRACT"`
