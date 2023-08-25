@@ -40,7 +40,7 @@ func NewMirrorCronjob(ctx indexerctx.IndexerContext) (Cronjob, error) {
 		return nil, err
 	}
 
-	txOpts, err := TransactOptsFromPrivateKey(cfg.Mirror.PrivateKey, cfg.Chain.ChainID)
+	txOpts, err := TransactOptsFromPrivateKey(cfg.Chain.PrivateKey, cfg.Chain.ChainID)
 	if err != nil {
 		return nil, err
 	}
