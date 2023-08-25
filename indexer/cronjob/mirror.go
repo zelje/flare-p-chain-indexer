@@ -35,6 +35,11 @@ type mirrorCronJob struct {
 
 func NewMirrorCronjob(ctx indexerctx.IndexerContext) (Cronjob, error) {
 	cfg := ctx.Config()
+
+	// if !cfg.Mirror.Enabled {
+	return &mirrorCronJob{}, nil
+	// }
+
 	contracts, err := initMirrorJobContracts(cfg)
 	if err != nil {
 		return nil, err

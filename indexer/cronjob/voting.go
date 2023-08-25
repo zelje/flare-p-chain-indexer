@@ -40,6 +40,11 @@ type votingCronjob struct {
 
 func NewVotingCronjob(ctx idxCtx.IndexerContext) (Cronjob, error) {
 	cfg := ctx.Config()
+
+	if !cfg.VotingCronjob.Enabled {
+		return &votingCronjob{}, nil
+	}
+
 	votingContract, err := newVotingContract(cfg)
 	if err != nil {
 		return nil, err
