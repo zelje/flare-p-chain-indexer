@@ -138,6 +138,7 @@ func (c *mirrorCronJob) indexerBehind() (bool, error) {
 		return false, err
 	}
 
+	// TODO - won't this always return true?
 	return time.Now().After(idxState.Updated), nil
 }
 
@@ -273,11 +274,39 @@ func (c *mirrorCronJob) getUnmirroredTxs(epoch int64) ([]database.PChainTxData, 
 	startTimestamp := time.Unix(c.epochTimeSeconds+(epoch*int64(c.epochPeriodSeconds)), 0)
 	endTimestamp := startTimestamp.Add(time.Duration(c.epochPeriodSeconds) * time.Second)
 
-	return database.GetUnmirroredPChainTxs(&database.GetUnmirroredPChainTxsInput{
+	txs, err := database.GetUnmirroredPChainTxs(&database.GetUnmirroredPChainTxsInput{
 		DB:             c.db,
 		StartTimestamp: startTimestamp,
 		EndTimestamp:   endTimestamp,
 	})
+	if err != nil {
+		return nil, err
+	}
+
+	return dedupeTxs(txs), nil
+}
+
+// Deduplicate txs by txID. This is necessary because the same tx can have
+// multiple UTXO inputs. We assume that all UTXO inputs are from the same
+// source address.
+func dedupeTxs(txs []database.PChainTxData) []database.PChainTxData {
+	txSet := make(map[string]*database.PChainTxData, len(txs))
+
+	for i := range txs {
+		tx := &txs[i]
+		if tx.TxID == nil {
+			continue
+		}
+
+		txSet[*tx.TxID] = tx
+	}
+
+	dedupedTxs := make([]database.PChainTxData, 0, len(txSet))
+	for _, tx := range txSet {
+		dedupedTxs = append(dedupedTxs, *tx)
+	}
+
+	return dedupedTxs
 }
 
 func (c *mirrorCronJob) mirrorTxs(txs []database.PChainTxData, epochID int64) error {
