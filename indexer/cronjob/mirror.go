@@ -344,7 +344,7 @@ func (c *mirrorCronJob) mirrorTx(in *mirrorTxInput) error {
 
 func toStakeData(
 	tx *database.PChainTxData, epochID *big.Int, txHash [32]byte,
-) (*mirroring.IIPChainStakeMirrorVerifierPChainStake, error) {
+) (*mirroring.IPChainStakeMirrorVerifierPChainStake, error) {
 	txType, err := getTxType(tx.Type)
 	if err != nil {
 		return nil, err
@@ -367,17 +367,14 @@ func toStakeData(
 
 	endTime := uint64(tx.EndTime.Unix())
 
-	return &mirroring.IIPChainStakeMirrorVerifierPChainStake{
-		EpochId:         epochID,
-		BlockNumber:     tx.BlockHeight,
-		TransactionHash: txHash,
-		TransactionType: txType,
-		NodeId:          nodeID,
-		StartTime:       startTime,
-		EndTime:         endTime,
-		Weight:          tx.Weight,
-		SourceAddress:   [20]byte(common.HexToAddress(tx.InputAddress)),
-		FeePercentage:   uint64(tx.FeePercentage),
+	return &mirroring.IPChainStakeMirrorVerifierPChainStake{
+		TxId:         txHash,
+		StakingType:  txType,
+		InputAddress: [20]byte(common.HexToAddress(tx.InputAddress)),
+		NodeId:       nodeID,
+		StartTime:    startTime,
+		EndTime:      endTime,
+		Weight:       tx.Weight,
 	}, nil
 }
 
