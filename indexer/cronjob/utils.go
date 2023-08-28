@@ -3,17 +3,60 @@ package cronjob
 import (
 	"context"
 	"flare-indexer/database"
+	"flare-indexer/utils/contracts/mirroring"
 	"flare-indexer/utils/merkle"
 	"math/big"
 
 	"github.com/ava-labs/avalanchego/ids"
 	"github.com/ava-labs/avalanchego/vms/platformvm/api"
+	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/pkg/errors"
 	"github.com/ybbus/jsonrpc/v3"
 )
+
+var (
+	merkleTreeItemABIObjectArguments abi.Arguments
+)
+
+func init() {
+	bytes32Ty, _ := abi.NewType("bytes32", "", nil)
+	uint8Ty, _ := abi.NewType("uint8", "", nil)
+	bytes20Ty, _ := abi.NewType("bytes20", "", nil)
+	uint64Ty, _ := abi.NewType("uint64", "", nil)
+	merkleTreeItemABIObjectArguments = abi.Arguments{
+		{
+			Name: "txId",
+			Type: bytes32Ty,
+		},
+		{
+			Name: "stakingType",
+			Type: uint8Ty,
+		},
+		{
+			Name: "inputAddress",
+			Type: bytes20Ty,
+		},
+		{
+			Name: "nodeId",
+			Type: bytes20Ty,
+		},
+		{
+			Name: "startTime",
+			Type: uint64Ty,
+		},
+		{
+			Name: "endTime",
+			Type: uint64Ty,
+		},
+		{
+			Name: "weight",
+			Type: uint64Ty,
+		},
+	}
+}
 
 type PermissionedValidators struct {
 	Validators []*api.PermissionedValidator
@@ -74,6 +117,65 @@ func dedupeTxs(txs []database.PChainTxData) []database.PChainTxData {
 	return dedupedTxs
 }
 
+func toStakeData(
+	tx *database.PChainTxData,
+) (*mirroring.IPChainStakeMirrorVerifierPChainStake, error) {
+	txHash, err := ids.FromString(*tx.TxID)
+	if err != nil {
+		return nil, errors.Wrap(err, "ids.FromString")
+	}
+
+	txType, err := getTxType(tx.Type)
+	if err != nil {
+		return nil, err
+	}
+
+	nodeID, err := ids.NodeIDFromString(tx.NodeID)
+	if err != nil {
+		return nil, errors.Wrap(err, "ids.NodeIDFromString")
+	}
+
+	if tx.StartTime == nil {
+		return nil, errors.New("tx.StartTime is nil")
+	}
+
+	startTime := uint64(tx.StartTime.Unix())
+
+	if tx.EndTime == nil {
+		return nil, errors.New("tx.EndTime is nil")
+	}
+
+	endTime := uint64(tx.EndTime.Unix())
+
+	return &mirroring.IPChainStakeMirrorVerifierPChainStake{
+		TxId:         txHash,
+		StakingType:  txType,
+		InputAddress: [20]byte(common.HexToAddress(tx.InputAddress)),
+		NodeId:       nodeID,
+		StartTime:    startTime,
+		EndTime:      endTime,
+		Weight:       tx.Weight,
+	}, nil
+}
+
+func encodeTreeItem(tx *database.PChainTxData) ([]byte, error) {
+	// ABI Encode mirroring.IPChainStakeMirrorVerifierPChainStake
+
+	stakeData, err := toStakeData(tx)
+	if err != nil {
+		return nil, errors.Wrap(err, "toStakeData")
+	}
+	return merkleTreeItemABIObjectArguments.Pack(
+		stakeData.TxId,
+		stakeData.StakingType,
+		stakeData.InputAddress,
+		stakeData.NodeId,
+		stakeData.StartTime,
+		stakeData.EndTime,
+		stakeData.Weight,
+	)
+}
+
 func buildTree(txs []database.PChainTxData) (merkle.Tree, error) {
 	hashes := make([]common.Hash, len(txs))
 
@@ -84,10 +186,11 @@ func buildTree(txs []database.PChainTxData) (merkle.Tree, error) {
 			return merkle.Tree{}, errors.New("tx.TxID is nil")
 		}
 
-		txHash, err := ids.FromString(*tx.TxID)
+		encodedBytes, err := encodeTreeItem(tx)
 		if err != nil {
-			return merkle.Tree{}, errors.Wrap(err, "ids.FromString")
+			return merkle.Tree{}, errors.Wrap(err, "encodeTreeItem")
 		}
+		txHash := crypto.Keccak256Hash(encodedBytes)
 
 		hashes[i] = common.Hash(txHash)
 	}

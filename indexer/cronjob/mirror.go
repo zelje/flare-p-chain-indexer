@@ -13,9 +13,7 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/ava-labs/avalanchego/ids"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/pkg/errors"
 	"golang.org/x/sync/errgroup"
@@ -319,17 +317,12 @@ type mirrorTxInput struct {
 }
 
 func (c *mirrorCronJob) mirrorTx(in *mirrorTxInput) error {
-	txHash, err := ids.FromString(*in.tx.TxID)
-	if err != nil {
-		return errors.Wrap(err, "ids.FromString")
-	}
-
-	stakeData, err := toStakeData(in.tx, in.epochID, txHash)
+	stakeData, err := toStakeData(in.tx)
 	if err != nil {
 		return err
 	}
 
-	merkleProof, err := getMerkleProof(in.merkleTree, txHash)
+	merkleProof, err := getMerkleProof(in.merkleTree, stakeData.TxId)
 	if err != nil {
 		return err
 	}
@@ -340,42 +333,6 @@ func (c *mirrorCronJob) mirrorTx(in *mirrorTxInput) error {
 	}
 
 	return nil
-}
-
-func toStakeData(
-	tx *database.PChainTxData, epochID *big.Int, txHash [32]byte,
-) (*mirroring.IPChainStakeMirrorVerifierPChainStake, error) {
-	txType, err := getTxType(tx.Type)
-	if err != nil {
-		return nil, err
-	}
-
-	nodeID, err := ids.NodeIDFromString(tx.NodeID)
-	if err != nil {
-		return nil, errors.Wrap(err, "ids.NodeIDFromString")
-	}
-
-	if tx.StartTime == nil {
-		return nil, errors.New("tx.StartTime is nil")
-	}
-
-	startTime := uint64(tx.StartTime.Unix())
-
-	if tx.EndTime == nil {
-		return nil, errors.New("tx.EndTime is nil")
-	}
-
-	endTime := uint64(tx.EndTime.Unix())
-
-	return &mirroring.IPChainStakeMirrorVerifierPChainStake{
-		TxId:         txHash,
-		StakingType:  txType,
-		InputAddress: [20]byte(common.HexToAddress(tx.InputAddress)),
-		NodeId:       nodeID,
-		StartTime:    startTime,
-		EndTime:      endTime,
-		Weight:       tx.Weight,
-	}, nil
 }
 
 func getTxType(txType database.PChainTxType) (uint8, error) {
