@@ -3,6 +3,7 @@ package cronjob
 import (
 	"context"
 	"flare-indexer/database"
+	"flare-indexer/utils"
 	"flare-indexer/utils/contracts/mirroring"
 	"flare-indexer/utils/merkle"
 	"math/big"
@@ -147,10 +148,17 @@ func toStakeData(
 
 	endTime := uint64(tx.EndTime.Unix())
 
+	address, err := utils.ParseAddress(tx.InputAddress)
+	if err != nil {
+		return nil, errors.Wrap(err, "utils.ParseAddress")
+	}
+	address20 := [20]byte{}
+	copy(address20[:], address)
+
 	return &mirroring.IPChainStakeMirrorVerifierPChainStake{
 		TxId:         txHash,
 		StakingType:  txType,
-		InputAddress: [20]byte(common.HexToAddress(tx.InputAddress)),
+		InputAddress: address20,
 		NodeId:       nodeID,
 		StartTime:    startTime,
 		EndTime:      endTime,
