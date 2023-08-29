@@ -23,10 +23,14 @@ var (
 )
 
 func init() {
-	bytes32Ty, _ := abi.NewType("bytes32", "", nil)
-	uint8Ty, _ := abi.NewType("uint8", "", nil)
-	bytes20Ty, _ := abi.NewType("bytes20", "", nil)
-	uint64Ty, _ := abi.NewType("uint64", "", nil)
+	bytes32Ty, err1 := abi.NewType("bytes32", "", nil)
+	uint8Ty, err2 := abi.NewType("uint8", "", nil)
+	bytes20Ty, err3 := abi.NewType("bytes20", "", nil)
+	uint64Ty, err4 := abi.NewType("uint64", "", nil)
+	err := utils.Join(err1, err2, err3, err4)
+	if err != nil {
+		panic(err)
+	}
 	merkleTreeItemABIObjectArguments = abi.Arguments{
 		{
 			Name: "txId",
@@ -157,13 +161,11 @@ func toStakeData(
 	if err != nil {
 		return nil, errors.Wrap(err, "utils.ParseAddress")
 	}
-	address20 := [20]byte{}
-	copy(address20[:], address)
 
 	return &mirroring.IPChainStakeMirrorVerifierPChainStake{
 		TxId:         txHash,
 		StakingType:  txType,
-		InputAddress: address20,
+		InputAddress: address,
 		NodeId:       nodeID,
 		StartTime:    startTime,
 		EndTime:      endTime,
@@ -203,9 +205,7 @@ func buildTree(txs []database.PChainTxData) (merkle.Tree, error) {
 		if err != nil {
 			return merkle.Tree{}, errors.Wrap(err, "encodeTreeItem")
 		}
-		txHash := crypto.Keccak256Hash(encodedBytes)
-
-		hashes[i] = common.Hash(txHash)
+		hashes[i] = crypto.Keccak256Hash(encodedBytes)
 	}
 
 	return merkle.Build(hashes, false), nil

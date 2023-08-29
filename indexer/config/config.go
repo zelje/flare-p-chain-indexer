@@ -15,7 +15,7 @@ type Config struct {
 	XChainIndexer IndexerConfig       `toml:"x_chain_indexer"`
 	PChainIndexer IndexerConfig       `toml:"p_chain_indexer"`
 	UptimeCronjob CronjobConfig       `toml:"uptime_cronjob"`
-	Mirror        MirrorConfig        `toml:"mirror"`
+	Mirror        MirrorConfig        `toml:"mirroring_cronjob"`
 	VotingCronjob VotingConfig        `toml:"voting_cronjob"`
 }
 
