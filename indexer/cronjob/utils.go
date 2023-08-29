@@ -3,10 +3,12 @@ package cronjob
 import (
 	"context"
 	"flare-indexer/database"
+	"flare-indexer/indexer/config"
 	"flare-indexer/utils"
 	"flare-indexer/utils/contracts/mirroring"
 	"flare-indexer/utils/merkle"
 	"math/big"
+	"time"
 
 	"github.com/ava-labs/avalanchego/ids"
 	"github.com/ava-labs/avalanchego/vms/platformvm/api"
@@ -217,4 +219,38 @@ func getMerkleRoot(votingData []database.PChainTxData) (common.Hash, error) {
 		return [32]byte{}, err
 	}
 	return tree.Root()
+}
+
+type epochInfo struct {
+	period        time.Duration
+	periodSeconds int
+	start         time.Time
+}
+
+func newEpochInfo(cfg *config.EpochConfig) epochInfo {
+	return epochInfo{
+		period:        cfg.Period,
+		periodSeconds: int(cfg.Period.Seconds()),
+		start:         cfg.Start,
+	}
+}
+
+func (e epochInfo) getStartTime(epoch int64) time.Time {
+	return e.start.Add(time.Duration(epoch) * e.period)
+}
+
+func (e epochInfo) getEndTime(epoch int64) time.Time {
+	return e.getStartTime(epoch + 1)
+}
+
+func (e epochInfo) getTimeRange(epoch int64) (time.Time, time.Time) {
+	return e.getStartTime(epoch), e.getEndTime(epoch)
+}
+
+func (e epochInfo) getEpochIndex(t time.Time) int64 {
+	return int64(t.Sub(e.start) / e.period)
+}
+
+func (e epochInfo) getCurrentEpoch() int64 {
+	return e.getEpochIndex(time.Now())
 }

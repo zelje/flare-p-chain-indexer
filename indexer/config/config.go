@@ -17,6 +17,7 @@ type Config struct {
 	UptimeCronjob CronjobConfig       `toml:"uptime_cronjob"`
 	Mirror        MirrorConfig        `toml:"mirroring_cronjob"`
 	VotingCronjob VotingConfig        `toml:"voting_cronjob"`
+	Epochs        EpochConfig         `toml:"epochs"`
 }
 
 type MetricsConfig struct {
@@ -37,17 +38,18 @@ type CronjobConfig struct {
 }
 
 type MirrorConfig struct {
-	Enabled           bool           `toml:"enabled"`
-	EpochPeriod       time.Duration  `toml:"epoch_period" envconfig:"EPOCH_PERIOD"`
-	EpochTime         time.Time      `toml:"epoch_time" envconfig:"EPOCH_TIME"`
+	CronjobConfig
 	MirroringContract common.Address `toml:"mirroring_contract" envconfig:"MIRRORING_CONTRACT"`
 }
 
 type VotingConfig struct {
 	CronjobConfig
-	EpochStart      int64          `toml:"epoch_start" envconfig:"VOTING_EPOCH_START"`
-	EpochPeriod     int64          `toml:"epoch_period" envconfig:"VOTING_EPOCH_PERIOD"`
 	ContractAddress common.Address `toml:"contract_address" envconfig:"VOTING_CONTRACT_ADDRESS"`
+}
+
+type EpochConfig struct {
+	Period time.Duration `toml:"epoch_period" envconfig:"EPOCH_PERIOD"`
+	Start  time.Time     `toml:"epoch_time" envconfig:"EPOCH_TIME"`
 }
 
 func newConfig() *Config {
@@ -71,8 +73,8 @@ func newConfig() *Config {
 		Chain: config.ChainConfig{
 			NodeURL: "http://localhost:9650/",
 		},
-		Mirror: MirrorConfig{
-			EpochPeriod: 90 * time.Second,
+		Epochs: EpochConfig{
+			Period: 90 * time.Second,
 		},
 	}
 }
