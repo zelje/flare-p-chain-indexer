@@ -9,10 +9,10 @@ import (
 )
 
 func init() {
-	migrations.Container.Add("2023-08-25-00-00", "Create initial state for straing cronjobs", createStakingCronjobState)
+	migrations.Container.Add("2023-08-25-00-00", "Create initial state for voting cronjob", createVotingCronjobState)
 }
 
-func createStakingCronjobState(db *gorm.DB) error {
+func createVotingCronjobState(db *gorm.DB) error {
 	return database.CreateState(db, &database.State{
 		Name:           VotingStateName,
 		NextDBIndex:    0,

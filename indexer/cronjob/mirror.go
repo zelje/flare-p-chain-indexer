@@ -20,7 +20,7 @@ import (
 	"gorm.io/gorm"
 )
 
-const MirrorStateName = "mirror_cronjob"
+const mirrorStateName = "mirror_cronjob"
 
 type mirrorCronJob struct {
 	db                 *gorm.DB
@@ -147,7 +147,7 @@ func (c *mirrorCronJob) indexerBehind() (bool, error) {
 
 func (c *mirrorCronJob) updateJobState(epoch int64) error {
 	return c.db.Transaction(func(tx *gorm.DB) error {
-		jobState, err := database.FetchState(tx, MirrorStateName)
+		jobState, err := database.FetchState(tx, mirrorStateName)
 		if err != nil {
 			return errors.Wrap(err, "database.FetchState")
 		}
@@ -214,7 +214,7 @@ func (c *mirrorCronJob) getEpochRange() (*epochRange, error) {
 }
 
 func (c *mirrorCronJob) getStartEpoch() (int64, error) {
-	jobState, err := database.FetchState(c.db, MirrorStateName)
+	jobState, err := database.FetchState(c.db, mirrorStateName)
 	if err != nil {
 		return 0, err
 	}
