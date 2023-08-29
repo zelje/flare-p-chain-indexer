@@ -11,7 +11,6 @@ import (
 	"flare-indexer/utils/contracts/voting"
 	"flare-indexer/utils/merkle"
 	"math/big"
-	"time"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -23,13 +22,12 @@ import (
 const MirrorStateName = "mirror_cronjob"
 
 type mirrorCronJob struct {
-	db                 *gorm.DB
-	enabled            bool
-	epochPeriodSeconds int
-	epochTimeSeconds   int64
-	mirroringContract  *mirroring.Mirroring
-	txOpts             *bind.TransactOpts
-	votingContract     *voting.Voting
+	db                *gorm.DB
+	enabled           bool
+	epochs            epochInfo
+	mirroringContract *mirroring.Mirroring
+	txOpts            *bind.TransactOpts
+	votingContract    *voting.Voting
 }
 
 func NewMirrorCronjob(ctx indexerctx.IndexerContext) (Cronjob, error) {
@@ -50,13 +48,12 @@ func NewMirrorCronjob(ctx indexerctx.IndexerContext) (Cronjob, error) {
 	}
 
 	return &mirrorCronJob{
-		db:                 ctx.DB(),
-		enabled:            cfg.Mirror.Enabled,
-		epochPeriodSeconds: int(cfg.Mirror.EpochPeriod / time.Second),
-		epochTimeSeconds:   cfg.Mirror.EpochTime.Unix(),
-		mirroringContract:  contracts.mirroring,
-		txOpts:             txOpts,
-		votingContract:     contracts.voting,
+		db:                ctx.DB(),
+		enabled:           cfg.Mirror.Enabled,
+		epochs:            newEpochInfo(&cfg.Epochs),
+		mirroringContract: contracts.mirroring,
+		txOpts:            txOpts,
+		votingContract:    contracts.voting,
 	}, nil
 }
 
@@ -96,20 +93,10 @@ func (c *mirrorCronJob) Enabled() bool {
 }
 
 func (c *mirrorCronJob) TimeoutSeconds() int {
-	return c.epochPeriodSeconds
+	return c.epochs.periodSeconds
 }
 
 func (c *mirrorCronJob) Call() error {
-	// Skip updating if indexer is behind
-	behind, err := c.indexerBehind()
-	if err != nil {
-		return err
-	}
-	if behind {
-		logger.Debug("indexer is behind, skipping mirror")
-		return nil
-	}
-
 	epochRange, err := c.getEpochRange()
 	if err != nil {
 		if errors.Is(err, errNoEpochsToMirror) {
@@ -120,7 +107,18 @@ func (c *mirrorCronJob) Call() error {
 		return err
 	}
 
+	idxState, err := database.FetchState(c.db, pchain.StateName)
+	if err != nil {
+		return err
+	}
+
 	for epoch := epochRange.start; epoch <= epochRange.end; epoch++ {
+		// Skip updating if indexer is behind
+		if c.indexerBehind(&idxState, epoch) {
+			logger.Debug("indexer is behind, skipping mirror")
+			return nil
+		}
+
 		if err := c.mirrorEpoch(epoch); err != nil {
 			return err
 		}
@@ -135,14 +133,9 @@ func (c *mirrorCronJob) Call() error {
 	return nil
 }
 
-func (c *mirrorCronJob) indexerBehind() (bool, error) {
-	idxState, err := database.FetchState(c.db, pchain.StateName)
-	if err != nil {
-		return false, err
-	}
-
-	// TODO - won't this always return true?
-	return time.Now().After(idxState.Updated), nil
+func (c *mirrorCronJob) indexerBehind(idxState *database.State, epoch int64) bool {
+	epochEnd := c.epochs.getEndTime(epoch)
+	return epochEnd.After(idxState.Updated)
 }
 
 func (c *mirrorCronJob) updateJobState(epoch int64) error {
@@ -223,7 +216,7 @@ func (c *mirrorCronJob) getStartEpoch() (int64, error) {
 }
 
 func (c *mirrorCronJob) getEndEpoch(ctx context.Context) (int64, error) {
-	currEpoch := (time.Now().Unix() - c.epochTimeSeconds) / int64(c.epochPeriodSeconds)
+	currEpoch := c.epochs.getCurrentEpoch()
 
 	for epoch := currEpoch; epoch > 0; epoch-- {
 		confirmed, err := c.isEpochConfirmed(ctx, epoch)
@@ -274,8 +267,7 @@ func (c *mirrorCronJob) mirrorEpoch(epoch int64) error {
 }
 
 func (c *mirrorCronJob) getUnmirroredTxs(epoch int64) ([]database.PChainTxData, error) {
-	startTimestamp := time.Unix(c.epochTimeSeconds+(epoch*int64(c.epochPeriodSeconds)), 0)
-	endTimestamp := startTimestamp.Add(time.Duration(c.epochPeriodSeconds) * time.Second)
+	startTimestamp, endTimestamp := c.epochs.getTimeRange(epoch)
 
 	txs, err := database.GetUnmirroredPChainTxs(&database.GetUnmirroredPChainTxsInput{
 		DB:             c.db,

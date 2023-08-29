@@ -28,16 +28,11 @@ var (
 
 type votingCronjob struct {
 	enabled bool
+	epochs  epochInfo
 	timeout int
 
 	// Lock to prevent concurrent aggregation
 	running bool
-
-	// epoch start timestamp (unix seconds)
-	start int64
-
-	// Epoch duration in seconds
-	interval int64
 
 	db             *gorm.DB
 	votingContract *voting.Voting
@@ -65,8 +60,7 @@ func NewVotingCronjob(ctx idxCtx.IndexerContext) (Cronjob, error) {
 		timeout:        cfg.VotingCronjob.TimeoutSeconds,
 		running:        false,
 		db:             ctx.DB(),
-		start:          cfg.VotingCronjob.EpochStart,
-		interval:       cfg.VotingCronjob.EpochPeriod,
+		epochs:         newEpochInfo(&cfg.Epochs),
 		votingContract: votingContract,
 		txOpts:         txOpts,
 	}, nil
@@ -105,9 +99,9 @@ func (c *votingCronjob) Call() error {
 
 	// Last epoch that was submitted to the contract
 	nextEpochToSubmit := state.NextDBIndex
-	lastEpochToSubmit := c.getEpochIndex(now) - 1
+	lastEpochToSubmit := c.epochs.getEpochIndex(now) - 1
 	for e := int64(nextEpochToSubmit); e <= lastEpochToSubmit; e++ {
-		start, end := c.getEpochBounds(e)
+		start, end := c.epochs.getTimeRange(e)
 
 		if end.After(idxState.Updated) {
 			break
@@ -155,14 +149,4 @@ func (c *votingCronjob) submitVotes(e int64, votingData []database.PChainTxData)
 	}
 	_, err = c.votingContract.SubmitVote(c.txOpts, big.NewInt(e), [32]byte(merkleRoot))
 	return err
-}
-
-func (c *votingCronjob) getEpochIndex(t time.Time) int64 {
-	return (t.Unix() - c.start) / c.interval
-}
-
-func (c *votingCronjob) getEpochBounds(epoch int64) (start, end time.Time) {
-	start = time.Unix(c.start+(epoch*c.interval), 0)
-	end = start.Add(time.Duration(c.interval) * time.Second)
-	return
 }
