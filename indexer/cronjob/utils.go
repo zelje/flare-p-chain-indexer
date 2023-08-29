@@ -216,9 +216,5 @@ func getMerkleRoot(votingData []database.PChainTxData) (common.Hash, error) {
 	if err != nil {
 		return [32]byte{}, err
 	}
-	hash, err := tree.GetHash(0)
-	if err != nil {
-		return [32]byte{}, err
-	}
-	return hash, nil
+	return tree.Root()
 }
