@@ -13,16 +13,14 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/ava-labs/avalanchego/ids"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/pkg/errors"
 	"golang.org/x/sync/errgroup"
 	"gorm.io/gorm"
 )
 
-const jobStateName = "mirror_cronjob"
+const MirrorStateName = "mirror_cronjob"
 
 type mirrorCronJob struct {
 	db                 *gorm.DB
@@ -37,9 +35,9 @@ type mirrorCronJob struct {
 func NewMirrorCronjob(ctx indexerctx.IndexerContext) (Cronjob, error) {
 	cfg := ctx.Config()
 
-	// if !cfg.Mirror.Enabled {
-	return &mirrorCronJob{}, nil
-	// }
+	if !cfg.Mirror.Enabled {
+		return &mirrorCronJob{}, nil
+	}
 
 	contracts, err := initMirrorJobContracts(cfg)
 	if err != nil {
@@ -149,7 +147,7 @@ func (c *mirrorCronJob) indexerBehind() (bool, error) {
 
 func (c *mirrorCronJob) updateJobState(epoch int64) error {
 	return c.db.Transaction(func(tx *gorm.DB) error {
-		jobState, err := database.FetchState(tx, jobStateName)
+		jobState, err := database.FetchState(tx, MirrorStateName)
 		if err != nil {
 			return errors.Wrap(err, "database.FetchState")
 		}
@@ -216,7 +214,7 @@ func (c *mirrorCronJob) getEpochRange() (*epochRange, error) {
 }
 
 func (c *mirrorCronJob) getStartEpoch() (int64, error) {
-	jobState, err := database.FetchState(c.db, jobStateName)
+	jobState, err := database.FetchState(c.db, MirrorStateName)
 	if err != nil {
 		return 0, err
 	}
@@ -291,29 +289,6 @@ func (c *mirrorCronJob) getUnmirroredTxs(epoch int64) ([]database.PChainTxData, 
 	return dedupeTxs(txs), nil
 }
 
-// Deduplicate txs by txID. This is necessary because the same tx can have
-// multiple UTXO inputs. We assume that all UTXO inputs are from the same
-// source address.
-func dedupeTxs(txs []database.PChainTxData) []database.PChainTxData {
-	txSet := make(map[string]*database.PChainTxData, len(txs))
-
-	for i := range txs {
-		tx := &txs[i]
-		if tx.TxID == nil {
-			continue
-		}
-
-		txSet[*tx.TxID] = tx
-	}
-
-	dedupedTxs := make([]database.PChainTxData, 0, len(txSet))
-	for _, tx := range txSet {
-		dedupedTxs = append(dedupedTxs, *tx)
-	}
-
-	return dedupedTxs
-}
-
 func (c *mirrorCronJob) mirrorTxs(txs []database.PChainTxData, epochID int64) error {
 	merkleTree, err := buildTree(txs)
 	if err != nil {
@@ -335,27 +310,6 @@ func (c *mirrorCronJob) mirrorTxs(txs []database.PChainTxData, epochID int64) er
 	return nil
 }
 
-func buildTree(txs []database.PChainTxData) (merkle.Tree, error) {
-	hashes := make([]common.Hash, len(txs))
-
-	for i := range txs {
-		tx := &txs[i]
-
-		if tx.TxID == nil {
-			return merkle.Tree{}, errors.New("tx.TxID is nil")
-		}
-
-		txHash, err := ids.FromString(*tx.TxID)
-		if err != nil {
-			return merkle.Tree{}, errors.Wrap(err, "ids.FromString")
-		}
-
-		hashes[i] = common.Hash(txHash)
-	}
-
-	return merkle.Build(hashes, false), nil
-}
-
 type mirrorTxInput struct {
 	epochID    *big.Int
 	merkleTree merkle.Tree
@@ -363,17 +317,12 @@ type mirrorTxInput struct {
 }
 
 func (c *mirrorCronJob) mirrorTx(in *mirrorTxInput) error {
-	txHash, err := ids.FromString(*in.tx.TxID)
-	if err != nil {
-		return errors.Wrap(err, "ids.FromString")
-	}
-
-	stakeData, err := toStakeData(in.tx, in.epochID, txHash)
+	stakeData, err := toStakeData(in.tx)
 	if err != nil {
 		return err
 	}
 
-	merkleProof, err := getMerkleProof(in.merkleTree, txHash)
+	merkleProof, err := getMerkleProof(in.merkleTree, stakeData.TxId)
 	if err != nil {
 		return err
 	}
@@ -384,45 +333,6 @@ func (c *mirrorCronJob) mirrorTx(in *mirrorTxInput) error {
 	}
 
 	return nil
-}
-
-func toStakeData(
-	tx *database.PChainTxData, epochID *big.Int, txHash [32]byte,
-) (*mirroring.IIPChainStakeMirrorVerifierPChainStake, error) {
-	txType, err := getTxType(tx.Type)
-	if err != nil {
-		return nil, err
-	}
-
-	nodeID, err := ids.NodeIDFromString(tx.NodeID)
-	if err != nil {
-		return nil, errors.Wrap(err, "ids.NodeIDFromString")
-	}
-
-	if tx.StartTime == nil {
-		return nil, errors.New("tx.StartTime is nil")
-	}
-
-	startTime := uint64(tx.StartTime.Unix())
-
-	if tx.EndTime == nil {
-		return nil, errors.New("tx.EndTime is nil")
-	}
-
-	endTime := uint64(tx.EndTime.Unix())
-
-	return &mirroring.IIPChainStakeMirrorVerifierPChainStake{
-		EpochId:         epochID,
-		BlockNumber:     tx.BlockHeight,
-		TransactionHash: txHash,
-		TransactionType: txType,
-		NodeId:          nodeID,
-		StartTime:       startTime,
-		EndTime:         endTime,
-		Weight:          tx.Weight,
-		SourceAddress:   [20]byte(common.HexToAddress(tx.InputAddress)),
-		FeePercentage:   uint64(tx.FeePercentage),
-	}, nil
 }
 
 func getTxType(txType database.PChainTxType) (uint8, error) {

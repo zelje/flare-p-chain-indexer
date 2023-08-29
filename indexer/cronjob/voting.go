@@ -12,12 +12,18 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"gorm.io/gorm"
 )
 
 const (
-	StateName string = "voting_cronjob"
+	VotingStateName string = "voting_cronjob"
+)
+
+var (
+	zeroBytes     [32]byte    = [32]byte{}
+	zeroBytesHash common.Hash = crypto.Keccak256Hash(zeroBytes[:])
 )
 
 type votingCronjob struct {
@@ -91,49 +97,64 @@ func (c *votingCronjob) Call() error {
 	if err != nil {
 		return err
 	}
-
-	now := time.Now()
-
-	// Skip updating if indexer is behind
-	if now.After(idxState.Updated) {
-		return nil
-	}
-
-	state, err := database.FetchState(c.db, StateName)
+	state, err := database.FetchState(c.db, VotingStateName)
 	if err != nil {
 		return err
 	}
-
-	callOpts := &bind.CallOpts{
-		From:    c.txOpts.From,
-		Context: context.Background(),
-	}
+	now := time.Now()
 
 	// Last epoch that was submitted to the contract
 	nextEpochToSubmit := state.NextDBIndex
 	lastEpochToSubmit := c.getEpochIndex(now) - 1
 	for e := int64(nextEpochToSubmit); e <= lastEpochToSubmit; e++ {
 		start, end := c.getEpochBounds(e)
+
+		if end.After(idxState.Updated) {
+			break
+		}
+
 		votingData, err := database.FetchPChainVotingData(c.db, start, end)
 		if err != nil {
 			return err
 		}
-		shouldVote, err := c.votingContract.ShouldVote(callOpts, big.NewInt(e), c.txOpts.From)
+		err = c.submitVotes(e, votingData)
 		if err != nil {
 			return err
 		}
-		if shouldVote {
-			merkleRoot, err := getMerkleRoot(votingData)
-			if err != nil {
-				return err
-			}
-			c.votingContract.SubmitVote(nil, big.NewInt(e), [32]byte(merkleRoot))
-		}
+
 		// Update state
 		state.NextDBIndex = uint64(e + 1)
 		database.UpdateState(c.db, &state)
 	}
 	return nil
+}
+
+func (c *votingCronjob) submitVotes(e int64, votingData []database.PChainTxData) error {
+	votingData = dedupeTxs(votingData)
+	callOpts := &bind.CallOpts{
+		From:    c.txOpts.From,
+		Context: context.Background(),
+	}
+
+	shouldVote, err := c.votingContract.ShouldVote(callOpts, big.NewInt(e), c.txOpts.From)
+	if err != nil {
+		return err
+	}
+	if !shouldVote {
+		return nil
+	}
+
+	var merkleRoot common.Hash
+	if len(votingData) == 0 {
+		merkleRoot = zeroBytesHash
+	} else {
+		merkleRoot, err = getMerkleRoot(votingData)
+		if err != nil {
+			return err
+		}
+	}
+	_, err = c.votingContract.SubmitVote(c.txOpts, big.NewInt(e), [32]byte(merkleRoot))
+	return err
 }
 
 func (c *votingCronjob) getEpochIndex(t time.Time) int64 {
@@ -144,16 +165,4 @@ func (c *votingCronjob) getEpochBounds(epoch int64) (start, end time.Time) {
 	start = time.Unix(c.start+(epoch*c.interval), 0)
 	end = start.Add(time.Duration(c.interval) * time.Second)
 	return
-}
-
-func getMerkleRoot(votingData []database.PChainTxData) (common.Hash, error) {
-	tree, err := buildTree(votingData)
-	if err != nil {
-		return [32]byte{}, err
-	}
-	hash, err := tree.GetHash(0)
-	if err != nil {
-		return [32]byte{}, err
-	}
-	return hash, nil
 }

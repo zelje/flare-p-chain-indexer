@@ -60,7 +60,10 @@ func (ci *ChainIndexerBase) IndexBatch() error {
 		if ci.metrics != nil {
 			ci.metrics.Update(currentState.LastChainIndex, currentState.NextDBIndex-1, duration)
 		}
-		return nil
+
+		// Update time of last run (for other clients to know that the indexer is running)
+		currentState.UpdateTime()
+		return database.UpdateState(ci.DB, &currentState)
 	}
 
 	// Get MaxBatch containers from the chain

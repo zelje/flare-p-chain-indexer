@@ -24,6 +24,13 @@ func FormatAddressBytes(addr []byte) (string, error) {
 	return address.FormatBech32(AddressHRP, addr)
 }
 
-func ParseAddress(addr string) (string, []byte, error) {
-	return address.ParseBech32(addr)
+func ParseAddress(addr string) ([]byte, error) {
+	hrp, address, err := address.ParseBech32(addr)
+	if err != nil {
+		return nil, err
+	}
+	if hrp != AddressHRP {
+		return nil, fmt.Errorf("invalid address prefix: %s", hrp)
+	}
+	return address, nil
 }
