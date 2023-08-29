@@ -96,10 +96,15 @@ func TransactOptsFromPrivateKey(privateKey string, chainID int) (*bind.TransactO
 	return opts, nil
 }
 
-// Deduplicate txs by txID. This is necessary because the same tx can have
+type idAddressPair struct {
+	TxID         string
+	InputAddress string
+}
+
+// Deduplicate txs by (txID, address) pairs. This is necessary because the same tx can have
 // multiple UTXO inputs.
 func dedupeTxs(txs []database.PChainTxData) []database.PChainTxData {
-	txSet := make(map[string]*database.PChainTxData, len(txs))
+	txSet := make(map[idAddressPair]*database.PChainTxData, len(txs))
 
 	for i := range txs {
 		tx := &txs[i]
@@ -107,7 +112,7 @@ func dedupeTxs(txs []database.PChainTxData) []database.PChainTxData {
 			continue
 		}
 
-		txSet[*tx.TxID] = tx
+		txSet[idAddressPair{*tx.TxID, tx.InputAddress}] = tx
 	}
 
 	dedupedTxs := make([]database.PChainTxData, 0, len(txSet))
