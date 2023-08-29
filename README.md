@@ -76,11 +76,11 @@ enabled = false       # enable uptime monitoring cronjob
 timeout_seconds = 10  # call uptime service on avalanche node every ... seconds
 
 [voting_cronjob]
-enabled = false       # enable voting client
-timeout_seconds = 10  # check for new epochs every ... seconds
-epoch_start =         # start voting of voting epochs (unix timestamp)
-epoch_period =        # length of epoch in seconds
-contract_address =    # voting contract address
+enabled = false          # enable voting client
+timeout_seconds = 10     # check for new epochs every ... seconds
+epoch_start = 1693260000 # start voting of voting epochs (unix timestamp)
+epoch_period = 360       # length of epoch in seconds
+contract_address = ""    # voting contract address
 
 [mirroring_cronjob]
 enabled = false       # enable mirroring client
