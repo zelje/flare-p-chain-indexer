@@ -1,21 +1,46 @@
 # Flare P-chain Attestation Suite
 
-This code implements two projects
+This code implements two projects (compiled into two executables)
 
-* P-chain indexer (indexer)
+* P-chain clients
 * Attestation client (services)
 
-## P-chain Indexer
+## P-chain Clients
+
+The executable can be built with `go build indexer/main/indexer.go`.
+This executable consists of several clients/cronjobs which can be enabled/disabled in the configuration file.
+
+* P-chain indexer
+* Uptime monitoring cronjob
+* Voting client
+* Mirroring client
+
+### P-chain indexer
 
 The P-chain indexer periodically reads blocks from an Avalanche-Go (Flare) node with
 enabled indexing (parameter `--index-enabled` set to true) from `/ext/index/P/block` route and writes transactions and their UTXO inputs and outputs to a MySQL database.
 
-The executable can be built with `go build indexer/main/indexer.go`.
+### Uptime monitoring cronjob
+
+The uptime monitoring cronjob periodically calls the `platform.getCurrentValidators` P-chain API route and writes all current validator node IDs thogether with "connected" flag to a MySQL database.
+
+### Voting client
+
+The voting client fetches all validators or delegators starting in a particular epoch from the MySQL database, creates a Merkle tree of their data hashes, and sends a vote transaction (epoch and Merkle tree root) to the voting contract.
+This is done for all epoch not already processes or voted for.
+
+### Mirroring client
+
+Sends the data about validators in a particuler epoch to the mirror contract.
+
+### Configuration
 
 The configuration is read from `toml` file. Some configuration
 parameters can also be configured using environment variables. See the list below.
 
 Config file can be specified using the command line parameter `--config`, e.g., `./indexer --config config.local.toml`. The default config file name is `config.toml`.
+
+Below is the list of configuration parameters for all clients. Clients that are not enabled can be omitted from the config file.
 
 ```toml
 [db]
@@ -48,10 +73,21 @@ start_index = 0        # start indexing at this block height
 
 [uptime_cronjob]
 enabled = false       # enable uptime monitoring cronjob
-timeout_seconds = 10  # call uptime service on avalanche node evey
+timeout_seconds = 10  # call uptime service on avalanche node every ... seconds
+
+[voting_cronjob]
+enabled = false       # enable voting client
+timeout_seconds = 10  # check for new epochs every ... seconds
+epoch_start =         # start voting of voting epochs (unix timestamp)
+epoch_period =        # length of epoch in seconds
+contract_address =    # voting contract address
+
+[mirroring_cronjob]
+enabled = false       # enable mirroring client
+timeout_seconds = 10  # check for new epochs every ... seconds
 ```
 
-## Attestation client services
+## Attestation client services (possible future use)
 
 The following services are implemented, according to the attestation specification:
 
