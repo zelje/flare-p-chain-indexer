@@ -17,7 +17,7 @@ func (t *Timestamp) UnmarshalText(text []byte) error {
 		t.Time = parsed
 		return nil
 	}
-	// Try to parse as Unix timestamp uint64
+	// Try to parse as Unix timestamp (as integer, in seconds)
 	unixTimestamp, err := strconv.ParseInt(string(text), 10, 64)
 	if err == nil {
 		t.Time = time.Unix(unixTimestamp, 0)
