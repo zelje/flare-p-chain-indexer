@@ -118,7 +118,9 @@ func (c *votingCronjob) Call() error {
 
 		// Update state
 		state.NextDBIndex = uint64(e + 1)
-		database.UpdateState(c.db, &state)
+		if err := database.UpdateState(c.db, &state); err != nil {
+			return err
+		}
 	}
 	return nil
 }
