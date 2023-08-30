@@ -231,7 +231,7 @@ func newEpochInfo(cfg *config.EpochConfig) epochInfo {
 	return epochInfo{
 		period:        cfg.Period,
 		periodSeconds: int(cfg.Period.Seconds()),
-		start:         cfg.Start,
+		start:         cfg.Start.Time,
 	}
 }
 

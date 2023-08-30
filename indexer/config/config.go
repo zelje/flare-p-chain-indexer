@@ -2,6 +2,7 @@ package config
 
 import (
 	"flare-indexer/config"
+	"flare-indexer/utils"
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -48,8 +49,8 @@ type VotingConfig struct {
 }
 
 type EpochConfig struct {
-	Period time.Duration `toml:"epoch_period" envconfig:"EPOCH_PERIOD"`
-	Start  time.Time     `toml:"epoch_time" envconfig:"EPOCH_TIME"`
+	Period time.Duration   `toml:"epoch_period" envconfig:"EPOCH_PERIOD"`
+	Start  utils.Timestamp `toml:"epoch_time" envconfig:"EPOCH_TIME"`
 }
 
 func newConfig() *Config {
