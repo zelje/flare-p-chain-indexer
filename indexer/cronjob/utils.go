@@ -83,6 +83,10 @@ func CallPChainGetConnectedValidators(client jsonrpc.RPCClient) ([]*api.Permissi
 }
 
 func TransactOptsFromPrivateKey(privateKey string, chainID int) (*bind.TransactOpts, error) {
+	if len(privateKey) < 2 {
+		return nil, errors.New("privateKey is too short")
+	}
+
 	if privateKey[:2] == "0x" {
 		privateKey = privateKey[2:]
 	}

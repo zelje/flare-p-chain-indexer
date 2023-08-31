@@ -13,6 +13,7 @@ import (
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/pkg/errors"
 	"golang.org/x/sync/errgroup"
@@ -63,6 +64,14 @@ type mirrorJobContracts struct {
 }
 
 func initMirrorJobContracts(cfg *config.Config) (*mirrorJobContracts, error) {
+	if cfg.Mirror.MirroringContract == (common.Address{}) {
+		return nil, errors.New("mirroring contract address not set")
+	}
+
+	if cfg.VotingCronjob.ContractAddress == (common.Address{}) {
+		return nil, errors.New("voting contract address not set")
+	}
+
 	eth, err := ethclient.Dial(cfg.Chain.EthRPCURL)
 	if err != nil {
 		return nil, err
@@ -107,6 +116,8 @@ func (c *mirrorCronJob) Call() error {
 		return err
 	}
 
+	logger.Debug("mirroring epochs %d-%d", epochRange.start, epochRange.end)
+
 	idxState, err := database.FetchState(c.db, pchain.StateName)
 	if err != nil {
 		return err
@@ -119,6 +130,7 @@ func (c *mirrorCronJob) Call() error {
 			return nil
 		}
 
+		logger.Debug("mirroring epoch %d", epoch)
 		if err := c.mirrorEpoch(epoch); err != nil {
 			return err
 		}
@@ -178,6 +190,7 @@ func (c *mirrorCronJob) getEpochRange() (*epochRange, error) {
 	eg.Go(func() error {
 		startEpoch, err := c.getStartEpoch()
 		if err != nil {
+			logger.Error("error getting start epoch: %s", err)
 			return err
 		}
 
@@ -188,6 +201,7 @@ func (c *mirrorCronJob) getEpochRange() (*epochRange, error) {
 	eg.Go(func() error {
 		endEpoch, err := c.getEndEpoch(ctx)
 		if err != nil {
+			logger.Error("error getting end epoch: %s", err)
 			return err
 		}
 

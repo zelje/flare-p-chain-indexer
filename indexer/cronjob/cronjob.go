@@ -14,6 +14,7 @@ type Cronjob interface {
 
 func RunCronjob(c Cronjob) {
 	if !c.Enabled() {
+		logger.Debug("%s cronjob disabled", c.Name())
 		return
 	}
 

@@ -48,8 +48,8 @@ type VotingConfig struct {
 }
 
 type EpochConfig struct {
-	Period time.Duration `toml:"epoch_period" envconfig:"EPOCH_PERIOD"`
-	Start  time.Time     `toml:"epoch_time" envconfig:"EPOCH_TIME"`
+	Period time.Duration `toml:"period" envconfig:"EPOCH_PERIOD"`
+	Start  time.Time     `toml:"start" envconfig:"EPOCH_START"`
 }
 
 func newConfig() *Config {
