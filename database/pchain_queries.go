@@ -186,19 +186,17 @@ func FetchPChainVotingData(db *gorm.DB, from time.Time, to time.Time) ([]PChainT
 	return data, query.Error
 }
 
-type GetUnmirroredPChainTxsInput struct {
+type GetPChainTxsForEpochInput struct {
 	DB             *gorm.DB
 	StartTimestamp time.Time
 	EndTimestamp   time.Time
 }
 
-func GetUnmirroredPChainTxs(in *GetUnmirroredPChainTxsInput) ([]PChainTxData, error) {
+func GetPChainTxsForEpoch(in *GetPChainTxsForEpochInput) ([]PChainTxData, error) {
 	var txs []PChainTxData
 	err := in.DB.
 		Table("p_chain_txes").
 		Joins("left join p_chain_tx_inputs as inputs on inputs.tx_id = p_chain_txes.tx_id").
-		Where("p_chain_txes.block_type = ?", PChainStandardBlock).
-		Where("p_chain_txes.mirrored = ?", false).
 		Where("p_chain_txes.start_time >= ?", in.StartTimestamp).
 		Where("p_chain_txes.start_time < ?", in.EndTimestamp).
 		Where(
@@ -213,15 +211,4 @@ func GetUnmirroredPChainTxs(in *GetUnmirroredPChainTxsInput) ([]PChainTxData, er
 	}
 
 	return txs, nil
-}
-
-func MarkTxsAsMirrored(db *gorm.DB, txs []PChainTxData) error {
-	newTxs := make([]PChainTx, len(txs))
-
-	for i := range txs {
-		newTxs[i] = txs[i].PChainTx
-		newTxs[i].Mirrored = true
-	}
-
-	return db.Table("p_chain_txes").Save(&newTxs).Error
 }

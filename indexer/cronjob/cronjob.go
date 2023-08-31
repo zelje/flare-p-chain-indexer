@@ -24,7 +24,7 @@ func RunCronjob(c Cronjob) {
 	for range ticker.C {
 		err := c.Call()
 		if err != nil {
-			logger.Error("%s cronjob error %v", c.Name, err)
+			logger.Error("%s cronjob error %s", c.Name(), err.Error())
 		}
 	}
 }

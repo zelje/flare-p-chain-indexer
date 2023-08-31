@@ -190,7 +190,6 @@ func (c *mirrorCronJob) getEpochRange() (*epochRange, error) {
 	eg.Go(func() error {
 		startEpoch, err := c.getStartEpoch()
 		if err != nil {
-			logger.Error("error getting start epoch: %s", err)
 			return err
 		}
 
@@ -201,7 +200,6 @@ func (c *mirrorCronJob) getEpochRange() (*epochRange, error) {
 	eg.Go(func() error {
 		endEpoch, err := c.getEndEpoch(ctx)
 		if err != nil {
-			logger.Error("error getting end epoch: %s", err)
 			return err
 		}
 
@@ -272,10 +270,6 @@ func (c *mirrorCronJob) mirrorEpoch(epoch int64) error {
 		return err
 	}
 
-	if err := database.MarkTxsAsMirrored(c.db, txs); err != nil {
-		return err
-	}
-
 	logger.Debug("successfully mirrored %d txs", len(txs))
 	return nil
 }
@@ -283,7 +277,7 @@ func (c *mirrorCronJob) mirrorEpoch(epoch int64) error {
 func (c *mirrorCronJob) getUnmirroredTxs(epoch int64) ([]database.PChainTxData, error) {
 	startTimestamp, endTimestamp := c.epochs.getTimeRange(epoch)
 
-	txs, err := database.GetUnmirroredPChainTxs(&database.GetUnmirroredPChainTxsInput{
+	txs, err := database.GetPChainTxsForEpoch(&database.GetPChainTxsForEpochInput{
 		DB:             c.db,
 		StartTimestamp: startTimestamp,
 		EndTimestamp:   endTimestamp,
@@ -328,7 +322,7 @@ func (c *mirrorCronJob) mirrorTx(in *mirrorTxInput) error {
 		return err
 	}
 
-	merkleProof, err := getMerkleProof(in.merkleTree, stakeData.TxId)
+	merkleProof, err := getMerkleProof(in.merkleTree, in.tx)
 	if err != nil {
 		return err
 	}
@@ -354,8 +348,13 @@ func getTxType(txType database.PChainTxType) (uint8, error) {
 	}
 }
 
-func getMerkleProof(merkleTree merkle.Tree, txHash [32]byte) ([][32]byte, error) {
-	proof, err := merkleTree.GetProofFromHash(txHash)
+func getMerkleProof(merkleTree merkle.Tree, tx *database.PChainTxData) ([][32]byte, error) {
+	hash, err := hashTransaction(tx)
+	if err != nil {
+		return nil, err
+	}
+
+	proof, err := merkleTree.GetProofFromHash(hash)
 	if err != nil {
 		return nil, errors.Wrap(err, "merkleTree.GetProof")
 	}

@@ -6,6 +6,7 @@ import (
 	"flare-indexer/indexer/config"
 	idxCtx "flare-indexer/indexer/context"
 	"flare-indexer/indexer/pchain"
+	"flare-indexer/logger"
 	"flare-indexer/utils/contracts/voting"
 	"math/big"
 	"time"
@@ -104,8 +105,11 @@ func (c *votingCronjob) Call() error {
 		start, end := c.epochs.getTimeRange(e)
 
 		if end.After(idxState.Updated) {
+			logger.Debug("Skipping epoch %d because it is not fully indexed", e)
 			break
 		}
+
+		logger.Debug("Submitting votes for epoch %d", e)
 
 		votingData, err := database.FetchPChainVotingData(c.db, start, end)
 		if err != nil {

@@ -23,7 +23,6 @@ type PChainTx struct {
 	RewardsOwner  string          `gorm:"type:varchar(60)"` // Rewards owner address (in case of add delegator or validator transaction)
 	Memo          string          `gorm:"type:varchar(256)"`
 	Bytes         []byte          `gorm:"type:mediumblob"`
-	Mirrored      bool            `gorm:"type:tinyint(1);index"` // True if mirrored to C-chain
 	FeePercentage uint32          // Fee percentage (in case of add validator transaction)
 }
 
