@@ -75,7 +75,7 @@ func newVotingContract(cfg *config.Config) (*voting.Voting, error) {
 }
 
 func (c *votingCronjob) Name() string {
-	return "mirror"
+	return "voting"
 }
 
 func (c *votingCronjob) Enabled() bool {
