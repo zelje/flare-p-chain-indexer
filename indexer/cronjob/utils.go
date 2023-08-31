@@ -76,7 +76,7 @@ type PermissionedValidators struct {
 // Get connected validators from P-Chain, returns nil on error
 // Status is 0 if success, -1 on timeout, -2 on other error
 // Error is nil on succes or when rpc call fails in this case status is < 0
-func CallPChainGetConnectedValidators(client jsonrpc.RPCClient) ([]*api.PermissionedValidator, int8, error) {
+func CallPChainGetConnectedValidators(client jsonrpc.RPCClient) ([]*api.PermissionedValidator, database.UptimeCronjobStatus, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), ConnectionTimeout)
 	defer cancel()
 	response, err := client.Call(ctx, "platform.getCurrentValidators")
@@ -85,11 +85,11 @@ func CallPChainGetConnectedValidators(client jsonrpc.RPCClient) ([]*api.Permissi
 	case nil:
 		reply := PermissionedValidators{}
 		err = response.GetObject(&reply)
-		return reply.Validators, 0, err
+		return reply.Validators, database.UptimeCronjobStatusDisconnected, err
 	case *jsonrpc.HTTPError:
-		return nil, -2, nil
+		return nil, database.UptimeCronjobStatusServiceError, nil
 	default:
-		return nil, -1, nil
+		return nil, database.UptimeCronjobStatusTimeout, nil
 	}
 }
 

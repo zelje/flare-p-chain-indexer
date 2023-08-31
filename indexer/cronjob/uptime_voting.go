@@ -18,6 +18,10 @@ import (
 	"gorm.io/gorm"
 )
 
+var (
+	errNoEpochsToAggregate = errors.New("no epochs to aggregate")
+)
+
 type uptimeVotingCronjob struct {
 	// General cronjob settings (read from config for uptime cronjob)
 	enabled bool
@@ -25,9 +29,6 @@ type uptimeVotingCronjob struct {
 
 	// epoch start timestamp (unix seconds)
 	epochs epochInfo
-
-	// Lock to prevent concurrent aggregation
-	running bool
 
 	// Last aggregation epoch, -1 if no aggregation has been done yet while running this instance
 	// It is set to the last finished aggregation epoch
@@ -65,7 +66,6 @@ func NewUptimeVotingCronjob(ctx context.IndexerContext) (Cronjob, error) {
 		epochs:              newEpochInfo(&ctx.Config().UptimeCronjob.EpochConfig),
 		timeout:             config.TimeoutSeconds,
 		enabled:             config.EnableVoting,
-		running:             false,
 		lastAggregatedEpoch: -1,
 		uptimeThreshold:     config.UptimeThreshold,
 		votingInterval:      config.VotingInterval,
@@ -93,88 +93,27 @@ func (c *uptimeVotingCronjob) OnStart() error {
 }
 
 func (c *uptimeVotingCronjob) Call() error {
-	if c.running {
-		return nil
-	}
-	c.running = true
-	defer func() {
-		c.running = false
-	}()
-
 	now := time.Now()
-	currentAggregationEpoch := c.epochs.getEpochIndex(now)
-	lastEpochToAggregate := currentAggregationEpoch - 1
-
-	// If we are sure that we have aggregated all the epochs up to lastEpochToAggregate, we can skip
-	if lastEpochToAggregate < 0 || lastEpochToAggregate <= c.lastAggregatedEpoch {
-		return nil
-	}
-
-	// Last aggregation epoch (epoch of the last persisted aggregation of any node since we
-	// store all epoch aggregations at once)
-	lastAggregation, err := database.FetchLastUptimeAggregation(c.db)
+	firstEpochToAggregate, lastEpochToAggregate, err := c.aggregationRange(now)
 	if err != nil {
-		return fmt.Errorf("failed fetching last uptime aggregation %w", err)
-	}
-	var firstEpochToAggregate int64
-	if lastAggregation == nil {
-		firstEpochToAggregate = 0
-	} else {
-		firstEpochToAggregate = int64(lastAggregation.Epoch) + 1
+		if err == errNoEpochsToAggregate {
+			return nil
+		}
+		return err
 	}
 
-	aggregations := make([]*database.UptimeAggregation, 0)
+	var aggregations []*database.UptimeAggregation
+	lastAggregatedEpoch := c.lastAggregatedEpoch
 
 	// Aggregate missing epochs for all nodes
-
-	// Minimal non-aggregated epoch for each of the nodes
 	for epoch := firstEpochToAggregate; epoch <= lastEpochToAggregate; epoch++ {
-		epochStart, epochEnd := c.epochs.getTimeRange(epoch)
-
-		// Get start and end times for all staking intervals that overlap with the current epoch
-		stakingIntervals, err := fetchNodeStakingIntervals(c.db, epochStart, epochEnd)
+		nodeAggregations, err := c.aggregateEpoch(epoch)
 		if err != nil {
-			return fmt.Errorf("failed fetching node staking intervals %w", err)
+			return err
 		}
 
-		epochNodes := mapset.NewSet[string]()
-		for _, interval := range stakingIntervals {
-			epochNodes.Add(interval.nodeID)
-		}
-
-		// Aggregate each node
-		nodeAggregations := make([]*database.UptimeAggregation, 0)
-		for nodeID := range epochNodes.Iter() {
-
-			// Find (the first) staking interval for the node
-			idx := sort.Search(len(stakingIntervals), func(i int) bool {
-				return stakingIntervals[i].nodeID >= nodeID
-			})
-
-			nodeConnectedTime := int64(0)
-			stakingDuration := int64(0)
-			for ; idx < len(stakingIntervals) && stakingIntervals[idx].nodeID == nodeID; idx++ {
-				start, end := utils.IntervalIntersection(stakingIntervals[idx].start, stakingIntervals[idx].end, epochStart.Unix(), epochEnd.Unix())
-				if end <= start {
-					continue
-				}
-				ct, err := aggregateNodeUptime(c.db, nodeID, start, end)
-				if err != nil {
-					return fmt.Errorf("failed aggregating node uptime %w", err)
-				}
-				nodeConnectedTime += ct
-				stakingDuration += end - start
-			}
-
-			nodeAggregations = append(nodeAggregations, &database.UptimeAggregation{
-				NodeID:          nodeID,
-				Epoch:           int(epoch),
-				StartTime:       epochStart,
-				EndTime:         epochEnd,
-				Value:           nodeConnectedTime,
-				StakingDuration: stakingDuration,
-			})
-		}
+		// One can submit votes even if they were submitted before, so we do not need to
+		// handle potential errors when persisting the aggregations
 		submitErr := c.submitVotes(epoch, nodeAggregations)
 		if submitErr != nil {
 			logger.Error("Failed submitting uptime votes for epoch %d: %v", epoch, submitErr)
@@ -182,6 +121,7 @@ func (c *uptimeVotingCronjob) Call() error {
 		}
 
 		aggregations = append(aggregations, nodeAggregations...)
+		lastAggregatedEpoch = epoch
 		logger.Info("Aggregated uptime for epoch %d", epoch)
 	}
 
@@ -192,8 +132,94 @@ func (c *uptimeVotingCronjob) Call() error {
 	if err != nil {
 		return fmt.Errorf("failed persisting uptime aggregations %w", err)
 	}
-	c.lastAggregatedEpoch = lastEpochToAggregate
+	c.lastAggregatedEpoch = lastAggregatedEpoch
 	return nil
+}
+
+func (c *uptimeVotingCronjob) aggregationRange(now time.Time) (firstEpochToAggregate int64, lastEpochToAggregate int64, err error) {
+	currentAggregationEpoch := c.epochs.getEpochIndex(now)
+	lastEpochToAggregate = currentAggregationEpoch - 1
+
+	// If we are sure that we have aggregated all the epochs up to lastEpochToAggregate, we can skip
+	if lastEpochToAggregate < 0 || lastEpochToAggregate <= c.lastAggregatedEpoch {
+		err = errNoEpochsToAggregate
+		return
+	}
+
+	// Last aggregation epoch (epoch of the last persisted aggregation of any node since we
+	// store all epoch aggregations at once)
+	lastAggregation, dbErr := database.FetchLastUptimeAggregation(c.db)
+	if dbErr != nil {
+		err = fmt.Errorf("failed fetching last uptime aggregation %w", dbErr)
+		return
+	}
+	if lastAggregation == nil {
+		firstEpochToAggregate = 0
+	} else {
+		firstEpochToAggregate = int64(lastAggregation.Epoch) + 1
+	}
+	return
+}
+
+func (c *uptimeVotingCronjob) aggregateEpoch(epoch int64) ([]*database.UptimeAggregation, error) {
+	epochStart, epochEnd := c.epochs.getTimeRange(epoch)
+
+	// Get start and end times for all staking intervals that overlap with the current epoch
+	stakingIntervals, err := fetchNodeStakingIntervals(c.db, epochStart, epochEnd)
+	if err != nil {
+		return nil, fmt.Errorf("failed fetching node staking intervals %w", err)
+	}
+
+	epochNodes := mapset.NewSet[string]()
+	for _, interval := range stakingIntervals {
+		epochNodes.Add(interval.nodeID)
+	}
+
+	// Aggregate each node
+	nodeAggregations := make([]*database.UptimeAggregation, 0, epochNodes.Cardinality())
+	for nodeID := range epochNodes.Iter() {
+		nodeAggregation, err := c.aggregateNode(epoch, nodeID, stakingIntervals)
+		if err != nil {
+			return nil, err
+		}
+
+		nodeAggregations = append(nodeAggregations, nodeAggregation)
+	}
+	return nodeAggregations, nil
+}
+
+// Aggregate the uptime for a node in the given epoch, stakingIntervals are the staking intervals for
+// all nodes that overlap with the epoch (sorted by nodeID)
+func (c *uptimeVotingCronjob) aggregateNode(epoch int64, nodeID string, stakingIntervals []nodeStakingInterval) (*database.UptimeAggregation, error) {
+	// Find (the first) staking interval for the node
+	idx := sort.Search(len(stakingIntervals), func(i int) bool {
+		return stakingIntervals[i].nodeID >= nodeID
+	})
+
+	epochStart, epochEnd := c.epochs.getTimeRange(epoch)
+	nodeConnectedTime := int64(0)
+	stakingDuration := int64(0)
+	for ; idx < len(stakingIntervals) && stakingIntervals[idx].nodeID == nodeID; idx++ {
+		start, end := utils.IntervalIntersection(stakingIntervals[idx].start, stakingIntervals[idx].end, epochStart.Unix(), epochEnd.Unix())
+		if end <= start {
+			continue
+		}
+		ct, err := aggregateNodeUptime(c.db, nodeID, start, end)
+		if err != nil {
+			return nil, fmt.Errorf("failed aggregating node uptime %w", err)
+		}
+		nodeConnectedTime += ct
+		stakingDuration += end - start
+	}
+
+	return &database.UptimeAggregation{
+		NodeID:          nodeID,
+		Epoch:           int(epoch),
+		StartTime:       epochStart,
+		EndTime:         epochEnd,
+		Value:           nodeConnectedTime,
+		StakingDuration: stakingDuration,
+	}, nil
 }
 
 func (c *uptimeVotingCronjob) submitVotes(epoch int64, nodeAggregations []*database.UptimeAggregation) error {

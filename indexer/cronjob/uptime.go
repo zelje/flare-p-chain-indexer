@@ -60,7 +60,7 @@ func (c *uptimeCronjob) Call() error {
 	if status < 0 {
 		entities = []*database.UptimeCronjob{&database.UptimeCronjob{
 			NodeID:    nil,
-			Status:    database.UptimeCronjobStatus(status),
+			Status:    status,
 			Timestamp: now,
 		}}
 	} else {
