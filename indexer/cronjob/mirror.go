@@ -243,7 +243,7 @@ func (c *mirrorCronJob) getEndEpoch(ctx context.Context) (int64, error) {
 		}
 	}
 
-	return 0, errors.New("no confirmed epoch found")
+	return 0, errNoEpochsToMirror
 }
 
 func (c *mirrorCronJob) isEpochConfirmed(ctx context.Context, epoch int64) (bool, error) {
