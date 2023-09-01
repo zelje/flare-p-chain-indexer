@@ -212,3 +212,28 @@ func GetPChainTxsForEpoch(in *GetPChainTxsForEpochInput) ([]PChainTxData, error)
 
 	return txs, nil
 }
+
+func MarkTxsAsMirrored(db *gorm.DB, txs []PChainTxData) error {
+	newTxs := make([]PChainTx, len(txs))
+
+	for i := range txs {
+		newTxs[i] = txs[i].PChainTx
+		newTxs[i].Mirrored = true
+	}
+
+	return db.Table("p_chain_txes").Save(&newTxs).Error
+}
+
+// Fetches all P-chain staking transactions of type txType intersecting the given time interval
+func FetchNodeStakingIntervals(db *gorm.DB, txType PChainTxType, startTime time.Time, endTime time.Time) ([]PChainTx, error) {
+	if txType != PChainAddValidatorTx && txType != PChainAddDelegatorTx {
+		return nil, errInvalidTransactionType
+	}
+
+	var txs []PChainTx
+	err := db.Where(&PChainTx{Type: txType}).
+		Where("start_time <= ?", endTime).
+		Where("end_time >= ?", startTime).
+		Find(&txs).Error
+	return txs, err
+}
