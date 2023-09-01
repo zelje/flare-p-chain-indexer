@@ -91,7 +91,7 @@ func (xi *txBatchIndexer) addTx(container *indexer.Container, blockType database
 	dbTx.BlockID = container.ID.String()
 	dbTx.BlockType = blockType
 	dbTx.BlockHeight = height
-	dbTx.Timestamp = time.Unix(0, container.Timestamp)
+	dbTx.Timestamp = time.Unix(container.Timestamp, 0)
 	dbTx.Bytes = container.Bytes
 
 	var err error = nil
@@ -125,7 +125,7 @@ func (xi *txBatchIndexer) addEmptyTx(container *indexer.Container, blockType dat
 	dbTx.BlockID = container.ID.String()
 	dbTx.BlockType = blockType
 	dbTx.BlockHeight = height
-	dbTx.Timestamp = time.Unix(0, container.Timestamp)
+	dbTx.Timestamp = time.Unix(container.Timestamp, 0)
 	dbTx.Bytes = container.Bytes
 	dbTx.TxID = nil
 
