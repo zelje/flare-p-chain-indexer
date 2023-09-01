@@ -13,6 +13,7 @@ import (
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/pkg/errors"
 	"golang.org/x/sync/errgroup"
@@ -63,6 +64,14 @@ type mirrorJobContracts struct {
 }
 
 func initMirrorJobContracts(cfg *config.Config) (*mirrorJobContracts, error) {
+	if cfg.Mirror.MirroringContract == (common.Address{}) {
+		return nil, errors.New("mirroring contract address not set")
+	}
+
+	if cfg.VotingCronjob.ContractAddress == (common.Address{}) {
+		return nil, errors.New("voting contract address not set")
+	}
+
 	eth, err := ethclient.Dial(cfg.Chain.EthRPCURL)
 	if err != nil {
 		return nil, err
@@ -111,6 +120,8 @@ func (c *mirrorCronJob) Call() error {
 		return err
 	}
 
+	logger.Debug("mirroring epochs %d-%d", epochRange.start, epochRange.end)
+
 	idxState, err := database.FetchState(c.db, pchain.StateName)
 	if err != nil {
 		return err
@@ -123,6 +134,7 @@ func (c *mirrorCronJob) Call() error {
 			return nil
 		}
 
+		logger.Debug("mirroring epoch %d", epoch)
 		if err := c.mirrorEpoch(epoch); err != nil {
 			return err
 		}
@@ -233,7 +245,7 @@ func (c *mirrorCronJob) getEndEpoch(ctx context.Context) (int64, error) {
 		}
 	}
 
-	return 0, errors.New("no confirmed epoch found")
+	return 0, errNoEpochsToMirror
 }
 
 func (c *mirrorCronJob) isEpochConfirmed(ctx context.Context, epoch int64) (bool, error) {
@@ -262,10 +274,6 @@ func (c *mirrorCronJob) mirrorEpoch(epoch int64) error {
 		return err
 	}
 
-	if err := database.MarkTxsAsMirrored(c.db, txs); err != nil {
-		return err
-	}
-
 	logger.Debug("successfully mirrored %d txs", len(txs))
 	return nil
 }
@@ -273,7 +281,7 @@ func (c *mirrorCronJob) mirrorEpoch(epoch int64) error {
 func (c *mirrorCronJob) getUnmirroredTxs(epoch int64) ([]database.PChainTxData, error) {
 	startTimestamp, endTimestamp := c.epochs.getTimeRange(epoch)
 
-	txs, err := database.GetUnmirroredPChainTxs(&database.GetUnmirroredPChainTxsInput{
+	txs, err := database.GetPChainTxsForEpoch(&database.GetPChainTxsForEpochInput{
 		DB:             c.db,
 		StartTimestamp: startTimestamp,
 		EndTimestamp:   endTimestamp,
@@ -318,7 +326,7 @@ func (c *mirrorCronJob) mirrorTx(in *mirrorTxInput) error {
 		return err
 	}
 
-	merkleProof, err := getMerkleProof(in.merkleTree, stakeData.TxId)
+	merkleProof, err := getMerkleProof(in.merkleTree, in.tx)
 	if err != nil {
 		return err
 	}
@@ -344,8 +352,13 @@ func getTxType(txType database.PChainTxType) (uint8, error) {
 	}
 }
 
-func getMerkleProof(merkleTree merkle.Tree, txHash [32]byte) ([][32]byte, error) {
-	proof, err := merkleTree.GetProofFromHash(txHash)
+func getMerkleProof(merkleTree merkle.Tree, tx *database.PChainTxData) ([][32]byte, error) {
+	hash, err := hashTransaction(tx)
+	if err != nil {
+		return nil, err
+	}
+
+	proof, err := merkleTree.GetProofFromHash(hash)
 	if err != nil {
 		return nil, errors.Wrap(err, "merkleTree.GetProof")
 	}

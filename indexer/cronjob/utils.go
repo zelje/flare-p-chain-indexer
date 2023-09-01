@@ -94,6 +94,10 @@ func CallPChainGetConnectedValidators(client jsonrpc.RPCClient) ([]*api.Permissi
 }
 
 func TransactOptsFromPrivateKey(privateKey string, chainID int) (*bind.TransactOpts, error) {
+	if len(privateKey) < 2 {
+		return nil, errors.New("privateKey is too short")
+	}
+
 	if privateKey[:2] == "0x" {
 		privateKey = privateKey[2:]
 	}
@@ -208,20 +212,28 @@ func buildTree(txs []database.PChainTxData) (merkle.Tree, error) {
 	hashes := make([]common.Hash, len(txs))
 
 	for i := range txs {
-		tx := &txs[i]
-
-		if tx.TxID == nil {
-			return merkle.Tree{}, errors.New("tx.TxID is nil")
-		}
-
-		encodedBytes, err := encodeTreeItem(tx)
+		hash, err := hashTransaction(&txs[i])
 		if err != nil {
-			return merkle.Tree{}, errors.Wrap(err, "encodeTreeItem")
+			return merkle.Tree{}, errors.Wrap(err, "getTxHash")
 		}
-		hashes[i] = crypto.Keccak256Hash(encodedBytes)
+
+		hashes[i] = hash
 	}
 
 	return merkle.Build(hashes, false), nil
+}
+
+func hashTransaction(tx *database.PChainTxData) (common.Hash, error) {
+	if tx.TxID == nil {
+		return common.Hash{}, errors.New("tx.TxID is nil")
+	}
+
+	encodedBytes, err := encodeTreeItem(tx)
+	if err != nil {
+		return common.Hash{}, errors.Wrap(err, "encodeTreeItem")
+	}
+
+	return crypto.Keccak256Hash(encodedBytes), nil
 }
 
 func getMerkleRoot(votingData []database.PChainTxData) (common.Hash, error) {

@@ -15,6 +15,7 @@ type Cronjob interface {
 
 func RunCronjob(c Cronjob) {
 	if !c.Enabled() {
+		logger.Debug("%s cronjob disabled", c.Name())
 		return
 	}
 
@@ -30,7 +31,7 @@ func RunCronjob(c Cronjob) {
 	for range ticker.C {
 		err := c.Call()
 		if err != nil {
-			logger.Error("%s cronjob error %v", c.Name, err)
+			logger.Error("%s cronjob error %s", c.Name(), err.Error())
 		}
 	}
 }
