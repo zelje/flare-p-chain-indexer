@@ -83,3 +83,9 @@ func FetchUptimes(db *gorm.DB, nodeIDs []string, start time.Time, end time.Time)
 	err := query.Find(&uptimes).Error
 	return uptimes, err
 }
+
+func FetchAggregations(db *gorm.DB) ([]*UptimeAggregation, error) {
+	var aggregations []*UptimeAggregation
+	err := db.Find(&aggregations).Error
+	return aggregations, err
+}

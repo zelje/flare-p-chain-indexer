@@ -33,7 +33,7 @@ func TestUptimeClient(t *testing.T) {
 		t.Fatalf("expected 3 validators, got %d", len(validators))
 	}
 
-	index := slices.IndexFunc(validators, func(v ValidatorStatus) bool {
+	index := slices.IndexFunc(validators, func(v *ValidatorStatus) bool {
 		return v.NodeID == "NodeID-MFrZFVCXPv5iCn6M9K6XduxGTYp891xXZ"
 	})
 	if index < 0 {
