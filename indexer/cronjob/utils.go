@@ -1,7 +1,6 @@
 package cronjob
 
 import (
-	"context"
 	"flare-indexer/database"
 	"flare-indexer/indexer/config"
 	"flare-indexer/utils"
@@ -11,17 +10,11 @@ import (
 	"time"
 
 	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/vms/platformvm/api"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/pkg/errors"
-	"github.com/ybbus/jsonrpc/v3"
-)
-
-const (
-	ConnectionTimeout = 3 * time.Second
 )
 
 var (
@@ -66,30 +59,6 @@ func init() {
 			Name: "weight",
 			Type: uint64Ty,
 		},
-	}
-}
-
-type PermissionedValidators struct {
-	Validators []*api.PermissionedValidator
-}
-
-// Get connected validators from P-Chain, returns nil on error
-// Status is 0 if success, -1 on timeout, -2 on other error
-// Error is nil on succes or when rpc call fails in this case status is < 0
-func CallPChainGetConnectedValidators(client jsonrpc.RPCClient) ([]*api.PermissionedValidator, database.UptimeCronjobStatus, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), ConnectionTimeout)
-	defer cancel()
-	response, err := client.Call(ctx, "platform.getCurrentValidators")
-
-	switch err.(type) {
-	case nil:
-		reply := PermissionedValidators{}
-		err = response.GetObject(&reply)
-		return reply.Validators, database.UptimeCronjobStatusDisconnected, err
-	case *jsonrpc.HTTPError:
-		return nil, database.UptimeCronjobStatusServiceError, nil
-	default:
-		return nil, database.UptimeCronjobStatusTimeout, nil
 	}
 }
 

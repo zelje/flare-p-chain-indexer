@@ -94,3 +94,13 @@ func TestPChainBlockIndexerPartial(t *testing.T) {
 	}
 
 }
+
+func TestIndexAllBlocks(t *testing.T) {
+	idxr := createPChainTestBlockIndexer(t, 200, 0)
+
+	// run batch
+	err := idxr.IndexBatch()
+	if err != nil {
+		t.Fatal(err)
+	}
+}

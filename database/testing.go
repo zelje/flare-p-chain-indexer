@@ -3,6 +3,7 @@ package database
 import (
 	"flare-indexer/config"
 	"fmt"
+	"time"
 
 	"github.com/go-sql-driver/mysql"
 	gormMysql "gorm.io/driver/mysql"
@@ -69,4 +70,16 @@ func FetchTransactionsByBlockHeights(db *gorm.DB, heights []uint64) ([]*PChainTx
 	var transactions []*PChainTx
 	err := db.Where("block_height IN ?", heights).Find(&transactions).Error
 	return transactions, err
+}
+
+func FetchUptimes(db *gorm.DB, nodeIDs []string, start time.Time, end time.Time) ([]*UptimeCronjob, error) {
+	var uptimes []*UptimeCronjob
+	query := db.Table("uptime_cronjobs").
+		Where("timestamp >= ?", start).
+		Where("timestamp < ?", end)
+	if len(nodeIDs) > 0 {
+		query = query.Where("node_id IN ?", nodeIDs)
+	}
+	err := query.Find(&uptimes).Error
+	return uptimes, err
 }

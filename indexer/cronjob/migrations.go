@@ -15,7 +15,7 @@ func init() {
 
 func createVotingCronjobState(db *gorm.DB) error {
 	return database.CreateState(db, &database.State{
-		Name:           VotingStateName,
+		Name:           votingStateName,
 		NextDBIndex:    0,
 		LastChainIndex: 0,
 		Updated:        time.Now(),

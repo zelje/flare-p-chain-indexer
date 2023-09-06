@@ -19,7 +19,7 @@ import (
 )
 
 const (
-	VotingStateName string = "voting_cronjob"
+	votingStateName string = "voting_cronjob"
 )
 
 var (
@@ -96,7 +96,7 @@ func (c *votingCronjob) Call() error {
 	if err != nil {
 		return err
 	}
-	state, err := database.FetchState(c.db, VotingStateName)
+	state, err := database.FetchState(c.db, votingStateName)
 	if err != nil {
 		return err
 	}
