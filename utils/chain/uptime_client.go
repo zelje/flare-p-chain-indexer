@@ -117,7 +117,7 @@ func (c *RecordedUptimeClient) GetValidatorStatus() ([]ValidatorStatus, database
 			} else {
 				// Prefer disconnected over connected
 				if data.Connected == 0 {
-					v.Connected = data.Connected == 0
+					v.Connected = false
 				}
 			}
 		}

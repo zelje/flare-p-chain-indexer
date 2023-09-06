@@ -52,10 +52,20 @@ func TestUptime(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	testUptimeClient.SetNow(utils.ParseTime("2023-02-02T14:29:50Z"))
+
+	now := utils.ParseTime("2023-02-02T14:29:50Z")
+	testUptimeClient.SetNow(now)
 
 	for i := 0; i < 100; i++ {
 		cronjob.Call()
 		testUptimeClient.Time.AdvanceNow(30 * time.Second)
+	}
+
+	uptimes, err := database.FetchUptimes(cronjob.db, []string{}, now, now.Add(31*time.Second))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(uptimes) != 6 {
+		t.Fatalf("expected 6 uptimes, got %d", len(uptimes))
 	}
 }
