@@ -299,6 +299,10 @@ func (c *mirrorCronJob) mirrorTxs(txs []database.PChainTxData, epochID int64) er
 		return err
 	}
 
+	if err := c.checkMerkleRoot(merkleTree, epochID); err != nil {
+		return err
+	}
+
 	for i := range txs {
 		in := mirrorTxInput{
 			epochID:    big.NewInt(epochID),
@@ -309,6 +313,24 @@ func (c *mirrorCronJob) mirrorTxs(txs []database.PChainTxData, epochID int64) er
 		if err := c.mirrorTx(&in); err != nil {
 			return err
 		}
+	}
+
+	return nil
+}
+
+func (c *mirrorCronJob) checkMerkleRoot(tree merkle.Tree, epoch int64) error {
+	root, err := tree.Root()
+	if err != nil {
+		return err
+	}
+
+	contractRoot, err := c.votingContract.GetMerkleRoot(new(bind.CallOpts), big.NewInt(epoch))
+	if err != nil {
+		return errors.Wrap(err, "votingContract.GetMerkleRoot")
+	}
+
+	if root != contractRoot {
+		return errors.Errorf("merkle root mismatch: got %x, expected %x", root, contractRoot)
 	}
 
 	return nil
