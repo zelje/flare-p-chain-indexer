@@ -67,3 +67,13 @@ func RPCClientOptions(apiKey string) string {
 		return "?x-apikey=" + apiKey
 	}
 }
+
+// Convert timestamp in nanoseconds or seconds to time.Time
+// Timestamps less than 253370764800 (9999-01-01T00:00:00Z) are considered to be in seconds
+func TimestampToTime(timestamp int64) time.Time {
+	if timestamp < 253370764800 {
+		return time.Unix(timestamp, 0)
+	} else {
+		return time.Unix(0, timestamp)
+	}
+}

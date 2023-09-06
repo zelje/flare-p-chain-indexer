@@ -6,9 +6,7 @@ import (
 	"flare-indexer/indexer/context"
 	"flare-indexer/utils"
 	"flare-indexer/utils/chain"
-	"time"
 
-	"github.com/ybbus/jsonrpc/v3"
 	"gorm.io/gorm"
 )
 
@@ -16,15 +14,15 @@ type uptimeCronjob struct {
 	config config.UptimeConfig
 	db     *gorm.DB
 
-	client jsonrpc.RPCClient
+	client chain.UptimeClient
 }
 
 func NewUptimeCronjob(ctx context.IndexerContext) Cronjob {
-	client := jsonrpc.NewClient(utils.JoinPaths(ctx.Config().Chain.NodeURL, "ext/bc/P"+chain.RPCClientOptions(ctx.Config().Chain.ApiKey)))
+	endpoint := utils.JoinPaths(ctx.Config().Chain.NodeURL, "ext/bc/P"+chain.RPCClientOptions(ctx.Config().Chain.ApiKey))
 	return &uptimeCronjob{
 		config: ctx.Config().UptimeCronjob,
 		db:     ctx.DB(),
-		client: client,
+		client: chain.NewAvalancheUptimeClient(endpoint),
 	}
 }
 
@@ -44,18 +42,17 @@ func (c *uptimeCronjob) OnStart() error {
 	entities := []*database.UptimeCronjob{&database.UptimeCronjob{
 		NodeID:    nil,
 		Status:    database.UptimeCronjobStatusIndexerStarted,
-		Timestamp: time.Now(),
+		Timestamp: c.client.Now(),
 	}}
 	return database.CreateUptimeCronjobEntry(c.db, entities)
 }
 
 func (c *uptimeCronjob) Call() error {
-	validators, status, err := CallPChainGetConnectedValidators(c.client)
+	validators, status, err := c.client.GetValidatorStatus()
 	if err != nil {
 		return err
 	}
-
-	now := time.Now()
+	now := c.client.Now()
 	var entities []*database.UptimeCronjob
 	if status < 0 {
 		entities = []*database.UptimeCronjob{&database.UptimeCronjob{
@@ -66,7 +63,7 @@ func (c *uptimeCronjob) Call() error {
 	} else {
 		entities = make([]*database.UptimeCronjob, len(validators))
 		for i, v := range validators {
-			nodeID := v.NodeID.String()
+			nodeID := v.NodeID
 			var status database.UptimeCronjobStatus
 			if v.Connected {
 				status = database.UptimeCronjobStatusConnected
