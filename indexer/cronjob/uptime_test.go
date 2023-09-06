@@ -57,7 +57,9 @@ func TestUptime(t *testing.T) {
 	testUptimeClient.SetNow(now)
 
 	for i := 0; i < 100; i++ {
-		cronjob.Call()
+		if err := cronjob.Call(); err != nil {
+			t.Fatal(err)
+		}
 		testUptimeClient.Time.AdvanceNow(30 * time.Second)
 	}
 

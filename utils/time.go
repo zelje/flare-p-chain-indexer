@@ -7,12 +7,12 @@ type ShiftedTime struct {
 }
 
 func NewShiftedTime(startNow time.Time) *ShiftedTime {
-	shift := startNow.Sub(time.Now())
+	shift := time.Until(startNow)
 	return &ShiftedTime{Shift: shift}
 }
 
 func (s *ShiftedTime) SetNow(startNow time.Time) {
-	s.Shift = startNow.Sub(time.Now())
+	s.Shift = time.Until(startNow)
 }
 
 func (s *ShiftedTime) Now() time.Time {
