@@ -1,0 +1,12 @@
+([]string) (len=4) {
+  (string) (len=40) "NodeID-GWPcbFJZFfZreETSoWjPimr846mXEKCtu",
+  (string) (len=40) "NodeID-MFrZFVCXPv5iCn6M9K6XduxGTYp891xXZ",
+  (string) (len=40) "NodeID-NFBbbJ4qCmNaCzeW7sxErhvWqvEQMnYcN",
+  (string) (len=40) "NodeID-P7oB2McjBGgW2NXXWVYjV8JEDFoW9xDE5"
+}
+([]int64) (len=4) {
+  (int64) 90,
+  (int64) 90,
+  (int64) 90,
+  (int64) 40
+}
