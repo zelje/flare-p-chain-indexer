@@ -4,12 +4,13 @@ import (
 	"context"
 	"flare-indexer/database"
 	"flare-indexer/indexer/config"
-	idxCtx "flare-indexer/indexer/context"
+	indexerctx "flare-indexer/indexer/context"
 	"flare-indexer/indexer/pchain"
 	"flare-indexer/logger"
+	"flare-indexer/utils"
 	"flare-indexer/utils/contracts/voting"
+	"fmt"
 	"math/big"
-	"time"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
@@ -38,11 +39,13 @@ type votingCronjob struct {
 	db             *gorm.DB
 	votingContract *voting.Voting
 	txOpts         *bind.TransactOpts
+
+	// For testing to set "now" to some past date
+	time utils.ShiftedTime
 }
 
-func NewVotingCronjob(ctx idxCtx.IndexerContext) (Cronjob, error) {
+func NewVotingCronjob(ctx indexerctx.IndexerContext) (*votingCronjob, error) {
 	cfg := ctx.Config()
-
 	if !cfg.VotingCronjob.Enabled {
 		return &votingCronjob{}, nil
 	}
@@ -100,7 +103,7 @@ func (c *votingCronjob) Call() error {
 	if err != nil {
 		return err
 	}
-	now := time.Now()
+	now := c.time.Now()
 
 	// Last epoch that was submitted to the contract
 	nextEpochToSubmit := state.NextDBIndex
@@ -113,8 +116,6 @@ func (c *votingCronjob) Call() error {
 			break
 		}
 
-		logger.Debug("Submitting votes for epoch %d", e)
-
 		votingData, err := database.FetchPChainVotingData(c.db, start, end)
 		if err != nil {
 			return err
@@ -123,6 +124,8 @@ func (c *votingCronjob) Call() error {
 		if err != nil {
 			return err
 		}
+		logger.Debug("Submitted votes for epoch %d", e)
+		fmt.Printf("Submitted votes for epoch %d\n", e)
 
 		// Update state
 		state.NextDBIndex = uint64(e + 1)
