@@ -9,7 +9,6 @@ import (
 	"flare-indexer/logger"
 	"flare-indexer/utils"
 	"flare-indexer/utils/contracts/voting"
-	"fmt"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -125,7 +124,6 @@ func (c *votingCronjob) Call() error {
 			return err
 		}
 		logger.Debug("Submitted votes for epoch %d", e)
-		fmt.Printf("Submitted votes for epoch %d\n", e)
 
 		// Update state
 		state.NextDBIndex = uint64(e + 1)

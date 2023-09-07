@@ -6,9 +6,11 @@ import (
 	indexerctx "flare-indexer/indexer/context"
 	"flare-indexer/indexer/pchain"
 	"flare-indexer/logger"
+	"flare-indexer/utils"
 	"flare-indexer/utils/contracts/mirroring"
 	"flare-indexer/utils/contracts/voting"
 	"flare-indexer/utils/merkle"
+	"fmt"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -27,9 +29,10 @@ type mirrorCronJob struct {
 	mirroringContract *mirroring.Mirroring
 	txOpts            *bind.TransactOpts
 	votingContract    *voting.Voting
+	time              utils.ShiftedTime
 }
 
-func NewMirrorCronjob(ctx indexerctx.IndexerContext) (Cronjob, error) {
+func NewMirrorCronjob(ctx indexerctx.IndexerContext) (*mirrorCronJob, error) {
 	cfg := ctx.Config()
 
 	if !cfg.Mirror.Enabled {
@@ -206,7 +209,7 @@ func (c *mirrorCronJob) getStartEpoch() (int64, error) {
 }
 
 func (c *mirrorCronJob) getEndEpoch(startEpoch int64) (int64, error) {
-	currEpoch := c.epochs.getCurrentEpoch()
+	currEpoch := c.epochs.getEpochIndex(c.time.Now())
 	logger.Debug("current epoch: %d", currEpoch)
 
 	for epoch := currEpoch; epoch > startEpoch; epoch-- {
@@ -303,6 +306,8 @@ func (c *mirrorCronJob) checkMerkleRoot(tree merkle.Tree, epoch int64) error {
 		return errors.Wrap(err, "votingContract.GetMerkleRoot")
 	}
 
+	fmt.Printf("Merkle root mirror: %x\n", root)
+
 	if root != contractRoot {
 		return errors.Errorf("merkle root mismatch: got %x, expected %x", root, contractRoot)
 	}
@@ -329,7 +334,7 @@ func (c *mirrorCronJob) mirrorTx(in *mirrorTxInput) error {
 
 	_, err = c.mirroringContract.MirrorStake(c.txOpts, *stakeData, merkleProof)
 	if err != nil {
-		return errors.Wrap(err, "mirroringContract.VerifyStake")
+		return errors.Wrap(err, "mirroringContract.MirrorStake")
 	}
 
 	return nil
