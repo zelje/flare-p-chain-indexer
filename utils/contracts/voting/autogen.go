@@ -37,7 +37,7 @@ type IPChainStakeMirrorMultiSigVotingPChainVotes struct {
 
 // VotingMetaData contains all meta data concerning the Voting contract.
 var VotingMetaData = &bind.MetaData{
-	ABI: "[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_governance\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_firstEpochStartTs\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_epochDurationSeconds\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_votingThreshold\",\"type\":\"uint256\"},{\"internalType\":\"address[]\",\"name\":\"_voters\",\"type\":\"address[]\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes4\",\"name\":\"selector\",\"type\":\"bytes4\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"allowedAfterTimestamp\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"encodedCall\",\"type\":\"bytes\"}],\"name\":\"GovernanceCallTimelocked\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"initialGovernance\",\"type\":\"address\"}],\"name\":\"GovernanceInitialised\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"governanceSettings\",\"type\":\"address\"}],\"name\":\"GovernedProductionModeEntered\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"epochId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"voter\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"merkleRoot\",\"type\":\"bytes32\"}],\"name\":\"PChainStakeMirrorVoteSubmitted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"voters\",\"type\":\"address[]\"}],\"name\":\"PChainStakeMirrorVotersSet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"epochId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"merkleRoot\",\"type\":\"bytes32\"}],\"name\":\"PChainStakeMirrorVotingFinalized\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"epochId\",\"type\":\"uint256\"}],\"name\":\"PChainStakeMirrorVotingReset\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"votingThreshold\",\"type\":\"uint256\"}],\"name\":\"PChainStakeMirrorVotingThresholdSet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes4\",\"name\":\"selector\",\"type\":\"bytes4\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"timestamp\",\"type\":\"uint256\"}],\"name\":\"TimelockedGovernanceCallCanceled\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes4\",\"name\":\"selector\",\"type\":\"bytes4\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"timestamp\",\"type\":\"uint256\"}],\"name\":\"TimelockedGovernanceCallExecuted\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"_selector\",\"type\":\"bytes4\"}],\"name\":\"cancelGovernanceCall\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address[]\",\"name\":\"_newVotersList\",\"type\":\"address[]\"}],\"name\":\"changeVoters\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"_selector\",\"type\":\"bytes4\"}],\"name\":\"executeGovernanceCall\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getCurrentEpochId\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getEpochConfiguration\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"_firstEpochStartTs\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_epochDurationSeconds\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_timestamp\",\"type\":\"uint256\"}],\"name\":\"getEpochId\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_epochId\",\"type\":\"uint256\"}],\"name\":\"getMerkleRoot\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getVoters\",\"outputs\":[{\"internalType\":\"address[]\",\"name\":\"\",\"type\":\"address[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_epochId\",\"type\":\"uint256\"}],\"name\":\"getVotes\",\"outputs\":[{\"components\":[{\"internalType\":\"bytes32\",\"name\":\"merkleRoot\",\"type\":\"bytes32\"},{\"internalType\":\"address[]\",\"name\":\"votes\",\"type\":\"address[]\"}],\"internalType\":\"structIPChainStakeMirrorMultiSigVoting.PChainVotes[]\",\"name\":\"\",\"type\":\"tuple[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getVotingThreshold\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"governance\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"governanceSettings\",\"outputs\":[{\"internalType\":\"contractIGovernanceSettings\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_initialGovernance\",\"type\":\"address\"}],\"name\":\"initialise\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"productionMode\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_epochId\",\"type\":\"uint256\"}],\"name\":\"resetVoting\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_votingThreshold\",\"type\":\"uint256\"}],\"name\":\"setVotingThreshold\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_epochId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"_voter\",\"type\":\"address\"}],\"name\":\"shouldVote\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_epochId\",\"type\":\"uint256\"},{\"internalType\":\"bytes20[]\",\"name\":\"_nodeIds\",\"type\":\"bytes20[]\"}],\"name\":\"submitValidatorUptimeVote\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_epochId\",\"type\":\"uint256\"},{\"internalType\":\"bytes32\",\"name\":\"_merkleRoot\",\"type\":\"bytes32\"}],\"name\":\"submitVote\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"switchToProductionMode\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"\",\"type\":\"bytes4\"}],\"name\":\"timelockedCalls\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"allowedAfterTimestamp\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"encodedCall\",\"type\":\"bytes\"}],\"stateMutability\":\"view\",\"type\":\"function\"}]",
+	ABI: "[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_governance\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_firstEpochStartTs\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_epochDurationSeconds\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_votingThreshold\",\"type\":\"uint256\"},{\"internalType\":\"address[]\",\"name\":\"_voters\",\"type\":\"address[]\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes4\",\"name\":\"selector\",\"type\":\"bytes4\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"allowedAfterTimestamp\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"encodedCall\",\"type\":\"bytes\"}],\"name\":\"GovernanceCallTimelocked\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"initialGovernance\",\"type\":\"address\"}],\"name\":\"GovernanceInitialised\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"governanceSettings\",\"type\":\"address\"}],\"name\":\"GovernedProductionModeEntered\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"rewardEpochId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"timestamp\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"voter\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bytes20[]\",\"name\":\"nodeIds\",\"type\":\"bytes20[]\"}],\"name\":\"PChainStakeMirrorValidatorUptimeVoteSubmitted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"epochId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"voter\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"merkleRoot\",\"type\":\"bytes32\"}],\"name\":\"PChainStakeMirrorVoteSubmitted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"voters\",\"type\":\"address[]\"}],\"name\":\"PChainStakeMirrorVotersSet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"epochId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"merkleRoot\",\"type\":\"bytes32\"}],\"name\":\"PChainStakeMirrorVotingFinalized\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"epochId\",\"type\":\"uint256\"}],\"name\":\"PChainStakeMirrorVotingReset\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"votingThreshold\",\"type\":\"uint256\"}],\"name\":\"PChainStakeMirrorVotingThresholdSet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes4\",\"name\":\"selector\",\"type\":\"bytes4\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"timestamp\",\"type\":\"uint256\"}],\"name\":\"TimelockedGovernanceCallCanceled\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes4\",\"name\":\"selector\",\"type\":\"bytes4\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"timestamp\",\"type\":\"uint256\"}],\"name\":\"TimelockedGovernanceCallExecuted\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"_selector\",\"type\":\"bytes4\"}],\"name\":\"cancelGovernanceCall\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address[]\",\"name\":\"_newVotersList\",\"type\":\"address[]\"}],\"name\":\"changeVoters\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"_selector\",\"type\":\"bytes4\"}],\"name\":\"executeGovernanceCall\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getCurrentEpochId\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getEpochConfiguration\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"_firstEpochStartTs\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_epochDurationSeconds\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_timestamp\",\"type\":\"uint256\"}],\"name\":\"getEpochId\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_epochId\",\"type\":\"uint256\"}],\"name\":\"getMerkleRoot\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getVoters\",\"outputs\":[{\"internalType\":\"address[]\",\"name\":\"\",\"type\":\"address[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_epochId\",\"type\":\"uint256\"}],\"name\":\"getVotes\",\"outputs\":[{\"components\":[{\"internalType\":\"bytes32\",\"name\":\"merkleRoot\",\"type\":\"bytes32\"},{\"internalType\":\"address[]\",\"name\":\"votes\",\"type\":\"address[]\"}],\"internalType\":\"structIPChainStakeMirrorMultiSigVoting.PChainVotes[]\",\"name\":\"\",\"type\":\"tuple[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getVotingThreshold\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"governance\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"governanceSettings\",\"outputs\":[{\"internalType\":\"contractIGovernanceSettings\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_initialGovernance\",\"type\":\"address\"}],\"name\":\"initialise\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"productionMode\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_epochId\",\"type\":\"uint256\"}],\"name\":\"resetVoting\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_votingThreshold\",\"type\":\"uint256\"}],\"name\":\"setVotingThreshold\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_epochId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"_voter\",\"type\":\"address\"}],\"name\":\"shouldVote\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_rewardEpochId\",\"type\":\"uint256\"},{\"internalType\":\"bytes20[]\",\"name\":\"_nodeIds\",\"type\":\"bytes20[]\"}],\"name\":\"submitValidatorUptimeVote\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_epochId\",\"type\":\"uint256\"},{\"internalType\":\"bytes32\",\"name\":\"_merkleRoot\",\"type\":\"bytes32\"}],\"name\":\"submitVote\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"switchToProductionMode\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"\",\"type\":\"bytes4\"}],\"name\":\"timelockedCalls\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"allowedAfterTimestamp\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"encodedCall\",\"type\":\"bytes\"}],\"stateMutability\":\"view\",\"type\":\"function\"}]",
 }
 
 // VotingABI is the input ABI used to generate the binding from.
@@ -714,23 +714,23 @@ func (_Voting *VotingTransactorSession) SetVotingThreshold(_votingThreshold *big
 
 // SubmitValidatorUptimeVote is a paid mutator transaction binding the contract method 0x5f9f3fd9.
 //
-// Solidity: function submitValidatorUptimeVote(uint256 _epochId, bytes20[] _nodeIds) returns()
-func (_Voting *VotingTransactor) SubmitValidatorUptimeVote(opts *bind.TransactOpts, _epochId *big.Int, _nodeIds [][20]byte) (*types.Transaction, error) {
-	return _Voting.contract.Transact(opts, "submitValidatorUptimeVote", _epochId, _nodeIds)
+// Solidity: function submitValidatorUptimeVote(uint256 _rewardEpochId, bytes20[] _nodeIds) returns()
+func (_Voting *VotingTransactor) SubmitValidatorUptimeVote(opts *bind.TransactOpts, _rewardEpochId *big.Int, _nodeIds [][20]byte) (*types.Transaction, error) {
+	return _Voting.contract.Transact(opts, "submitValidatorUptimeVote", _rewardEpochId, _nodeIds)
 }
 
 // SubmitValidatorUptimeVote is a paid mutator transaction binding the contract method 0x5f9f3fd9.
 //
-// Solidity: function submitValidatorUptimeVote(uint256 _epochId, bytes20[] _nodeIds) returns()
-func (_Voting *VotingSession) SubmitValidatorUptimeVote(_epochId *big.Int, _nodeIds [][20]byte) (*types.Transaction, error) {
-	return _Voting.Contract.SubmitValidatorUptimeVote(&_Voting.TransactOpts, _epochId, _nodeIds)
+// Solidity: function submitValidatorUptimeVote(uint256 _rewardEpochId, bytes20[] _nodeIds) returns()
+func (_Voting *VotingSession) SubmitValidatorUptimeVote(_rewardEpochId *big.Int, _nodeIds [][20]byte) (*types.Transaction, error) {
+	return _Voting.Contract.SubmitValidatorUptimeVote(&_Voting.TransactOpts, _rewardEpochId, _nodeIds)
 }
 
 // SubmitValidatorUptimeVote is a paid mutator transaction binding the contract method 0x5f9f3fd9.
 //
-// Solidity: function submitValidatorUptimeVote(uint256 _epochId, bytes20[] _nodeIds) returns()
-func (_Voting *VotingTransactorSession) SubmitValidatorUptimeVote(_epochId *big.Int, _nodeIds [][20]byte) (*types.Transaction, error) {
-	return _Voting.Contract.SubmitValidatorUptimeVote(&_Voting.TransactOpts, _epochId, _nodeIds)
+// Solidity: function submitValidatorUptimeVote(uint256 _rewardEpochId, bytes20[] _nodeIds) returns()
+func (_Voting *VotingTransactorSession) SubmitValidatorUptimeVote(_rewardEpochId *big.Int, _nodeIds [][20]byte) (*types.Transaction, error) {
+	return _Voting.Contract.SubmitValidatorUptimeVote(&_Voting.TransactOpts, _rewardEpochId, _nodeIds)
 }
 
 // SubmitVote is a paid mutator transaction binding the contract method 0xac8f38c8.
@@ -1173,6 +1173,161 @@ func (_Voting *VotingFilterer) WatchGovernedProductionModeEntered(opts *bind.Wat
 func (_Voting *VotingFilterer) ParseGovernedProductionModeEntered(log types.Log) (*VotingGovernedProductionModeEntered, error) {
 	event := new(VotingGovernedProductionModeEntered)
 	if err := _Voting.contract.UnpackLog(event, "GovernedProductionModeEntered", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
+}
+
+// VotingPChainStakeMirrorValidatorUptimeVoteSubmittedIterator is returned from FilterPChainStakeMirrorValidatorUptimeVoteSubmitted and is used to iterate over the raw logs and unpacked data for PChainStakeMirrorValidatorUptimeVoteSubmitted events raised by the Voting contract.
+type VotingPChainStakeMirrorValidatorUptimeVoteSubmittedIterator struct {
+	Event *VotingPChainStakeMirrorValidatorUptimeVoteSubmitted // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *VotingPChainStakeMirrorValidatorUptimeVoteSubmittedIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(VotingPChainStakeMirrorValidatorUptimeVoteSubmitted)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(VotingPChainStakeMirrorValidatorUptimeVoteSubmitted)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *VotingPChainStakeMirrorValidatorUptimeVoteSubmittedIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *VotingPChainStakeMirrorValidatorUptimeVoteSubmittedIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// VotingPChainStakeMirrorValidatorUptimeVoteSubmitted represents a PChainStakeMirrorValidatorUptimeVoteSubmitted event raised by the Voting contract.
+type VotingPChainStakeMirrorValidatorUptimeVoteSubmitted struct {
+	RewardEpochId *big.Int
+	Timestamp     *big.Int
+	Voter         common.Address
+	NodeIds       [][20]byte
+	Raw           types.Log // Blockchain specific contextual infos
+}
+
+// FilterPChainStakeMirrorValidatorUptimeVoteSubmitted is a free log retrieval operation binding the contract event 0x1dafa85eb81adeb6e48e08365cf90c9ade61034e1e9fa293dc9730c4a8f89b39.
+//
+// Solidity: event PChainStakeMirrorValidatorUptimeVoteSubmitted(uint256 indexed rewardEpochId, uint256 indexed timestamp, address voter, bytes20[] nodeIds)
+func (_Voting *VotingFilterer) FilterPChainStakeMirrorValidatorUptimeVoteSubmitted(opts *bind.FilterOpts, rewardEpochId []*big.Int, timestamp []*big.Int) (*VotingPChainStakeMirrorValidatorUptimeVoteSubmittedIterator, error) {
+
+	var rewardEpochIdRule []interface{}
+	for _, rewardEpochIdItem := range rewardEpochId {
+		rewardEpochIdRule = append(rewardEpochIdRule, rewardEpochIdItem)
+	}
+	var timestampRule []interface{}
+	for _, timestampItem := range timestamp {
+		timestampRule = append(timestampRule, timestampItem)
+	}
+
+	logs, sub, err := _Voting.contract.FilterLogs(opts, "PChainStakeMirrorValidatorUptimeVoteSubmitted", rewardEpochIdRule, timestampRule)
+	if err != nil {
+		return nil, err
+	}
+	return &VotingPChainStakeMirrorValidatorUptimeVoteSubmittedIterator{contract: _Voting.contract, event: "PChainStakeMirrorValidatorUptimeVoteSubmitted", logs: logs, sub: sub}, nil
+}
+
+// WatchPChainStakeMirrorValidatorUptimeVoteSubmitted is a free log subscription operation binding the contract event 0x1dafa85eb81adeb6e48e08365cf90c9ade61034e1e9fa293dc9730c4a8f89b39.
+//
+// Solidity: event PChainStakeMirrorValidatorUptimeVoteSubmitted(uint256 indexed rewardEpochId, uint256 indexed timestamp, address voter, bytes20[] nodeIds)
+func (_Voting *VotingFilterer) WatchPChainStakeMirrorValidatorUptimeVoteSubmitted(opts *bind.WatchOpts, sink chan<- *VotingPChainStakeMirrorValidatorUptimeVoteSubmitted, rewardEpochId []*big.Int, timestamp []*big.Int) (event.Subscription, error) {
+
+	var rewardEpochIdRule []interface{}
+	for _, rewardEpochIdItem := range rewardEpochId {
+		rewardEpochIdRule = append(rewardEpochIdRule, rewardEpochIdItem)
+	}
+	var timestampRule []interface{}
+	for _, timestampItem := range timestamp {
+		timestampRule = append(timestampRule, timestampItem)
+	}
+
+	logs, sub, err := _Voting.contract.WatchLogs(opts, "PChainStakeMirrorValidatorUptimeVoteSubmitted", rewardEpochIdRule, timestampRule)
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(VotingPChainStakeMirrorValidatorUptimeVoteSubmitted)
+				if err := _Voting.contract.UnpackLog(event, "PChainStakeMirrorValidatorUptimeVoteSubmitted", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParsePChainStakeMirrorValidatorUptimeVoteSubmitted is a log parse operation binding the contract event 0x1dafa85eb81adeb6e48e08365cf90c9ade61034e1e9fa293dc9730c4a8f89b39.
+//
+// Solidity: event PChainStakeMirrorValidatorUptimeVoteSubmitted(uint256 indexed rewardEpochId, uint256 indexed timestamp, address voter, bytes20[] nodeIds)
+func (_Voting *VotingFilterer) ParsePChainStakeMirrorValidatorUptimeVoteSubmitted(log types.Log) (*VotingPChainStakeMirrorValidatorUptimeVoteSubmitted, error) {
+	event := new(VotingPChainStakeMirrorValidatorUptimeVoteSubmitted)
+	if err := _Voting.contract.UnpackLog(event, "PChainStakeMirrorValidatorUptimeVoteSubmitted", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log

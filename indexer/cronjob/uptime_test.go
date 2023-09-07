@@ -5,7 +5,6 @@ import (
 	"flare-indexer/database"
 	"flare-indexer/indexer/config"
 	"flare-indexer/indexer/context"
-	"flare-indexer/utils"
 	"testing"
 	"time"
 )
@@ -53,7 +52,7 @@ func TestUptime(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	now := utils.ParseTime("2023-02-02T14:29:50Z")
+	now := time.Unix(1675348249, 0)
 	testUptimeClient.SetNow(now)
 
 	for i := 0; i < 100; i++ {
@@ -67,7 +66,7 @@ func TestUptime(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(uptimes) != 6 {
-		t.Fatalf("expected 6 uptimes, got %d", len(uptimes))
+	if len(uptimes) != 8 {
+		t.Fatalf("expected 8 uptimes, got %d", len(uptimes))
 	}
 }

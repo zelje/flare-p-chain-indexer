@@ -23,7 +23,7 @@ type ValidatorStatus struct {
 }
 
 type UptimeClient interface {
-	GetValidatorStatus() ([]ValidatorStatus, database.UptimeCronjobStatus, error)
+	GetValidatorStatus() ([]*ValidatorStatus, database.UptimeCronjobStatus, error)
 	Now() time.Time
 }
 
@@ -37,14 +37,14 @@ func NewAvalancheUptimeClient(endpoint string) UptimeClient {
 	}
 }
 
-func (c *AvalancheUptimeClient) GetValidatorStatus() ([]ValidatorStatus, database.UptimeCronjobStatus, error) {
+func (c *AvalancheUptimeClient) GetValidatorStatus() ([]*ValidatorStatus, database.UptimeCronjobStatus, error) {
 	validators, status, err := CallPChainGetConnectedValidators(c.client)
 	if err != nil {
 		return nil, status, err
 	}
-	vs := make([]ValidatorStatus, len(validators))
+	vs := make([]*ValidatorStatus, len(validators))
 	for i, v := range validators {
-		vs[i] = ValidatorStatus{
+		vs[i] = &ValidatorStatus{
 			NodeID:    v.NodeID.String(),
 			Connected: v.Connected,
 		}
@@ -104,13 +104,13 @@ func NewRecordedUptimeClient(fileName string, startNow time.Time) (*RecordedUpti
 	}, nil
 }
 
-func (c *RecordedUptimeClient) GetValidatorStatus() ([]ValidatorStatus, database.UptimeCronjobStatus, error) {
+func (c *RecordedUptimeClient) GetValidatorStatus() ([]*ValidatorStatus, database.UptimeCronjobStatus, error) {
 	now := c.Time.Now().Unix()
-	validatorMap := make(map[string]ValidatorStatus)
+	validatorMap := make(map[string]*ValidatorStatus)
 	for _, data := range c.data {
 		if now >= data.Start && now < data.End {
 			if v, ok := validatorMap[data.NodeID]; !ok {
-				validatorMap[data.NodeID] = ValidatorStatus{
+				validatorMap[data.NodeID] = &ValidatorStatus{
 					NodeID:    data.NodeID,
 					Connected: data.Connected == 1,
 				}

@@ -118,19 +118,25 @@
         "type": "bytes20"
       },
       {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "txHash",
+        "type": "bytes32"
+      },
+      {
         "indexed": false,
         "internalType": "uint256",
-        "name": "amount",
+        "name": "amountWei",
         "type": "uint256"
       },
       {
         "indexed": false,
         "internalType": "bytes32",
-        "name": "pChainTxHash",
+        "name": "pChainTxId",
         "type": "bytes32"
       }
     ],
-    "name": "StakingConfirmed",
+    "name": "StakeConfirmed",
     "type": "event"
   },
   {
@@ -149,19 +155,19 @@
         "type": "bytes20"
       },
       {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "txHash",
+        "type": "bytes32"
       },
       {
         "indexed": false,
-        "internalType": "bytes32",
-        "name": "pChainTxHash",
-        "type": "bytes32"
+        "internalType": "uint256",
+        "name": "amountWei",
+        "type": "uint256"
       }
     ],
-    "name": "StakingEnded",
+    "name": "StakeEnded",
     "type": "event"
   },
   {
@@ -565,7 +571,7 @@
         "type": "bytes20"
       }
     ],
-    "name": "isActiveStakeVerified",
+    "name": "isActiveStakeMirrored",
     "outputs": [
       {
         "internalType": "bool",
@@ -587,6 +593,61 @@
       }
     ],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "bytes32",
+            "name": "txId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint8",
+            "name": "stakingType",
+            "type": "uint8"
+          },
+          {
+            "internalType": "bytes20",
+            "name": "inputAddress",
+            "type": "bytes20"
+          },
+          {
+            "internalType": "bytes20",
+            "name": "nodeId",
+            "type": "bytes20"
+          },
+          {
+            "internalType": "uint64",
+            "name": "startTime",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint64",
+            "name": "endTime",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint64",
+            "name": "weight",
+            "type": "uint64"
+          }
+        ],
+        "internalType": "struct IPChainStakeMirrorVerifier.PChainStake",
+        "name": "_stakeData",
+        "type": "tuple"
+      },
+      {
+        "internalType": "bytes32[]",
+        "name": "_merkleProof",
+        "type": "bytes32[]"
+      }
+    ],
+    "name": "mirrorStake",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -651,6 +712,30 @@
     ],
     "name": "setMaxUpdatesPerBlock",
     "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_owner",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_count",
+        "type": "uint256"
+      }
+    ],
+    "name": "stakesHistoryCleanup",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
     "stateMutability": "nonpayable",
     "type": "function"
   },
@@ -901,61 +986,6 @@
       }
     ],
     "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "components": [
-          {
-            "internalType": "bytes32",
-            "name": "txId",
-            "type": "bytes32"
-          },
-          {
-            "internalType": "uint8",
-            "name": "stakingType",
-            "type": "uint8"
-          },
-          {
-            "internalType": "bytes20",
-            "name": "inputAddress",
-            "type": "bytes20"
-          },
-          {
-            "internalType": "bytes20",
-            "name": "nodeId",
-            "type": "bytes20"
-          },
-          {
-            "internalType": "uint64",
-            "name": "startTime",
-            "type": "uint64"
-          },
-          {
-            "internalType": "uint64",
-            "name": "endTime",
-            "type": "uint64"
-          },
-          {
-            "internalType": "uint64",
-            "name": "weight",
-            "type": "uint64"
-          }
-        ],
-        "internalType": "struct IPChainStakeMirrorVerifier.PChainStake",
-        "name": "_stakeData",
-        "type": "tuple"
-      },
-      {
-        "internalType": "bytes32[]",
-        "name": "_merkleProof",
-        "type": "bytes32[]"
-      }
-    ],
-    "name": "verifyStake",
-    "outputs": [],
-    "stateMutability": "nonpayable",
     "type": "function"
   },
   {

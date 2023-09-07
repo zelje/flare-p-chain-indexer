@@ -43,9 +43,12 @@ type uptimeVotingCronjob struct {
 	txOpts         *bind.TransactOpts
 
 	db *gorm.DB
+
+	// For testing to set "now" to some past date
+	time utils.ShiftedTime
 }
 
-func NewUptimeVotingCronjob(ctx context.IndexerContext) (Cronjob, error) {
+func NewUptimeVotingCronjob(ctx context.IndexerContext) (*uptimeVotingCronjob, error) {
 	cfg := ctx.Config()
 
 	if !cfg.UptimeCronjob.EnableVoting {
@@ -93,7 +96,7 @@ func (c *uptimeVotingCronjob) OnStart() error {
 }
 
 func (c *uptimeVotingCronjob) Call() error {
-	now := time.Now()
+	now := c.time.Now()
 	firstEpochToAggregate, lastEpochToAggregate, err := c.aggregationRange(now)
 	if err != nil {
 		if err == errNoEpochsToAggregate {
