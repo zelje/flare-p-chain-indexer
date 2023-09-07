@@ -42,7 +42,7 @@ type IPChainStakeMirrorVerifierPChainStake struct {
 
 // MirroringMetaData contains all meta data concerning the Mirroring contract.
 var MirroringMetaData = &bind.MetaData{
-	ABI: "[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_governance\",\"type\":\"address\"},{\"internalType\":\"contractFlareDaemon\",\"name\":\"_flareDaemon\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_addressUpdater\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_maxUpdatesPerBlock\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"CreatedTotalSupplyCache\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes4\",\"name\":\"selector\",\"type\":\"bytes4\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"allowedAfterTimestamp\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"encodedCall\",\"type\":\"bytes\"}],\"name\":\"GovernanceCallTimelocked\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"initialGovernance\",\"type\":\"address\"}],\"name\":\"GovernanceInitialised\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"governanceSettings\",\"type\":\"address\"}],\"name\":\"GovernedProductionModeEntered\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"maxUpdatesPerBlock\",\"type\":\"uint256\"}],\"name\":\"MaxUpdatesPerBlockSet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"bytes20\",\"name\":\"nodeId\",\"type\":\"bytes20\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"pChainTxHash\",\"type\":\"bytes32\"}],\"name\":\"StakingConfirmed\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"bytes20\",\"name\":\"nodeId\",\"type\":\"bytes20\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"pChainTxHash\",\"type\":\"bytes32\"}],\"name\":\"StakingEnded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes4\",\"name\":\"selector\",\"type\":\"bytes4\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"timestamp\",\"type\":\"uint256\"}],\"name\":\"TimelockedGovernanceCallCanceled\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes4\",\"name\":\"selector\",\"type\":\"bytes4\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"timestamp\",\"type\":\"uint256\"}],\"name\":\"TimelockedGovernanceCallExecuted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes20\",\"name\":\"nodeId\",\"type\":\"bytes20\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"blockNumber\",\"type\":\"uint256\"}],\"name\":\"VotePowerCacheCreated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"bytes20\",\"name\":\"nodeId\",\"type\":\"bytes20\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"priorVotePower\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"newVotePower\",\"type\":\"uint256\"}],\"name\":\"VotePowerChanged\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"activate\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"active\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"addressBinder\",\"outputs\":[{\"internalType\":\"contractIAddressBinder\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_owner\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_count\",\"type\":\"uint256\"}],\"name\":\"balanceHistoryCleanup\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_owner\",\"type\":\"address\"}],\"name\":\"balanceOf\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_owner\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"balanceOfAt\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes20[]\",\"name\":\"_owners\",\"type\":\"bytes20[]\"},{\"internalType\":\"uint256\",\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"batchVotePowerOfAt\",\"outputs\":[{\"internalType\":\"uint256[]\",\"name\":\"_votePowers\",\"type\":\"uint256[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"_selector\",\"type\":\"bytes4\"}],\"name\":\"cancelGovernanceCall\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"cleanerContract\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"cleanupBlockNumber\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"cleanupBlockNumberManager\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"daemonize\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"deactivate\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"_selector\",\"type\":\"bytes4\"}],\"name\":\"executeGovernanceCall\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"flareDaemon\",\"outputs\":[{\"internalType\":\"contractFlareDaemon\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getAddressUpdater\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"_addressUpdater\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getContractName\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"governance\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"governanceSettings\",\"outputs\":[{\"internalType\":\"contractIGovernanceSettings\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"governanceVotePower\",\"outputs\":[{\"internalType\":\"contractIIGovernanceVotePower\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_initialGovernance\",\"type\":\"address\"}],\"name\":\"initialise\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"_txId\",\"type\":\"bytes32\"},{\"internalType\":\"bytes20\",\"name\":\"_inputAddress\",\"type\":\"bytes20\"}],\"name\":\"isActiveStakeVerified\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"maxUpdatesPerBlock\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"nextTimestampToTrigger\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"productionMode\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_cleanerContract\",\"type\":\"address\"}],\"name\":\"setCleanerContract\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"setCleanupBlockNumber\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_maxUpdatesPerBlock\",\"type\":\"uint256\"}],\"name\":\"setMaxUpdatesPerBlock\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_owner\",\"type\":\"address\"}],\"name\":\"stakesOf\",\"outputs\":[{\"internalType\":\"bytes20[]\",\"name\":\"_nodeIds\",\"type\":\"bytes20[]\"},{\"internalType\":\"uint256[]\",\"name\":\"_amounts\",\"type\":\"uint256[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_owner\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"stakesOfAt\",\"outputs\":[{\"internalType\":\"bytes20[]\",\"name\":\"_nodeIds\",\"type\":\"bytes20[]\"},{\"internalType\":\"uint256[]\",\"name\":\"_amounts\",\"type\":\"uint256[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"switchToFallbackMode\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"switchToProductionMode\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"\",\"type\":\"bytes4\"}],\"name\":\"timelockedCalls\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"allowedAfterTimestamp\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"encodedCall\",\"type\":\"bytes\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"totalSupply\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"totalSupplyAt\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"totalSupplyCacheCleanup\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_count\",\"type\":\"uint256\"}],\"name\":\"totalSupplyHistoryCleanup\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"totalVotePower\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"totalVotePowerAt\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"totalVotePowerAtCached\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32[]\",\"name\":\"_contractNameHashes\",\"type\":\"bytes32[]\"},{\"internalType\":\"address[]\",\"name\":\"_contractAddresses\",\"type\":\"address[]\"}],\"name\":\"updateContractAddresses\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"verifier\",\"outputs\":[{\"internalType\":\"contractIIPChainStakeMirrorVerifier\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"bytes32\",\"name\":\"txId\",\"type\":\"bytes32\"},{\"internalType\":\"uint8\",\"name\":\"stakingType\",\"type\":\"uint8\"},{\"internalType\":\"bytes20\",\"name\":\"inputAddress\",\"type\":\"bytes20\"},{\"internalType\":\"bytes20\",\"name\":\"nodeId\",\"type\":\"bytes20\"},{\"internalType\":\"uint64\",\"name\":\"startTime\",\"type\":\"uint64\"},{\"internalType\":\"uint64\",\"name\":\"endTime\",\"type\":\"uint64\"},{\"internalType\":\"uint64\",\"name\":\"weight\",\"type\":\"uint64\"}],\"internalType\":\"structIPChainStakeMirrorVerifier.PChainStake\",\"name\":\"_stakeData\",\"type\":\"tuple\"},{\"internalType\":\"bytes32[]\",\"name\":\"_merkleProof\",\"type\":\"bytes32[]\"}],\"name\":\"verifyStake\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes20\",\"name\":\"_nodeId\",\"type\":\"bytes20\"},{\"internalType\":\"uint256\",\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"votePowerCacheCleanup\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_owner\",\"type\":\"address\"},{\"internalType\":\"bytes20\",\"name\":\"_nodeId\",\"type\":\"bytes20\"}],\"name\":\"votePowerFromTo\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"_votePower\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_owner\",\"type\":\"address\"},{\"internalType\":\"bytes20\",\"name\":\"_nodeId\",\"type\":\"bytes20\"},{\"internalType\":\"uint256\",\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"votePowerFromToAt\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"_votePower\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes20\",\"name\":\"_nodeId\",\"type\":\"bytes20\"},{\"internalType\":\"uint256\",\"name\":\"_count\",\"type\":\"uint256\"}],\"name\":\"votePowerHistoryCleanup\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes20\",\"name\":\"_nodeId\",\"type\":\"bytes20\"}],\"name\":\"votePowerOf\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes20\",\"name\":\"_nodeId\",\"type\":\"bytes20\"},{\"internalType\":\"uint256\",\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"votePowerOfAt\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes20\",\"name\":\"_nodeId\",\"type\":\"bytes20\"},{\"internalType\":\"uint256\",\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"votePowerOfAtCached\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
+	ABI: "[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_governance\",\"type\":\"address\"},{\"internalType\":\"contractFlareDaemon\",\"name\":\"_flareDaemon\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_addressUpdater\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_maxUpdatesPerBlock\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"CreatedTotalSupplyCache\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes4\",\"name\":\"selector\",\"type\":\"bytes4\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"allowedAfterTimestamp\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"encodedCall\",\"type\":\"bytes\"}],\"name\":\"GovernanceCallTimelocked\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"initialGovernance\",\"type\":\"address\"}],\"name\":\"GovernanceInitialised\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"governanceSettings\",\"type\":\"address\"}],\"name\":\"GovernedProductionModeEntered\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"maxUpdatesPerBlock\",\"type\":\"uint256\"}],\"name\":\"MaxUpdatesPerBlockSet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"bytes20\",\"name\":\"nodeId\",\"type\":\"bytes20\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"txHash\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amountWei\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"pChainTxId\",\"type\":\"bytes32\"}],\"name\":\"StakeConfirmed\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"bytes20\",\"name\":\"nodeId\",\"type\":\"bytes20\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"txHash\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amountWei\",\"type\":\"uint256\"}],\"name\":\"StakeEnded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes4\",\"name\":\"selector\",\"type\":\"bytes4\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"timestamp\",\"type\":\"uint256\"}],\"name\":\"TimelockedGovernanceCallCanceled\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes4\",\"name\":\"selector\",\"type\":\"bytes4\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"timestamp\",\"type\":\"uint256\"}],\"name\":\"TimelockedGovernanceCallExecuted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes20\",\"name\":\"nodeId\",\"type\":\"bytes20\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"blockNumber\",\"type\":\"uint256\"}],\"name\":\"VotePowerCacheCreated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"bytes20\",\"name\":\"nodeId\",\"type\":\"bytes20\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"priorVotePower\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"newVotePower\",\"type\":\"uint256\"}],\"name\":\"VotePowerChanged\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"activate\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"active\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"addressBinder\",\"outputs\":[{\"internalType\":\"contractIAddressBinder\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_owner\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_count\",\"type\":\"uint256\"}],\"name\":\"balanceHistoryCleanup\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_owner\",\"type\":\"address\"}],\"name\":\"balanceOf\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_owner\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"balanceOfAt\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes20[]\",\"name\":\"_owners\",\"type\":\"bytes20[]\"},{\"internalType\":\"uint256\",\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"batchVotePowerOfAt\",\"outputs\":[{\"internalType\":\"uint256[]\",\"name\":\"_votePowers\",\"type\":\"uint256[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"_selector\",\"type\":\"bytes4\"}],\"name\":\"cancelGovernanceCall\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"cleanerContract\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"cleanupBlockNumber\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"cleanupBlockNumberManager\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"daemonize\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"deactivate\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"_selector\",\"type\":\"bytes4\"}],\"name\":\"executeGovernanceCall\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"flareDaemon\",\"outputs\":[{\"internalType\":\"contractFlareDaemon\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getAddressUpdater\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"_addressUpdater\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getContractName\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"governance\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"governanceSettings\",\"outputs\":[{\"internalType\":\"contractIGovernanceSettings\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"governanceVotePower\",\"outputs\":[{\"internalType\":\"contractIIGovernanceVotePower\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_initialGovernance\",\"type\":\"address\"}],\"name\":\"initialise\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"_txId\",\"type\":\"bytes32\"},{\"internalType\":\"bytes20\",\"name\":\"_inputAddress\",\"type\":\"bytes20\"}],\"name\":\"isActiveStakeMirrored\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"maxUpdatesPerBlock\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"bytes32\",\"name\":\"txId\",\"type\":\"bytes32\"},{\"internalType\":\"uint8\",\"name\":\"stakingType\",\"type\":\"uint8\"},{\"internalType\":\"bytes20\",\"name\":\"inputAddress\",\"type\":\"bytes20\"},{\"internalType\":\"bytes20\",\"name\":\"nodeId\",\"type\":\"bytes20\"},{\"internalType\":\"uint64\",\"name\":\"startTime\",\"type\":\"uint64\"},{\"internalType\":\"uint64\",\"name\":\"endTime\",\"type\":\"uint64\"},{\"internalType\":\"uint64\",\"name\":\"weight\",\"type\":\"uint64\"}],\"internalType\":\"structIPChainStakeMirrorVerifier.PChainStake\",\"name\":\"_stakeData\",\"type\":\"tuple\"},{\"internalType\":\"bytes32[]\",\"name\":\"_merkleProof\",\"type\":\"bytes32[]\"}],\"name\":\"mirrorStake\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"nextTimestampToTrigger\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"productionMode\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_cleanerContract\",\"type\":\"address\"}],\"name\":\"setCleanerContract\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"setCleanupBlockNumber\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_maxUpdatesPerBlock\",\"type\":\"uint256\"}],\"name\":\"setMaxUpdatesPerBlock\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_owner\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_count\",\"type\":\"uint256\"}],\"name\":\"stakesHistoryCleanup\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_owner\",\"type\":\"address\"}],\"name\":\"stakesOf\",\"outputs\":[{\"internalType\":\"bytes20[]\",\"name\":\"_nodeIds\",\"type\":\"bytes20[]\"},{\"internalType\":\"uint256[]\",\"name\":\"_amounts\",\"type\":\"uint256[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_owner\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"stakesOfAt\",\"outputs\":[{\"internalType\":\"bytes20[]\",\"name\":\"_nodeIds\",\"type\":\"bytes20[]\"},{\"internalType\":\"uint256[]\",\"name\":\"_amounts\",\"type\":\"uint256[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"switchToFallbackMode\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"switchToProductionMode\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"\",\"type\":\"bytes4\"}],\"name\":\"timelockedCalls\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"allowedAfterTimestamp\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"encodedCall\",\"type\":\"bytes\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"totalSupply\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"totalSupplyAt\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"totalSupplyCacheCleanup\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_count\",\"type\":\"uint256\"}],\"name\":\"totalSupplyHistoryCleanup\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"totalVotePower\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"totalVotePowerAt\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"totalVotePowerAtCached\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32[]\",\"name\":\"_contractNameHashes\",\"type\":\"bytes32[]\"},{\"internalType\":\"address[]\",\"name\":\"_contractAddresses\",\"type\":\"address[]\"}],\"name\":\"updateContractAddresses\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"verifier\",\"outputs\":[{\"internalType\":\"contractIIPChainStakeMirrorVerifier\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes20\",\"name\":\"_nodeId\",\"type\":\"bytes20\"},{\"internalType\":\"uint256\",\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"votePowerCacheCleanup\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_owner\",\"type\":\"address\"},{\"internalType\":\"bytes20\",\"name\":\"_nodeId\",\"type\":\"bytes20\"}],\"name\":\"votePowerFromTo\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"_votePower\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_owner\",\"type\":\"address\"},{\"internalType\":\"bytes20\",\"name\":\"_nodeId\",\"type\":\"bytes20\"},{\"internalType\":\"uint256\",\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"votePowerFromToAt\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"_votePower\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes20\",\"name\":\"_nodeId\",\"type\":\"bytes20\"},{\"internalType\":\"uint256\",\"name\":\"_count\",\"type\":\"uint256\"}],\"name\":\"votePowerHistoryCleanup\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes20\",\"name\":\"_nodeId\",\"type\":\"bytes20\"}],\"name\":\"votePowerOf\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes20\",\"name\":\"_nodeId\",\"type\":\"bytes20\"},{\"internalType\":\"uint256\",\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"votePowerOfAt\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes20\",\"name\":\"_nodeId\",\"type\":\"bytes20\"},{\"internalType\":\"uint256\",\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"votePowerOfAtCached\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
 }
 
 // MirroringABI is the input ABI used to generate the binding from.
@@ -625,12 +625,12 @@ func (_Mirroring *MirroringCallerSession) GovernanceVotePower() (common.Address,
 	return _Mirroring.Contract.GovernanceVotePower(&_Mirroring.CallOpts)
 }
 
-// IsActiveStakeVerified is a free data retrieval call binding the contract method 0x03f6645a.
+// IsActiveStakeMirrored is a free data retrieval call binding the contract method 0xd9ab4dfe.
 //
-// Solidity: function isActiveStakeVerified(bytes32 _txId, bytes20 _inputAddress) view returns(bool)
-func (_Mirroring *MirroringCaller) IsActiveStakeVerified(opts *bind.CallOpts, _txId [32]byte, _inputAddress [20]byte) (bool, error) {
+// Solidity: function isActiveStakeMirrored(bytes32 _txId, bytes20 _inputAddress) view returns(bool)
+func (_Mirroring *MirroringCaller) IsActiveStakeMirrored(opts *bind.CallOpts, _txId [32]byte, _inputAddress [20]byte) (bool, error) {
 	var out []interface{}
-	err := _Mirroring.contract.Call(opts, &out, "isActiveStakeVerified", _txId, _inputAddress)
+	err := _Mirroring.contract.Call(opts, &out, "isActiveStakeMirrored", _txId, _inputAddress)
 
 	if err != nil {
 		return *new(bool), err
@@ -642,18 +642,18 @@ func (_Mirroring *MirroringCaller) IsActiveStakeVerified(opts *bind.CallOpts, _t
 
 }
 
-// IsActiveStakeVerified is a free data retrieval call binding the contract method 0x03f6645a.
+// IsActiveStakeMirrored is a free data retrieval call binding the contract method 0xd9ab4dfe.
 //
-// Solidity: function isActiveStakeVerified(bytes32 _txId, bytes20 _inputAddress) view returns(bool)
-func (_Mirroring *MirroringSession) IsActiveStakeVerified(_txId [32]byte, _inputAddress [20]byte) (bool, error) {
-	return _Mirroring.Contract.IsActiveStakeVerified(&_Mirroring.CallOpts, _txId, _inputAddress)
+// Solidity: function isActiveStakeMirrored(bytes32 _txId, bytes20 _inputAddress) view returns(bool)
+func (_Mirroring *MirroringSession) IsActiveStakeMirrored(_txId [32]byte, _inputAddress [20]byte) (bool, error) {
+	return _Mirroring.Contract.IsActiveStakeMirrored(&_Mirroring.CallOpts, _txId, _inputAddress)
 }
 
-// IsActiveStakeVerified is a free data retrieval call binding the contract method 0x03f6645a.
+// IsActiveStakeMirrored is a free data retrieval call binding the contract method 0xd9ab4dfe.
 //
-// Solidity: function isActiveStakeVerified(bytes32 _txId, bytes20 _inputAddress) view returns(bool)
-func (_Mirroring *MirroringCallerSession) IsActiveStakeVerified(_txId [32]byte, _inputAddress [20]byte) (bool, error) {
-	return _Mirroring.Contract.IsActiveStakeVerified(&_Mirroring.CallOpts, _txId, _inputAddress)
+// Solidity: function isActiveStakeMirrored(bytes32 _txId, bytes20 _inputAddress) view returns(bool)
+func (_Mirroring *MirroringCallerSession) IsActiveStakeMirrored(_txId [32]byte, _inputAddress [20]byte) (bool, error) {
+	return _Mirroring.Contract.IsActiveStakeMirrored(&_Mirroring.CallOpts, _txId, _inputAddress)
 }
 
 // MaxUpdatesPerBlock is a free data retrieval call binding the contract method 0xca4af538.
@@ -1310,6 +1310,27 @@ func (_Mirroring *MirroringTransactorSession) Initialise(_initialGovernance comm
 	return _Mirroring.Contract.Initialise(&_Mirroring.TransactOpts, _initialGovernance)
 }
 
+// MirrorStake is a paid mutator transaction binding the contract method 0x2e335805.
+//
+// Solidity: function mirrorStake((bytes32,uint8,bytes20,bytes20,uint64,uint64,uint64) _stakeData, bytes32[] _merkleProof) returns()
+func (_Mirroring *MirroringTransactor) MirrorStake(opts *bind.TransactOpts, _stakeData IPChainStakeMirrorVerifierPChainStake, _merkleProof [][32]byte) (*types.Transaction, error) {
+	return _Mirroring.contract.Transact(opts, "mirrorStake", _stakeData, _merkleProof)
+}
+
+// MirrorStake is a paid mutator transaction binding the contract method 0x2e335805.
+//
+// Solidity: function mirrorStake((bytes32,uint8,bytes20,bytes20,uint64,uint64,uint64) _stakeData, bytes32[] _merkleProof) returns()
+func (_Mirroring *MirroringSession) MirrorStake(_stakeData IPChainStakeMirrorVerifierPChainStake, _merkleProof [][32]byte) (*types.Transaction, error) {
+	return _Mirroring.Contract.MirrorStake(&_Mirroring.TransactOpts, _stakeData, _merkleProof)
+}
+
+// MirrorStake is a paid mutator transaction binding the contract method 0x2e335805.
+//
+// Solidity: function mirrorStake((bytes32,uint8,bytes20,bytes20,uint64,uint64,uint64) _stakeData, bytes32[] _merkleProof) returns()
+func (_Mirroring *MirroringTransactorSession) MirrorStake(_stakeData IPChainStakeMirrorVerifierPChainStake, _merkleProof [][32]byte) (*types.Transaction, error) {
+	return _Mirroring.Contract.MirrorStake(&_Mirroring.TransactOpts, _stakeData, _merkleProof)
+}
+
 // SetCleanerContract is a paid mutator transaction binding the contract method 0xf6a494af.
 //
 // Solidity: function setCleanerContract(address _cleanerContract) returns()
@@ -1371,6 +1392,27 @@ func (_Mirroring *MirroringSession) SetMaxUpdatesPerBlock(_maxUpdatesPerBlock *b
 // Solidity: function setMaxUpdatesPerBlock(uint256 _maxUpdatesPerBlock) returns()
 func (_Mirroring *MirroringTransactorSession) SetMaxUpdatesPerBlock(_maxUpdatesPerBlock *big.Int) (*types.Transaction, error) {
 	return _Mirroring.Contract.SetMaxUpdatesPerBlock(&_Mirroring.TransactOpts, _maxUpdatesPerBlock)
+}
+
+// StakesHistoryCleanup is a paid mutator transaction binding the contract method 0xc13edf70.
+//
+// Solidity: function stakesHistoryCleanup(address _owner, uint256 _count) returns(uint256)
+func (_Mirroring *MirroringTransactor) StakesHistoryCleanup(opts *bind.TransactOpts, _owner common.Address, _count *big.Int) (*types.Transaction, error) {
+	return _Mirroring.contract.Transact(opts, "stakesHistoryCleanup", _owner, _count)
+}
+
+// StakesHistoryCleanup is a paid mutator transaction binding the contract method 0xc13edf70.
+//
+// Solidity: function stakesHistoryCleanup(address _owner, uint256 _count) returns(uint256)
+func (_Mirroring *MirroringSession) StakesHistoryCleanup(_owner common.Address, _count *big.Int) (*types.Transaction, error) {
+	return _Mirroring.Contract.StakesHistoryCleanup(&_Mirroring.TransactOpts, _owner, _count)
+}
+
+// StakesHistoryCleanup is a paid mutator transaction binding the contract method 0xc13edf70.
+//
+// Solidity: function stakesHistoryCleanup(address _owner, uint256 _count) returns(uint256)
+func (_Mirroring *MirroringTransactorSession) StakesHistoryCleanup(_owner common.Address, _count *big.Int) (*types.Transaction, error) {
+	return _Mirroring.Contract.StakesHistoryCleanup(&_Mirroring.TransactOpts, _owner, _count)
 }
 
 // SwitchToFallbackMode is a paid mutator transaction binding the contract method 0xe22fdece.
@@ -1497,27 +1539,6 @@ func (_Mirroring *MirroringSession) UpdateContractAddresses(_contractNameHashes 
 // Solidity: function updateContractAddresses(bytes32[] _contractNameHashes, address[] _contractAddresses) returns()
 func (_Mirroring *MirroringTransactorSession) UpdateContractAddresses(_contractNameHashes [][32]byte, _contractAddresses []common.Address) (*types.Transaction, error) {
 	return _Mirroring.Contract.UpdateContractAddresses(&_Mirroring.TransactOpts, _contractNameHashes, _contractAddresses)
-}
-
-// VerifyStake is a paid mutator transaction binding the contract method 0xe7fca64a.
-//
-// Solidity: function verifyStake((bytes32,uint8,bytes20,bytes20,uint64,uint64,uint64) _stakeData, bytes32[] _merkleProof) returns()
-func (_Mirroring *MirroringTransactor) VerifyStake(opts *bind.TransactOpts, _stakeData IPChainStakeMirrorVerifierPChainStake, _merkleProof [][32]byte) (*types.Transaction, error) {
-	return _Mirroring.contract.Transact(opts, "verifyStake", _stakeData, _merkleProof)
-}
-
-// VerifyStake is a paid mutator transaction binding the contract method 0xe7fca64a.
-//
-// Solidity: function verifyStake((bytes32,uint8,bytes20,bytes20,uint64,uint64,uint64) _stakeData, bytes32[] _merkleProof) returns()
-func (_Mirroring *MirroringSession) VerifyStake(_stakeData IPChainStakeMirrorVerifierPChainStake, _merkleProof [][32]byte) (*types.Transaction, error) {
-	return _Mirroring.Contract.VerifyStake(&_Mirroring.TransactOpts, _stakeData, _merkleProof)
-}
-
-// VerifyStake is a paid mutator transaction binding the contract method 0xe7fca64a.
-//
-// Solidity: function verifyStake((bytes32,uint8,bytes20,bytes20,uint64,uint64,uint64) _stakeData, bytes32[] _merkleProof) returns()
-func (_Mirroring *MirroringTransactorSession) VerifyStake(_stakeData IPChainStakeMirrorVerifierPChainStake, _merkleProof [][32]byte) (*types.Transaction, error) {
-	return _Mirroring.Contract.VerifyStake(&_Mirroring.TransactOpts, _stakeData, _merkleProof)
 }
 
 // VotePowerCacheCleanup is a paid mutator transaction binding the contract method 0xa2e96264.
@@ -2255,9 +2276,9 @@ func (_Mirroring *MirroringFilterer) ParseMaxUpdatesPerBlockSet(log types.Log) (
 	return event, nil
 }
 
-// MirroringStakingConfirmedIterator is returned from FilterStakingConfirmed and is used to iterate over the raw logs and unpacked data for StakingConfirmed events raised by the Mirroring contract.
-type MirroringStakingConfirmedIterator struct {
-	Event *MirroringStakingConfirmed // Event containing the contract specifics and raw log
+// MirroringStakeConfirmedIterator is returned from FilterStakeConfirmed and is used to iterate over the raw logs and unpacked data for StakeConfirmed events raised by the Mirroring contract.
+type MirroringStakeConfirmedIterator struct {
+	Event *MirroringStakeConfirmed // Event containing the contract specifics and raw log
 
 	contract *bind.BoundContract // Generic contract to use for unpacking event data
 	event    string              // Event name to use for unpacking event data
@@ -2271,7 +2292,7 @@ type MirroringStakingConfirmedIterator struct {
 // Next advances the iterator to the subsequent event, returning whether there
 // are any more events found. In case of a retrieval or parsing error, false is
 // returned and Error() can be queried for the exact failure.
-func (it *MirroringStakingConfirmedIterator) Next() bool {
+func (it *MirroringStakeConfirmedIterator) Next() bool {
 	// If the iterator failed, stop iterating
 	if it.fail != nil {
 		return false
@@ -2280,7 +2301,7 @@ func (it *MirroringStakingConfirmedIterator) Next() bool {
 	if it.done {
 		select {
 		case log := <-it.logs:
-			it.Event = new(MirroringStakingConfirmed)
+			it.Event = new(MirroringStakeConfirmed)
 			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 				it.fail = err
 				return false
@@ -2295,7 +2316,7 @@ func (it *MirroringStakingConfirmedIterator) Next() bool {
 	// Iterator still in progress, wait for either a data or an error event
 	select {
 	case log := <-it.logs:
-		it.Event = new(MirroringStakingConfirmed)
+		it.Event = new(MirroringStakeConfirmed)
 		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 			it.fail = err
 			return false
@@ -2311,30 +2332,31 @@ func (it *MirroringStakingConfirmedIterator) Next() bool {
 }
 
 // Error returns any retrieval or parsing error occurred during filtering.
-func (it *MirroringStakingConfirmedIterator) Error() error {
+func (it *MirroringStakeConfirmedIterator) Error() error {
 	return it.fail
 }
 
 // Close terminates the iteration process, releasing any pending underlying
 // resources.
-func (it *MirroringStakingConfirmedIterator) Close() error {
+func (it *MirroringStakeConfirmedIterator) Close() error {
 	it.sub.Unsubscribe()
 	return nil
 }
 
-// MirroringStakingConfirmed represents a StakingConfirmed event raised by the Mirroring contract.
-type MirroringStakingConfirmed struct {
-	Owner        common.Address
-	NodeId       [20]byte
-	Amount       *big.Int
-	PChainTxHash [32]byte
-	Raw          types.Log // Blockchain specific contextual infos
+// MirroringStakeConfirmed represents a StakeConfirmed event raised by the Mirroring contract.
+type MirroringStakeConfirmed struct {
+	Owner      common.Address
+	NodeId     [20]byte
+	TxHash     [32]byte
+	AmountWei  *big.Int
+	PChainTxId [32]byte
+	Raw        types.Log // Blockchain specific contextual infos
 }
 
-// FilterStakingConfirmed is a free log retrieval operation binding the contract event 0xbf8bc99fe74f2d93c83df24cbdaa5f4c3fc95d1afc04b7bb1d4e3f308bde9b13.
+// FilterStakeConfirmed is a free log retrieval operation binding the contract event 0x4963ffc566fe8fe6af0920b81985e6514afa925fe3408430f490ea3b61e548cd.
 //
-// Solidity: event StakingConfirmed(address indexed owner, bytes20 indexed nodeId, uint256 amount, bytes32 pChainTxHash)
-func (_Mirroring *MirroringFilterer) FilterStakingConfirmed(opts *bind.FilterOpts, owner []common.Address, nodeId [][20]byte) (*MirroringStakingConfirmedIterator, error) {
+// Solidity: event StakeConfirmed(address indexed owner, bytes20 indexed nodeId, bytes32 indexed txHash, uint256 amountWei, bytes32 pChainTxId)
+func (_Mirroring *MirroringFilterer) FilterStakeConfirmed(opts *bind.FilterOpts, owner []common.Address, nodeId [][20]byte, txHash [][32]byte) (*MirroringStakeConfirmedIterator, error) {
 
 	var ownerRule []interface{}
 	for _, ownerItem := range owner {
@@ -2344,18 +2366,22 @@ func (_Mirroring *MirroringFilterer) FilterStakingConfirmed(opts *bind.FilterOpt
 	for _, nodeIdItem := range nodeId {
 		nodeIdRule = append(nodeIdRule, nodeIdItem)
 	}
+	var txHashRule []interface{}
+	for _, txHashItem := range txHash {
+		txHashRule = append(txHashRule, txHashItem)
+	}
 
-	logs, sub, err := _Mirroring.contract.FilterLogs(opts, "StakingConfirmed", ownerRule, nodeIdRule)
+	logs, sub, err := _Mirroring.contract.FilterLogs(opts, "StakeConfirmed", ownerRule, nodeIdRule, txHashRule)
 	if err != nil {
 		return nil, err
 	}
-	return &MirroringStakingConfirmedIterator{contract: _Mirroring.contract, event: "StakingConfirmed", logs: logs, sub: sub}, nil
+	return &MirroringStakeConfirmedIterator{contract: _Mirroring.contract, event: "StakeConfirmed", logs: logs, sub: sub}, nil
 }
 
-// WatchStakingConfirmed is a free log subscription operation binding the contract event 0xbf8bc99fe74f2d93c83df24cbdaa5f4c3fc95d1afc04b7bb1d4e3f308bde9b13.
+// WatchStakeConfirmed is a free log subscription operation binding the contract event 0x4963ffc566fe8fe6af0920b81985e6514afa925fe3408430f490ea3b61e548cd.
 //
-// Solidity: event StakingConfirmed(address indexed owner, bytes20 indexed nodeId, uint256 amount, bytes32 pChainTxHash)
-func (_Mirroring *MirroringFilterer) WatchStakingConfirmed(opts *bind.WatchOpts, sink chan<- *MirroringStakingConfirmed, owner []common.Address, nodeId [][20]byte) (event.Subscription, error) {
+// Solidity: event StakeConfirmed(address indexed owner, bytes20 indexed nodeId, bytes32 indexed txHash, uint256 amountWei, bytes32 pChainTxId)
+func (_Mirroring *MirroringFilterer) WatchStakeConfirmed(opts *bind.WatchOpts, sink chan<- *MirroringStakeConfirmed, owner []common.Address, nodeId [][20]byte, txHash [][32]byte) (event.Subscription, error) {
 
 	var ownerRule []interface{}
 	for _, ownerItem := range owner {
@@ -2365,8 +2391,12 @@ func (_Mirroring *MirroringFilterer) WatchStakingConfirmed(opts *bind.WatchOpts,
 	for _, nodeIdItem := range nodeId {
 		nodeIdRule = append(nodeIdRule, nodeIdItem)
 	}
+	var txHashRule []interface{}
+	for _, txHashItem := range txHash {
+		txHashRule = append(txHashRule, txHashItem)
+	}
 
-	logs, sub, err := _Mirroring.contract.WatchLogs(opts, "StakingConfirmed", ownerRule, nodeIdRule)
+	logs, sub, err := _Mirroring.contract.WatchLogs(opts, "StakeConfirmed", ownerRule, nodeIdRule, txHashRule)
 	if err != nil {
 		return nil, err
 	}
@@ -2376,8 +2406,8 @@ func (_Mirroring *MirroringFilterer) WatchStakingConfirmed(opts *bind.WatchOpts,
 			select {
 			case log := <-logs:
 				// New log arrived, parse the event and forward to the user
-				event := new(MirroringStakingConfirmed)
-				if err := _Mirroring.contract.UnpackLog(event, "StakingConfirmed", log); err != nil {
+				event := new(MirroringStakeConfirmed)
+				if err := _Mirroring.contract.UnpackLog(event, "StakeConfirmed", log); err != nil {
 					return err
 				}
 				event.Raw = log
@@ -2398,21 +2428,21 @@ func (_Mirroring *MirroringFilterer) WatchStakingConfirmed(opts *bind.WatchOpts,
 	}), nil
 }
 
-// ParseStakingConfirmed is a log parse operation binding the contract event 0xbf8bc99fe74f2d93c83df24cbdaa5f4c3fc95d1afc04b7bb1d4e3f308bde9b13.
+// ParseStakeConfirmed is a log parse operation binding the contract event 0x4963ffc566fe8fe6af0920b81985e6514afa925fe3408430f490ea3b61e548cd.
 //
-// Solidity: event StakingConfirmed(address indexed owner, bytes20 indexed nodeId, uint256 amount, bytes32 pChainTxHash)
-func (_Mirroring *MirroringFilterer) ParseStakingConfirmed(log types.Log) (*MirroringStakingConfirmed, error) {
-	event := new(MirroringStakingConfirmed)
-	if err := _Mirroring.contract.UnpackLog(event, "StakingConfirmed", log); err != nil {
+// Solidity: event StakeConfirmed(address indexed owner, bytes20 indexed nodeId, bytes32 indexed txHash, uint256 amountWei, bytes32 pChainTxId)
+func (_Mirroring *MirroringFilterer) ParseStakeConfirmed(log types.Log) (*MirroringStakeConfirmed, error) {
+	event := new(MirroringStakeConfirmed)
+	if err := _Mirroring.contract.UnpackLog(event, "StakeConfirmed", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log
 	return event, nil
 }
 
-// MirroringStakingEndedIterator is returned from FilterStakingEnded and is used to iterate over the raw logs and unpacked data for StakingEnded events raised by the Mirroring contract.
-type MirroringStakingEndedIterator struct {
-	Event *MirroringStakingEnded // Event containing the contract specifics and raw log
+// MirroringStakeEndedIterator is returned from FilterStakeEnded and is used to iterate over the raw logs and unpacked data for StakeEnded events raised by the Mirroring contract.
+type MirroringStakeEndedIterator struct {
+	Event *MirroringStakeEnded // Event containing the contract specifics and raw log
 
 	contract *bind.BoundContract // Generic contract to use for unpacking event data
 	event    string              // Event name to use for unpacking event data
@@ -2426,7 +2456,7 @@ type MirroringStakingEndedIterator struct {
 // Next advances the iterator to the subsequent event, returning whether there
 // are any more events found. In case of a retrieval or parsing error, false is
 // returned and Error() can be queried for the exact failure.
-func (it *MirroringStakingEndedIterator) Next() bool {
+func (it *MirroringStakeEndedIterator) Next() bool {
 	// If the iterator failed, stop iterating
 	if it.fail != nil {
 		return false
@@ -2435,7 +2465,7 @@ func (it *MirroringStakingEndedIterator) Next() bool {
 	if it.done {
 		select {
 		case log := <-it.logs:
-			it.Event = new(MirroringStakingEnded)
+			it.Event = new(MirroringStakeEnded)
 			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 				it.fail = err
 				return false
@@ -2450,7 +2480,7 @@ func (it *MirroringStakingEndedIterator) Next() bool {
 	// Iterator still in progress, wait for either a data or an error event
 	select {
 	case log := <-it.logs:
-		it.Event = new(MirroringStakingEnded)
+		it.Event = new(MirroringStakeEnded)
 		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 			it.fail = err
 			return false
@@ -2466,30 +2496,30 @@ func (it *MirroringStakingEndedIterator) Next() bool {
 }
 
 // Error returns any retrieval or parsing error occurred during filtering.
-func (it *MirroringStakingEndedIterator) Error() error {
+func (it *MirroringStakeEndedIterator) Error() error {
 	return it.fail
 }
 
 // Close terminates the iteration process, releasing any pending underlying
 // resources.
-func (it *MirroringStakingEndedIterator) Close() error {
+func (it *MirroringStakeEndedIterator) Close() error {
 	it.sub.Unsubscribe()
 	return nil
 }
 
-// MirroringStakingEnded represents a StakingEnded event raised by the Mirroring contract.
-type MirroringStakingEnded struct {
-	Owner        common.Address
-	NodeId       [20]byte
-	Amount       *big.Int
-	PChainTxHash [32]byte
-	Raw          types.Log // Blockchain specific contextual infos
+// MirroringStakeEnded represents a StakeEnded event raised by the Mirroring contract.
+type MirroringStakeEnded struct {
+	Owner     common.Address
+	NodeId    [20]byte
+	TxHash    [32]byte
+	AmountWei *big.Int
+	Raw       types.Log // Blockchain specific contextual infos
 }
 
-// FilterStakingEnded is a free log retrieval operation binding the contract event 0x686b691da70217717b3ac40133e66b65244527fcf5f35159ac03a4e85d9ce751.
+// FilterStakeEnded is a free log retrieval operation binding the contract event 0xd89d725ca28c0d5002ce399c8a15b0a26908a79c36244c807f9f0b9878f7e756.
 //
-// Solidity: event StakingEnded(address indexed owner, bytes20 indexed nodeId, uint256 amount, bytes32 pChainTxHash)
-func (_Mirroring *MirroringFilterer) FilterStakingEnded(opts *bind.FilterOpts, owner []common.Address, nodeId [][20]byte) (*MirroringStakingEndedIterator, error) {
+// Solidity: event StakeEnded(address indexed owner, bytes20 indexed nodeId, bytes32 indexed txHash, uint256 amountWei)
+func (_Mirroring *MirroringFilterer) FilterStakeEnded(opts *bind.FilterOpts, owner []common.Address, nodeId [][20]byte, txHash [][32]byte) (*MirroringStakeEndedIterator, error) {
 
 	var ownerRule []interface{}
 	for _, ownerItem := range owner {
@@ -2499,18 +2529,22 @@ func (_Mirroring *MirroringFilterer) FilterStakingEnded(opts *bind.FilterOpts, o
 	for _, nodeIdItem := range nodeId {
 		nodeIdRule = append(nodeIdRule, nodeIdItem)
 	}
+	var txHashRule []interface{}
+	for _, txHashItem := range txHash {
+		txHashRule = append(txHashRule, txHashItem)
+	}
 
-	logs, sub, err := _Mirroring.contract.FilterLogs(opts, "StakingEnded", ownerRule, nodeIdRule)
+	logs, sub, err := _Mirroring.contract.FilterLogs(opts, "StakeEnded", ownerRule, nodeIdRule, txHashRule)
 	if err != nil {
 		return nil, err
 	}
-	return &MirroringStakingEndedIterator{contract: _Mirroring.contract, event: "StakingEnded", logs: logs, sub: sub}, nil
+	return &MirroringStakeEndedIterator{contract: _Mirroring.contract, event: "StakeEnded", logs: logs, sub: sub}, nil
 }
 
-// WatchStakingEnded is a free log subscription operation binding the contract event 0x686b691da70217717b3ac40133e66b65244527fcf5f35159ac03a4e85d9ce751.
+// WatchStakeEnded is a free log subscription operation binding the contract event 0xd89d725ca28c0d5002ce399c8a15b0a26908a79c36244c807f9f0b9878f7e756.
 //
-// Solidity: event StakingEnded(address indexed owner, bytes20 indexed nodeId, uint256 amount, bytes32 pChainTxHash)
-func (_Mirroring *MirroringFilterer) WatchStakingEnded(opts *bind.WatchOpts, sink chan<- *MirroringStakingEnded, owner []common.Address, nodeId [][20]byte) (event.Subscription, error) {
+// Solidity: event StakeEnded(address indexed owner, bytes20 indexed nodeId, bytes32 indexed txHash, uint256 amountWei)
+func (_Mirroring *MirroringFilterer) WatchStakeEnded(opts *bind.WatchOpts, sink chan<- *MirroringStakeEnded, owner []common.Address, nodeId [][20]byte, txHash [][32]byte) (event.Subscription, error) {
 
 	var ownerRule []interface{}
 	for _, ownerItem := range owner {
@@ -2520,8 +2554,12 @@ func (_Mirroring *MirroringFilterer) WatchStakingEnded(opts *bind.WatchOpts, sin
 	for _, nodeIdItem := range nodeId {
 		nodeIdRule = append(nodeIdRule, nodeIdItem)
 	}
+	var txHashRule []interface{}
+	for _, txHashItem := range txHash {
+		txHashRule = append(txHashRule, txHashItem)
+	}
 
-	logs, sub, err := _Mirroring.contract.WatchLogs(opts, "StakingEnded", ownerRule, nodeIdRule)
+	logs, sub, err := _Mirroring.contract.WatchLogs(opts, "StakeEnded", ownerRule, nodeIdRule, txHashRule)
 	if err != nil {
 		return nil, err
 	}
@@ -2531,8 +2569,8 @@ func (_Mirroring *MirroringFilterer) WatchStakingEnded(opts *bind.WatchOpts, sin
 			select {
 			case log := <-logs:
 				// New log arrived, parse the event and forward to the user
-				event := new(MirroringStakingEnded)
-				if err := _Mirroring.contract.UnpackLog(event, "StakingEnded", log); err != nil {
+				event := new(MirroringStakeEnded)
+				if err := _Mirroring.contract.UnpackLog(event, "StakeEnded", log); err != nil {
 					return err
 				}
 				event.Raw = log
@@ -2553,12 +2591,12 @@ func (_Mirroring *MirroringFilterer) WatchStakingEnded(opts *bind.WatchOpts, sin
 	}), nil
 }
 
-// ParseStakingEnded is a log parse operation binding the contract event 0x686b691da70217717b3ac40133e66b65244527fcf5f35159ac03a4e85d9ce751.
+// ParseStakeEnded is a log parse operation binding the contract event 0xd89d725ca28c0d5002ce399c8a15b0a26908a79c36244c807f9f0b9878f7e756.
 //
-// Solidity: event StakingEnded(address indexed owner, bytes20 indexed nodeId, uint256 amount, bytes32 pChainTxHash)
-func (_Mirroring *MirroringFilterer) ParseStakingEnded(log types.Log) (*MirroringStakingEnded, error) {
-	event := new(MirroringStakingEnded)
-	if err := _Mirroring.contract.UnpackLog(event, "StakingEnded", log); err != nil {
+// Solidity: event StakeEnded(address indexed owner, bytes20 indexed nodeId, bytes32 indexed txHash, uint256 amountWei)
+func (_Mirroring *MirroringFilterer) ParseStakeEnded(log types.Log) (*MirroringStakeEnded, error) {
+	event := new(MirroringStakeEnded)
+	if err := _Mirroring.contract.UnpackLog(event, "StakeEnded", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log
