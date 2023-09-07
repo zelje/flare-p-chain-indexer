@@ -44,6 +44,7 @@ type uptimeVotingCronjob struct {
 
 	db *gorm.DB
 
+	// For testing to set "now" to some past date
 	time utils.ShiftedTime
 }
 
