@@ -1,7 +1,6 @@
 package cronjob
 
 import (
-	"context"
 	"flare-indexer/database"
 	"flare-indexer/indexer/config"
 	indexerctx "flare-indexer/indexer/context"
@@ -16,7 +15,6 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/pkg/errors"
-	"golang.org/x/sync/errgroup"
 	"gorm.io/gorm"
 )
 
@@ -179,47 +177,23 @@ type epochRange struct {
 
 var errNoEpochsToMirror = errors.New("no epochs to mirror")
 
-func (e *epochRange) validate() error {
-	if e.start > e.end {
-		return errNoEpochsToMirror
-	}
-
-	return nil
-}
-
 func (c *mirrorCronJob) getEpochRange() (*epochRange, error) {
-	epochRange := new(epochRange)
-	eg, ctx := errgroup.WithContext(context.Background())
-
-	eg.Go(func() error {
-		startEpoch, err := c.getStartEpoch()
-		if err != nil {
-			return err
-		}
-
-		epochRange.start = startEpoch
-		return nil
-	})
-
-	eg.Go(func() error {
-		endEpoch, err := c.getEndEpoch(ctx)
-		if err != nil {
-			return err
-		}
-
-		epochRange.end = endEpoch
-		return nil
-	})
-
-	if err := eg.Wait(); err != nil {
+	startEpoch, err := c.getStartEpoch()
+	if err != nil {
 		return nil, err
 	}
 
-	if err := epochRange.validate(); err != nil {
+	logger.Debug("start epoch: %d", startEpoch)
+
+	endEpoch, err := c.getEndEpoch(startEpoch)
+	if err != nil {
 		return nil, err
 	}
 
-	return epochRange, nil
+	return &epochRange{
+		start: startEpoch,
+		end:   endEpoch,
+	}, nil
 }
 
 func (c *mirrorCronJob) getStartEpoch() (int64, error) {
@@ -231,11 +205,12 @@ func (c *mirrorCronJob) getStartEpoch() (int64, error) {
 	return int64(jobState.NextDBIndex), nil
 }
 
-func (c *mirrorCronJob) getEndEpoch(ctx context.Context) (int64, error) {
+func (c *mirrorCronJob) getEndEpoch(startEpoch int64) (int64, error) {
 	currEpoch := c.epochs.getCurrentEpoch()
+	logger.Debug("current epoch: %d", currEpoch)
 
-	for epoch := currEpoch; epoch > 0; epoch-- {
-		confirmed, err := c.isEpochConfirmed(ctx, epoch)
+	for epoch := currEpoch; epoch > startEpoch; epoch-- {
+		confirmed, err := c.isEpochConfirmed(epoch)
 		if err != nil {
 			return 0, err
 		}
@@ -248,9 +223,8 @@ func (c *mirrorCronJob) getEndEpoch(ctx context.Context) (int64, error) {
 	return 0, errNoEpochsToMirror
 }
 
-func (c *mirrorCronJob) isEpochConfirmed(ctx context.Context, epoch int64) (bool, error) {
-	opts := &bind.CallOpts{Context: ctx}
-	merkleRoot, err := c.votingContract.GetMerkleRoot(opts, big.NewInt(epoch))
+func (c *mirrorCronJob) isEpochConfirmed(epoch int64) (bool, error) {
+	merkleRoot, err := c.votingContract.GetMerkleRoot(new(bind.CallOpts), big.NewInt(epoch))
 	if err != nil {
 		return false, errors.Wrap(err, "votingContract.GetMerkleRoot")
 	}
@@ -353,7 +327,7 @@ func (c *mirrorCronJob) mirrorTx(in *mirrorTxInput) error {
 		return err
 	}
 
-	_, err = c.mirroringContract.VerifyStake(c.txOpts, *stakeData, merkleProof)
+	_, err = c.mirroringContract.MirrorStake(c.txOpts, *stakeData, merkleProof)
 	if err != nil {
 		return errors.Wrap(err, "mirroringContract.VerifyStake")
 	}
