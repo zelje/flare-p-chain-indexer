@@ -77,7 +77,7 @@ func createTestUptimeVotingCronjob(epochStart time.Time) (*uptimeVotingCronjob, 
 		Client:       testClient,
 		DB:           ctx.DB(),
 		Config:       ctx.Config().PChainIndexer,
-		BatchIndexer: pchain.NewPChainBatchIndexer(ctx, testClient, testRPCClient),
+		BatchIndexer: pchain.NewPChainBatchIndexer(ctx, testClient, testRPCClient, nil),
 	}
 	return cronjob, indexer, nil
 }

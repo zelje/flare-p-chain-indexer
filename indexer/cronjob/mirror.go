@@ -10,7 +10,6 @@ import (
 	"flare-indexer/utils/contracts/mirroring"
 	"flare-indexer/utils/contracts/voting"
 	"flare-indexer/utils/merkle"
-	"fmt"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -305,8 +304,6 @@ func (c *mirrorCronJob) checkMerkleRoot(tree merkle.Tree, epoch int64) error {
 	if err != nil {
 		return errors.Wrap(err, "votingContract.GetMerkleRoot")
 	}
-
-	fmt.Printf("Merkle root mirror: %x\n", root)
 
 	if root != contractRoot {
 		return errors.Errorf("merkle root mismatch: got %x, expected %x", root, contractRoot)

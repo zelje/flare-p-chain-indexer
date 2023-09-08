@@ -18,20 +18,38 @@ import (
 	"gorm.io/gorm"
 )
 
+// Transform indexer database entities before persisting them
+// They are always no-op except in certain tests
+type PChainDataTransformer struct {
+	transformPChainTx func(*database.PChainTx) *database.PChainTx
+}
+
+func (dt *PChainDataTransformer) TransformPChainTxs(txs []*database.PChainTx) []*database.PChainTx {
+	return utils.Map(txs, dt.transformPChainTx)
+}
+
 // Indexer for P-chain transactions. Implements ContainerBatchIndexer
 type txBatchIndexer struct {
 	db        *gorm.DB
 	client    chain.IndexerClient
 	rpcClient chain.RPCClient
 
-	inOutIndexer *shared.InputOutputIndexer
-	newTxs       []*database.PChainTx
+	inOutIndexer    *shared.InputOutputIndexer
+	newTxs          []*database.PChainTx
+	dataTransformer *PChainDataTransformer
+}
+
+func NewPChainDataTransformer(txTransformer func(tx *database.PChainTx) *database.PChainTx) *PChainDataTransformer {
+	return &PChainDataTransformer{
+		transformPChainTx: txTransformer,
+	}
 }
 
 func NewPChainBatchIndexer(
 	ctx context.IndexerContext,
 	client chain.IndexerClient,
 	rpcClient chain.RPCClient,
+	dataTransformer *PChainDataTransformer,
 ) *txBatchIndexer {
 	updater := newPChainInputUpdater(ctx, rpcClient)
 	return &txBatchIndexer{
@@ -39,8 +57,9 @@ func NewPChainBatchIndexer(
 		client:    client,
 		rpcClient: rpcClient,
 
-		inOutIndexer: shared.NewInputOutputIndexer(updater),
-		newTxs:       make([]*database.PChainTx, 0),
+		inOutIndexer:    shared.NewInputOutputIndexer(updater),
+		newTxs:          make([]*database.PChainTx, 0),
+		dataTransformer: dataTransformer,
 	}
 }
 
@@ -193,7 +212,14 @@ func (xi *txBatchIndexer) PersistEntities(db *gorm.DB) error {
 	if err != nil {
 		return err
 	}
-	return database.CreatePChainEntities(db, xi.newTxs, ins, outs)
+
+	var txs []*database.PChainTx
+	if xi.dataTransformer != nil {
+		txs = xi.dataTransformer.TransformPChainTxs(xi.newTxs)
+	} else {
+		txs = xi.newTxs
+	}
+	return database.CreatePChainEntities(db, txs, ins, outs)
 }
 
 // Common code for AddDelegatorTx and AddValidatorTx

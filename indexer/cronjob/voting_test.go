@@ -10,7 +10,6 @@ import (
 	"flare-indexer/indexer/shared"
 	"flare-indexer/utils"
 	"flare-indexer/utils/contracts/voting"
-	"fmt"
 	"math/big"
 	"testing"
 	"time"
@@ -68,6 +67,16 @@ func votingCronjobTestConfig(epochStart time.Time, dbName string, privateKey str
 	return cfg
 }
 
+// Transform p-chain txs before persisting:
+// Extend end time of a validator tx past test start time to prevent mirror contract to fail
+func transformPChainTx(tx *database.PChainTx) *database.PChainTx {
+	if tx.Type == database.PChainAddValidatorTx || tx.Type == database.PChainAddDelegatorTx {
+		minEndTime := time.Date(9999, 1, 1, 0, 0, 0, 0, time.UTC)
+		tx.EndTime = &minEndTime
+	}
+	return tx
+}
+
 func createTestVotingClients(epochStart time.Time) (*votingCronjob, *votingCronjob, *mirrorCronJob, *shared.ChainIndexerBase, *shared.ChainIndexerBase, error) {
 	ctx1, err := context.BuildTestContext(votingCronjobTestConfig(epochStart, "flare_indexer_indexer", privateKey1))
 	if err != nil {
@@ -89,21 +98,28 @@ func createTestVotingClients(epochStart time.Time) (*votingCronjob, *votingCronj
 	if err != nil {
 		return nil, nil, nil, nil, nil, err
 	}
+
 	indexer1 := &shared.ChainIndexerBase{
-		StateName:    pchain.StateName,
-		IndexerName:  "P-chain Blocks Test",
-		Client:       testClient,
-		DB:           ctx1.DB(),
-		Config:       ctx1.Config().PChainIndexer,
-		BatchIndexer: pchain.NewPChainBatchIndexer(ctx1, testClient, testRPCClient),
+		StateName:   pchain.StateName,
+		IndexerName: "P-chain Blocks Test",
+		Client:      testClient,
+		DB:          ctx1.DB(),
+		Config:      ctx1.Config().PChainIndexer,
+		BatchIndexer: pchain.NewPChainBatchIndexer(
+			ctx1, testClient, testRPCClient,
+			pchain.NewPChainDataTransformer(transformPChainTx),
+		),
 	}
 	indexer2 := &shared.ChainIndexerBase{
-		StateName:    pchain.StateName,
-		IndexerName:  "P-chain Blocks Test",
-		Client:       testClient,
-		DB:           ctx2.DB(),
-		Config:       ctx2.Config().PChainIndexer,
-		BatchIndexer: pchain.NewPChainBatchIndexer(ctx1, testClient, testRPCClient),
+		StateName:   pchain.StateName,
+		IndexerName: "P-chain Blocks Test",
+		Client:      testClient,
+		DB:          ctx2.DB(),
+		Config:      ctx2.Config().PChainIndexer,
+		BatchIndexer: pchain.NewPChainBatchIndexer(
+			ctx1, testClient, testRPCClient,
+			pchain.NewPChainDataTransformer(transformPChainTx),
+		),
 	}
 	return cronjob1, cronjob2, mirror, indexer1, indexer2, nil
 }
@@ -150,7 +166,6 @@ func TestVoting(t *testing.T) {
 	t.Run("Verify merkle root", func(t *testing.T) {
 		root, err := getMerkleRootFromContract(vCronjob1.votingContract, 0)
 		require.NoError(t, err)
-		fmt.Printf("Merkle root: %x\n", root)
 		cupaloy.SnapshotT(t, root)
 	})
 	t.Run("Run mirroring client", func(t *testing.T) {
