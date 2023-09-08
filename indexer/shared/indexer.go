@@ -124,7 +124,7 @@ func (ci *ChainIndexerBase) Run() {
 	if !ci.Config.Enabled {
 		return
 	}
-	ticker := time.NewTicker(time.Duration(ci.Config.TimeoutMillis * int(time.Millisecond)))
+	ticker := time.NewTicker(ci.Config.Timeout)
 	for range ticker.C {
 		err := ci.IndexBatch()
 		if err != nil {

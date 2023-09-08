@@ -8,7 +8,7 @@ import (
 type Cronjob interface {
 	Name() string
 	Enabled() bool
-	TimeoutSeconds() int
+	Timeout() time.Duration
 	Call() error
 	OnStart() error
 }
@@ -27,7 +27,7 @@ func RunCronjob(c Cronjob) {
 
 	logger.Debug("starting %s cronjob", c.Name())
 
-	ticker := time.NewTicker(time.Duration(c.TimeoutSeconds() * int(time.Second)))
+	ticker := time.NewTicker(c.Timeout())
 	for range ticker.C {
 		err := c.Call()
 		if err != nil {

@@ -30,15 +30,15 @@ func votingCronjobTestConfig(epochStart time.Time, dbName string, privateKey str
 		},
 		VotingCronjob: config.VotingConfig{
 			CronjobConfig: config.CronjobConfig{
-				Enabled:        true,
-				TimeoutSeconds: 30,
+				Enabled: true,
+				Timeout: 30 * time.Second,
 			},
 			ContractAddress: common.HexToAddress("0x7c2C195CD6D34B8F845992d380aADB2730bB9C6F"),
 		},
 		Mirror: config.MirrorConfig{
 			CronjobConfig: config.CronjobConfig{
-				Enabled:        true,
-				TimeoutSeconds: 30,
+				Enabled: true,
+				Timeout: 30 * time.Second,
 			},
 			MirroringContract: common.HexToAddress("0x8858eeB3DfffA017D4BCE9801D340D36Cf895CCf"),
 		},
@@ -47,10 +47,10 @@ func votingCronjobTestConfig(epochStart time.Time, dbName string, privateKey str
 			Period: 90 * time.Second,
 		},
 		PChainIndexer: config.IndexerConfig{
-			Enabled:       true,
-			TimeoutMillis: 3000,
-			BatchSize:     200,
-			StartIndex:    0,
+			Enabled:    true,
+			Timeout:    3000 * time.Millisecond,
+			BatchSize:  200,
+			StartIndex: 0,
 		},
 		DB: globalConfig.DBConfig{
 			Username:   database.MysqlTestUser,

@@ -6,6 +6,7 @@ import (
 	"flare-indexer/indexer/context"
 	"flare-indexer/utils"
 	"flare-indexer/utils/chain"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -30,8 +31,8 @@ func (c *uptimeCronjob) Name() string {
 	return "uptime"
 }
 
-func (c *uptimeCronjob) TimeoutSeconds() int {
-	return c.config.TimeoutSeconds
+func (c *uptimeCronjob) Timeout() time.Duration {
+	return c.config.Timeout
 }
 
 func (c *uptimeCronjob) Enabled() bool {

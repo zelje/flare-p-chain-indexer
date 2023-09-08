@@ -7,6 +7,7 @@ import (
 	"flare-indexer/utils/chain"
 	"log"
 	"testing"
+	"time"
 )
 
 var (
@@ -35,15 +36,15 @@ func pchainIndexerTestConfig(batchSize int, startIndex uint64) *config.Config {
 			ChainID:         162,
 		},
 		PChainIndexer: config.IndexerConfig{
-			Enabled:       true,
-			TimeoutMillis: 3000,
-			BatchSize:     batchSize,
-			StartIndex:    startIndex,
+			Enabled:    true,
+			Timeout:    3000 * time.Millisecond,
+			BatchSize:  batchSize,
+			StartIndex: startIndex,
 		},
 		UptimeCronjob: config.UptimeConfig{
 			CronjobConfig: config.CronjobConfig{
-				Enabled:        true,
-				TimeoutSeconds: 60,
+				Enabled: true,
+				Timeout: 60 * time.Second,
 			},
 		},
 		DB: globalConfig.DBConfig{

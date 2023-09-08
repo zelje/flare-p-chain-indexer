@@ -26,21 +26,20 @@ type MetricsConfig struct {
 }
 
 type IndexerConfig struct {
-	Enabled          bool   `toml:"enabled"`
-	TimeoutMillis    int    `toml:"timeout_millis"`
-	BatchSize        int    `toml:"batch_size"`
-	StartIndex       uint64 `toml:"start_index"`
-	OutputsCacheSize int    `toml:"outputs_cache_size"`
+	Enabled    bool          `toml:"enabled"`
+	Timeout    time.Duration `toml:"timeout"`
+	BatchSize  int           `toml:"batch_size"`
+	StartIndex uint64        `toml:"start_index"`
 }
 
 type CronjobConfig struct {
-	Enabled        bool `toml:"enabled"`
-	TimeoutSeconds int  `toml:"timeout_seconds"`
+	Enabled bool          `toml:"enabled"`
+	Timeout time.Duration `toml:"timeout"`
 }
 
 type MirrorConfig struct {
 	CronjobConfig
-	MirroringContract common.Address `toml:"mirroring_contract" envconfig:"MIRRORING_CONTRACT_ADDRESS"`
+	MirroringContract common.Address `toml:"contract_address" envconfig:"MIRRORING_CONTRACT_ADDRESS"`
 }
 
 type VotingConfig struct {
@@ -64,21 +63,21 @@ type UptimeConfig struct {
 func newConfig() *Config {
 	return &Config{
 		XChainIndexer: IndexerConfig{
-			Enabled:       true,
-			TimeoutMillis: 3000,
-			BatchSize:     10,
-			StartIndex:    0,
+			Enabled:    true,
+			Timeout:    3000 * time.Millisecond,
+			BatchSize:  10,
+			StartIndex: 0,
 		},
 		PChainIndexer: IndexerConfig{
-			Enabled:       true,
-			TimeoutMillis: 3000,
-			BatchSize:     10,
-			StartIndex:    0,
+			Enabled:    true,
+			Timeout:    3000 * time.Millisecond,
+			BatchSize:  10,
+			StartIndex: 0,
 		},
 		UptimeCronjob: UptimeConfig{
 			CronjobConfig: CronjobConfig{
-				Enabled:        false,
-				TimeoutSeconds: 60,
+				Enabled: false,
+				Timeout: 60 * time.Second,
 			},
 		},
 		Chain: config.ChainConfig{

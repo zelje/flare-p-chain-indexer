@@ -64,27 +64,38 @@ prometheus_address = "localhost:2112"  # expose indexer metrics to this address 
 node_url = "http://localhost:9650/"  # node indexer address
 address_hrp = "localflare"  # HRP (human readable part) of chain -- used to properly encode/decode addresses
 chain_id = 162  # chain id
+eth_rpc_url = "http://localhost:9650/ext/C/rpc"  # Ethereum RPC URL
+api_key = ""    # API key (in case the node is protected by API key), adds ?x-apikey=... to all requests if not empty
+private_key = "0x00000000000000"  # private key of the account (for voting and mirroring clients), in hex
 
 [p_chain_indexer]
 enabled = true         # enable p-chain indexing
-timeout_millis = 1000  # call avalanche p-chain indexer every ... ms
-batch_size = 10        # batch size to fetch from the node (max ????)
+timeout = "1000ms"     # call avalanche p-chain indexer every ...
+batch_size = 10        # batch size to fetch from the node
 start_index = 0        # start indexing at this block height
 
 [uptime_cronjob]
-enabled = false       # enable uptime monitoring cronjob
-timeout_seconds = 10  # call uptime service on avalanche node every ... seconds
+enabled = false         # enable uptime monitoring cronjob
+timeout = "10s"         # call uptime service on every ...
+enable_voting = true    # enable voting for connected validators
+start = "2021-08-01T00:00:00Z"  # start of the uptime voting epoch, supports also unix timestamp as a number
+period = "90s"          # length of the epoch
+uptime_threshold = 0.8  # minimum uptime ratio in the epoch for a validator to be considered connected
+
+# epochs for mirroring and voting clients
+[epochs]
+start = "2021-08-01T00:00:00Z"  # start of the voting epochs, supports also unix timestamp as a number
+period = "90s"          # length of the epoch
 
 [voting_cronjob]
 enabled = false          # enable voting client
-timeout_seconds = 10     # check for new epochs every ... seconds
-epoch_start = 1693260000 # start voting of voting epochs (unix timestamp)
-epoch_period = 360       # length of epoch in seconds
-contract_address = ""    # voting contract address
+timeout = "10s"          # check for new epochs every ...
+contract_address = "0xf956df3800379fdFA31D0A45FDD5001D02F4109c"    # voting contract address
 
 [mirroring_cronjob]
 enabled = false       # enable mirroring client
-timeout_seconds = 10  # check for new epochs every ... seconds
+timeout = "10s"       # check for new epochs every ... seconds
+contract_address = "0xE64Df6a7e4f4c277C5299f0FE12D7BbB8A207175"    # mirror contract address
 ```
 
 ## Attestation client services (possible future use)

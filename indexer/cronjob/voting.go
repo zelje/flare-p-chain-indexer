@@ -10,6 +10,7 @@ import (
 	"flare-indexer/utils"
 	"flare-indexer/utils/contracts/voting"
 	"math/big"
+	"time"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
@@ -30,7 +31,7 @@ var (
 type votingCronjob struct {
 	enabled bool
 	epochs  epochInfo
-	timeout int
+	timeout time.Duration
 
 	// Lock to prevent concurrent aggregation
 	running bool
@@ -60,7 +61,7 @@ func NewVotingCronjob(ctx indexerctx.IndexerContext) (*votingCronjob, error) {
 
 	return &votingCronjob{
 		enabled:        cfg.VotingCronjob.Enabled,
-		timeout:        cfg.VotingCronjob.TimeoutSeconds,
+		timeout:        cfg.VotingCronjob.Timeout,
 		running:        false,
 		db:             ctx.DB(),
 		epochs:         newEpochInfo(&cfg.Epochs),
@@ -85,7 +86,7 @@ func (c *votingCronjob) Enabled() bool {
 	return c.enabled
 }
 
-func (c *votingCronjob) TimeoutSeconds() int {
+func (c *votingCronjob) Timeout() time.Duration {
 	return c.timeout
 }
 

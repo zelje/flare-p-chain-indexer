@@ -11,6 +11,7 @@ import (
 	"flare-indexer/utils/contracts/voting"
 	"flare-indexer/utils/merkle"
 	"math/big"
+	"time"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
@@ -101,8 +102,8 @@ func (c *mirrorCronJob) Enabled() bool {
 	return c.enabled
 }
 
-func (c *mirrorCronJob) TimeoutSeconds() int {
-	return c.epochs.periodSeconds
+func (c *mirrorCronJob) Timeout() time.Duration {
+	return c.epochs.period
 }
 
 func (c *mirrorCronJob) OnStart() error {
