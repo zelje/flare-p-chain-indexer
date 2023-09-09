@@ -368,6 +368,7 @@ func (c *mirrorCronJob) mirrorTx(in *mirrorTxInput) error {
 		return err
 	}
 
+	logger.Debug("mirroring tx %s", *in.tx.TxID)
 	err = c.contracts.MirrorStake(stakeData, merkleProof)
 	if err != nil {
 		return errors.Wrap(err, "mirroringContract.VerifyStake")
