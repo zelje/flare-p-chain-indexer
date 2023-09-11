@@ -124,7 +124,7 @@ func (c *votingCronjob) Call() error {
 		if err != nil {
 			return err
 		}
-		logger.Debug("Submitted votes for epoch %d", e)
+		logger.Info("Submitted votes for epoch %d", e)
 
 		// Update state
 		state.NextDBIndex = uint64(e + 1)

@@ -246,12 +246,11 @@ func (c *mirrorCronJob) mirrorEpoch(epoch int64) error {
 		return nil
 	}
 
-	logger.Debug("mirroring %d txs", len(txs))
+	logger.Info("mirroring %d txs", len(txs))
 	if err := c.mirrorTxs(txs, epoch); err != nil {
 		return err
 	}
 
-	logger.Debug("successfully mirrored %d txs", len(txs))
 	return nil
 }
 
