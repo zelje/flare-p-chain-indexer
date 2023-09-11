@@ -104,6 +104,7 @@ func (c *uptimeVotingCronjob) Call() error {
 		}
 		return err
 	}
+	firstEpochToAggregate = utils.Max(firstEpochToAggregate, int64(c.epochs.first))
 
 	var aggregations []*database.UptimeAggregation
 	lastAggregatedEpoch := c.lastAggregatedEpoch
