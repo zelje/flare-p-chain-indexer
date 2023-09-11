@@ -105,8 +105,6 @@ Tests for indexer expect a MySQL database running. Please run `docker-compose up
 Additionally, tests for voting, mirroring and uptime clients expect a Hardhat instance from <https://gitlab.com/flarenetwork/flare-smart-contracts/-/tree/staking-tests> running. You start it by running
 `yarn staking_test` (following `yarn` and `yarn c` commands).
 
-Then run `go test ./...` in the `indexer` directory.
-
 ## Attestation client services (possible future use)
 
 The following services are implemented, according to the attestation specification:
