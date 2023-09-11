@@ -51,7 +51,7 @@ type uptimeVotingCronjob struct {
 func NewUptimeVotingCronjob(ctx context.IndexerContext) (*uptimeVotingCronjob, error) {
 	cfg := ctx.Config()
 
-	if !cfg.UptimeCronjob.EnableVoting {
+	if !cfg.UptimeCronjob.Enabled || !cfg.UptimeCronjob.EnableVoting {
 		return &uptimeVotingCronjob{}, nil
 	}
 

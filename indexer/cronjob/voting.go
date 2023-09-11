@@ -106,7 +106,7 @@ func (c *votingCronjob) Call() error {
 	now := c.time.Now()
 
 	// Last epoch that was submitted to the contract
-	nextEpochToSubmit := state.NextDBIndex
+	nextEpochToSubmit := utils.Max(state.NextDBIndex, c.epochs.first)
 	lastEpochToSubmit := c.epochs.getEpochIndex(now) - 1
 	for e := int64(nextEpochToSubmit); e <= lastEpochToSubmit; e++ {
 		start, end := c.epochs.getTimeRange(e)

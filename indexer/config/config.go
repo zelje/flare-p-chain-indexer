@@ -50,6 +50,7 @@ type VotingConfig struct {
 type EpochConfig struct {
 	Period time.Duration   `toml:"period" envconfig:"EPOCH_PERIOD"`
 	Start  utils.Timestamp `toml:"start" envconfig:"EPOCH_TIME"`
+	First  uint64          `toml:"first" envconfig:"EPOCH_FIRST"`
 }
 
 type UptimeConfig struct {

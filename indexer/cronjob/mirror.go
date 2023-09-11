@@ -205,7 +205,7 @@ func (c *mirrorCronJob) getStartEpoch() (int64, error) {
 		return 0, err
 	}
 
-	return int64(jobState.NextDBIndex), nil
+	return int64(utils.Max(jobState.NextDBIndex, c.epochs.first)), nil
 }
 
 func (c *mirrorCronJob) getEndEpoch(startEpoch int64) (int64, error) {
