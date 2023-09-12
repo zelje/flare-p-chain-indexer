@@ -249,7 +249,3 @@ func (e epochInfo) getTimeRange(epoch int64) (time.Time, time.Time) {
 func (e epochInfo) getEpochIndex(t time.Time) int64 {
 	return int64(t.Sub(e.start) / e.period)
 }
-
-func (e epochInfo) getCurrentEpoch() int64 {
-	return e.getEpochIndex(time.Now())
-}
