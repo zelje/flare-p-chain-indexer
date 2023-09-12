@@ -6,6 +6,7 @@ import (
 	indexerctx "flare-indexer/indexer/context"
 	"flare-indexer/indexer/pchain"
 	"flare-indexer/logger"
+	"flare-indexer/utils"
 	"flare-indexer/utils/contracts/mirroring"
 	"flare-indexer/utils/contracts/voting"
 	"flare-indexer/utils/merkle"
@@ -26,6 +27,7 @@ type mirrorCronJob struct {
 	contracts mirrorContracts
 	enabled   bool
 	epochs    epochInfo
+	time              utils.ShiftedTime
 }
 
 type mirrorDB interface {
@@ -162,8 +164,8 @@ func (c *mirrorCronJob) Enabled() bool {
 	return c.enabled
 }
 
-func (c *mirrorCronJob) TimeoutSeconds() int {
-	return c.epochs.periodSeconds
+func (c *mirrorCronJob) Timeout() time.Duration {
+	return c.epochs.period
 }
 
 func (c *mirrorCronJob) OnStart() error {
@@ -247,11 +249,11 @@ func (c *mirrorCronJob) getStartEpoch() (int64, error) {
 		return 0, err
 	}
 
-	return int64(jobState.NextDBIndex), nil
+	return int64(utils.Max(jobState.NextDBIndex, c.epochs.first)), nil
 }
 
 func (c *mirrorCronJob) getEndEpoch(startEpoch int64) (int64, error) {
-	currEpoch := c.epochs.getCurrentEpoch()
+	currEpoch := c.epochs.getEpochIndex(c.time.Now())
 	logger.Debug("current epoch: %d", currEpoch)
 
 	for epoch := currEpoch; epoch > startEpoch; epoch-- {
@@ -288,12 +290,11 @@ func (c *mirrorCronJob) mirrorEpoch(epoch int64) error {
 		return nil
 	}
 
-	logger.Debug("mirroring %d txs", len(txs))
+	logger.Info("mirroring %d txs", len(txs))
 	if err := c.mirrorTxs(txs, epoch); err != nil {
 		return err
 	}
 
-	logger.Debug("successfully mirrored %d txs", len(txs))
 	return nil
 }
 
@@ -371,7 +372,7 @@ func (c *mirrorCronJob) mirrorTx(in *mirrorTxInput) error {
 	logger.Debug("mirroring tx %s", *in.tx.TxID)
 	err = c.contracts.MirrorStake(stakeData, merkleProof)
 	if err != nil {
-		return errors.Wrap(err, "mirroringContract.VerifyStake")
+		return errors.Wrap(err, "mirroringContract.MirrorStake")
 	}
 
 	return nil

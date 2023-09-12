@@ -17,8 +17,8 @@ func uptimeCronjobTestConfig() *config.Config {
 		},
 		UptimeCronjob: config.UptimeConfig{
 			CronjobConfig: config.CronjobConfig{
-				Enabled:        true,
-				TimeoutSeconds: 60,
+				Enabled: true,
+				Timeout: 60 * time.Second,
 			},
 		},
 		DB: globalConfig.DBConfig{

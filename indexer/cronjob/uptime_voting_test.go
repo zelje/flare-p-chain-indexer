@@ -28,8 +28,8 @@ func uptimeVotingCronjobTestConfig(epochStart time.Time) *config.Config {
 		},
 		UptimeCronjob: config.UptimeConfig{
 			CronjobConfig: config.CronjobConfig{
-				Enabled:        true,
-				TimeoutSeconds: 30,
+				Enabled: true,
+				Timeout: 30 * time.Second,
 			},
 			EpochConfig: config.EpochConfig{
 				Start:  utils.Timestamp{Time: epochStart},
@@ -43,10 +43,10 @@ func uptimeVotingCronjobTestConfig(epochStart time.Time) *config.Config {
 			ContractAddress: common.HexToAddress("0x7c2C195CD6D34B8F845992d380aADB2730bB9C6F"),
 		},
 		PChainIndexer: config.IndexerConfig{
-			Enabled:       true,
-			TimeoutMillis: 3000,
-			BatchSize:     200,
-			StartIndex:    0,
+			Enabled:    true,
+			Timeout:    3000 * time.Millisecond,
+			BatchSize:  200,
+			StartIndex: 0,
 		},
 		DB: globalConfig.DBConfig{
 			Username:   database.MysqlTestUser,
@@ -77,7 +77,7 @@ func createTestUptimeVotingCronjob(epochStart time.Time) (*uptimeVotingCronjob, 
 		Client:       testClient,
 		DB:           ctx.DB(),
 		Config:       ctx.Config().PChainIndexer,
-		BatchIndexer: pchain.NewPChainBatchIndexer(ctx, testClient, testRPCClient),
+		BatchIndexer: pchain.NewPChainBatchIndexer(ctx, testClient, testRPCClient, nil),
 	}
 	return cronjob, indexer, nil
 }

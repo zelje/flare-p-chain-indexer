@@ -9,8 +9,8 @@ import (
 	"flare-indexer/logger"
 	"flare-indexer/utils"
 	"flare-indexer/utils/contracts/voting"
-	"fmt"
 	"math/big"
+	"time"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
@@ -31,7 +31,7 @@ var (
 type votingCronjob struct {
 	enabled bool
 	epochs  epochInfo
-	timeout int
+	timeout time.Duration
 
 	// Lock to prevent concurrent aggregation
 	running bool
@@ -61,7 +61,7 @@ func NewVotingCronjob(ctx indexerctx.IndexerContext) (*votingCronjob, error) {
 
 	return &votingCronjob{
 		enabled:        cfg.VotingCronjob.Enabled,
-		timeout:        cfg.VotingCronjob.TimeoutSeconds,
+		timeout:        cfg.VotingCronjob.Timeout,
 		running:        false,
 		db:             ctx.DB(),
 		epochs:         newEpochInfo(&cfg.Epochs),
@@ -86,7 +86,7 @@ func (c *votingCronjob) Enabled() bool {
 	return c.enabled
 }
 
-func (c *votingCronjob) TimeoutSeconds() int {
+func (c *votingCronjob) Timeout() time.Duration {
 	return c.timeout
 }
 
@@ -106,7 +106,7 @@ func (c *votingCronjob) Call() error {
 	now := c.time.Now()
 
 	// Last epoch that was submitted to the contract
-	nextEpochToSubmit := state.NextDBIndex
+	nextEpochToSubmit := utils.Max(state.NextDBIndex, c.epochs.first)
 	lastEpochToSubmit := c.epochs.getEpochIndex(now) - 1
 	for e := int64(nextEpochToSubmit); e <= lastEpochToSubmit; e++ {
 		start, end := c.epochs.getTimeRange(e)
@@ -124,8 +124,7 @@ func (c *votingCronjob) Call() error {
 		if err != nil {
 			return err
 		}
-		logger.Debug("Submitted votes for epoch %d", e)
-		fmt.Printf("Submitted votes for epoch %d\n", e)
+		logger.Info("Submitted votes for epoch %d", e)
 
 		// Update state
 		state.NextDBIndex = uint64(e + 1)

@@ -29,7 +29,7 @@ func CreatePChainBlockIndexer(ctx context.IndexerContext) *pChainBlockIndexer {
 	idxr.Config = config
 	idxr.InitMetrics(StateName)
 
-	idxr.BatchIndexer = NewPChainBatchIndexer(ctx, client, rpcClient)
+	idxr.BatchIndexer = NewPChainBatchIndexer(ctx, client, rpcClient, nil)
 
 	return &idxr
 }

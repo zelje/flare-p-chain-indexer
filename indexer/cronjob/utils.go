@@ -221,16 +221,16 @@ func getMerkleRoot(votingData []database.PChainTxData) (common.Hash, error) {
 }
 
 type epochInfo struct {
-	period        time.Duration
-	periodSeconds int
-	start         time.Time
+	period time.Duration
+	start  time.Time
+	first  uint64
 }
 
 func newEpochInfo(cfg *config.EpochConfig) epochInfo {
 	return epochInfo{
-		period:        cfg.Period,
-		periodSeconds: int(cfg.Period.Seconds()),
-		start:         cfg.Start.Time,
+		period: cfg.Period,
+		start:  cfg.Start.Time,
+		first:  cfg.First,
 	}
 }
 

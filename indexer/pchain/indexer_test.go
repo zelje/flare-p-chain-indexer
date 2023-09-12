@@ -18,7 +18,7 @@ func createPChainTestBlockIndexer(t *testing.T, batchSize int, startIndex uint64
 	idxr.Client = testClient
 	idxr.DB = ctx.DB()
 	idxr.Config = ctx.Config().PChainIndexer
-	idxr.BatchIndexer = NewPChainBatchIndexer(ctx, idxr.Client, testRPCClient)
+	idxr.BatchIndexer = NewPChainBatchIndexer(ctx, idxr.Client, testRPCClient, nil)
 
 	return &idxr
 }

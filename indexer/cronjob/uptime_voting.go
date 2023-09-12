@@ -25,7 +25,7 @@ var (
 type uptimeVotingCronjob struct {
 	// General cronjob settings (read from config for uptime cronjob)
 	enabled bool
-	timeout int
+	timeout time.Duration
 
 	// epoch start timestamp (unix seconds)
 	epochs epochInfo
@@ -51,7 +51,7 @@ type uptimeVotingCronjob struct {
 func NewUptimeVotingCronjob(ctx context.IndexerContext) (*uptimeVotingCronjob, error) {
 	cfg := ctx.Config()
 
-	if !cfg.UptimeCronjob.EnableVoting {
+	if !cfg.UptimeCronjob.Enabled || !cfg.UptimeCronjob.EnableVoting {
 		return &uptimeVotingCronjob{}, nil
 	}
 
@@ -67,7 +67,7 @@ func NewUptimeVotingCronjob(ctx context.IndexerContext) (*uptimeVotingCronjob, e
 	config := ctx.Config().UptimeCronjob
 	return &uptimeVotingCronjob{
 		epochs:              newEpochInfo(&ctx.Config().UptimeCronjob.EpochConfig),
-		timeout:             config.TimeoutSeconds,
+		timeout:             config.Timeout,
 		enabled:             config.EnableVoting,
 		lastAggregatedEpoch: -1,
 		uptimeThreshold:     config.UptimeThreshold,
@@ -83,7 +83,7 @@ func (c *uptimeVotingCronjob) Name() string {
 	return "uptime_aggregator"
 }
 
-func (c *uptimeVotingCronjob) TimeoutSeconds() int {
+func (c *uptimeVotingCronjob) Timeout() time.Duration {
 	return c.timeout
 }
 
@@ -104,6 +104,7 @@ func (c *uptimeVotingCronjob) Call() error {
 		}
 		return err
 	}
+	firstEpochToAggregate = utils.Max(firstEpochToAggregate, int64(c.epochs.first))
 
 	var aggregations []*database.UptimeAggregation
 	lastAggregatedEpoch := c.lastAggregatedEpoch
