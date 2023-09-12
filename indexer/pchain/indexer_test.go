@@ -1,9 +1,13 @@
 package pchain
 
 import (
+	"encoding/hex"
 	"flare-indexer/database"
 	"flare-indexer/indexer/context"
+	"fmt"
 	"testing"
+
+	"github.com/ava-labs/avalanchego/utils/formatting/address"
 )
 
 func createPChainTestBlockIndexer(t *testing.T, batchSize int, startIndex uint64) *pChainBlockIndexer {
@@ -21,6 +25,15 @@ func createPChainTestBlockIndexer(t *testing.T, batchSize int, startIndex uint64
 	idxr.BatchIndexer = NewPChainBatchIndexer(ctx, idxr.Client, testRPCClient, nil)
 
 	return &idxr
+}
+
+func TestBech32Address(t *testing.T) {
+	hrp, address, err := address.ParseBech32("costwo1n5vvqn7g05sxzaes8xtvr5mx6m95q96jesrg5g")
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("HRP: %s\n", hrp)
+	fmt.Printf("Address: %s\n", hex.EncodeToString(address))
 }
 
 func TestPChainBlockIndexerAll(t *testing.T) {

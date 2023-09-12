@@ -23,12 +23,7 @@ var (
 )
 
 type uptimeVotingCronjob struct {
-	// General cronjob settings (read from config for uptime cronjob)
-	enabled bool
-	timeout time.Duration
-
-	// epoch start timestamp (unix seconds)
-	epochs epochInfo
+	epochCronjob
 
 	// Last aggregation epoch, -1 if no aggregation has been done yet while running this instance
 	// It is set to the last finished aggregation epoch
@@ -66,9 +61,11 @@ func NewUptimeVotingCronjob(ctx context.IndexerContext) (*uptimeVotingCronjob, e
 
 	config := ctx.Config().UptimeCronjob
 	return &uptimeVotingCronjob{
-		epochs:              newEpochInfo(&ctx.Config().UptimeCronjob.EpochConfig),
-		timeout:             config.Timeout,
-		enabled:             config.EnableVoting,
+		epochCronjob: epochCronjob{
+			enabled: config.EnableVoting,
+			timeout: config.Timeout,
+			epochs:  newEpochInfo(&ctx.Config().UptimeCronjob.EpochConfig),
+		},
 		lastAggregatedEpoch: -1,
 		uptimeThreshold:     config.UptimeThreshold,
 		votingInterval:      config.VotingInterval,
@@ -97,20 +94,19 @@ func (c *uptimeVotingCronjob) OnStart() error {
 
 func (c *uptimeVotingCronjob) Call() error {
 	now := c.time.Now()
-	firstEpochToAggregate, lastEpochToAggregate, err := c.aggregationRange(now)
+	epochRange, err := c.aggregationRange(now)
 	if err != nil {
 		if err == errNoEpochsToAggregate {
 			return nil
 		}
 		return err
 	}
-	firstEpochToAggregate = utils.Max(firstEpochToAggregate, int64(c.epochs.first))
 
 	var aggregations []*database.UptimeAggregation
 	lastAggregatedEpoch := c.lastAggregatedEpoch
 
 	// Aggregate missing epochs for all nodes
-	for epoch := firstEpochToAggregate; epoch <= lastEpochToAggregate; epoch++ {
+	for epoch := epochRange.start; epoch <= epochRange.end; epoch++ {
 		nodeAggregations, err := c.aggregateEpoch(epoch)
 		if err != nil {
 			return err
@@ -140,29 +136,29 @@ func (c *uptimeVotingCronjob) Call() error {
 	return nil
 }
 
-func (c *uptimeVotingCronjob) aggregationRange(now time.Time) (firstEpochToAggregate int64, lastEpochToAggregate int64, err error) {
+func (c *uptimeVotingCronjob) aggregationRange(now time.Time) (*epochRange, error) {
 	currentAggregationEpoch := c.epochs.getEpochIndex(now)
-	lastEpochToAggregate = currentAggregationEpoch - 1
+	lastEpochToAggregate := currentAggregationEpoch - 1
 
 	// If we are sure that we have aggregated all the epochs up to lastEpochToAggregate, we can skip
 	if lastEpochToAggregate < 0 || lastEpochToAggregate <= c.lastAggregatedEpoch {
-		err = errNoEpochsToAggregate
-		return
+		return nil, errNoEpochsToAggregate
 	}
 
 	// Last aggregation epoch (epoch of the last persisted aggregation of any node since we
 	// store all epoch aggregations at once)
 	lastAggregation, dbErr := database.FetchLastUptimeAggregation(c.db)
 	if dbErr != nil {
-		err = fmt.Errorf("failed fetching last uptime aggregation %w", dbErr)
-		return
+		return nil, fmt.Errorf("failed fetching last uptime aggregation %w", dbErr)
 	}
+
+	var firstEpochToAggregate int64
 	if lastAggregation == nil {
 		firstEpochToAggregate = 0
 	} else {
 		firstEpochToAggregate = int64(lastAggregation.Epoch) + 1
 	}
-	return
+	return c.getTrimmedEpochRange(firstEpochToAggregate, lastEpochToAggregate), nil
 }
 
 func (c *uptimeVotingCronjob) aggregateEpoch(epoch int64) ([]*database.UptimeAggregation, error) {

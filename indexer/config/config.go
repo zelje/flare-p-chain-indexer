@@ -33,8 +33,9 @@ type IndexerConfig struct {
 }
 
 type CronjobConfig struct {
-	Enabled bool          `toml:"enabled"`
-	Timeout time.Duration `toml:"timeout"`
+	Enabled   bool          `toml:"enabled"`
+	Timeout   time.Duration `toml:"timeout"`
+	BatchSize int           `toml:"batch_size"`
 }
 
 type MirrorConfig struct {
@@ -50,7 +51,7 @@ type VotingConfig struct {
 type EpochConfig struct {
 	Period time.Duration   `toml:"period" envconfig:"EPOCH_PERIOD"`
 	Start  utils.Timestamp `toml:"start" envconfig:"EPOCH_TIME"`
-	First  uint64          `toml:"first" envconfig:"EPOCH_FIRST"`
+	First  int64           `toml:"first" envconfig:"EPOCH_FIRST"`
 }
 
 type UptimeConfig struct {

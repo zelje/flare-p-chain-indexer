@@ -23,9 +23,8 @@ import (
 const mirrorStateName = "mirror_cronjob"
 
 type mirrorCronJob struct {
+	epochCronjob
 	db                *gorm.DB
-	enabled           bool
-	epochs            epochInfo
 	mirroringContract *mirroring.Mirroring
 	txOpts            *bind.TransactOpts
 	votingContract    *voting.Voting
@@ -50,9 +49,8 @@ func NewMirrorCronjob(ctx indexerctx.IndexerContext) (*mirrorCronJob, error) {
 	}
 
 	return &mirrorCronJob{
+		epochCronjob:      newEpochCronjob(&cfg.Mirror.CronjobConfig, &cfg.Epochs),
 		db:                ctx.DB(),
-		enabled:           cfg.Mirror.Enabled,
-		epochs:            newEpochInfo(&cfg.Epochs),
 		mirroringContract: contracts.mirroring,
 		txOpts:            txOpts,
 		votingContract:    contracts.voting,
@@ -96,10 +94,6 @@ func initMirrorJobContracts(cfg *config.Config) (*mirrorJobContracts, error) {
 
 func (c *mirrorCronJob) Name() string {
 	return "mirror"
-}
-
-func (c *mirrorCronJob) Enabled() bool {
-	return c.enabled
 }
 
 func (c *mirrorCronJob) Timeout() time.Duration {
@@ -173,11 +167,6 @@ func (c *mirrorCronJob) updateJobState(epoch int64) error {
 	})
 }
 
-type epochRange struct {
-	start int64
-	end   int64
-}
-
 var errNoEpochsToMirror = errors.New("no epochs to mirror")
 
 func (c *mirrorCronJob) getEpochRange() (*epochRange, error) {
@@ -193,10 +182,7 @@ func (c *mirrorCronJob) getEpochRange() (*epochRange, error) {
 		return nil, err
 	}
 
-	return &epochRange{
-		start: startEpoch,
-		end:   endEpoch,
-	}, nil
+	return c.getTrimmedEpochRange(startEpoch, endEpoch), nil
 }
 
 func (c *mirrorCronJob) getStartEpoch() (int64, error) {
@@ -205,7 +191,7 @@ func (c *mirrorCronJob) getStartEpoch() (int64, error) {
 		return 0, err
 	}
 
-	return int64(utils.Max(jobState.NextDBIndex, c.epochs.first)), nil
+	return int64(jobState.NextDBIndex), nil
 }
 
 func (c *mirrorCronJob) getEndEpoch(startEpoch int64) (int64, error) {
