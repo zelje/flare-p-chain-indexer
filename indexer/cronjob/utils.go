@@ -7,6 +7,7 @@ import (
 	"flare-indexer/utils/contracts/mirroring"
 	"flare-indexer/utils/merkle"
 	"math/big"
+	"sort"
 	"time"
 
 	"github.com/ava-labs/avalanchego/ids"
@@ -109,6 +110,12 @@ func dedupeTxs(txs []database.PChainTxData) []database.PChainTxData {
 	for _, tx := range txSet {
 		dedupedTxs = append(dedupedTxs, *tx)
 	}
+
+	// Sort txs lexically by txID. This isn't strictly necessary but provides
+	// a consistent ordering for testing.
+	sort.Slice(dedupedTxs, func(i, j int) bool {
+		return *dedupedTxs[i].TxID < *dedupedTxs[j].TxID
+	})
 
 	return dedupedTxs
 }
