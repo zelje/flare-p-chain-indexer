@@ -56,9 +56,10 @@ type epochRange struct {
 
 func newEpochCronjob(cronjobCfg *config.CronjobConfig, epochCfg *config.EpochConfig) epochCronjob {
 	return epochCronjob{
-		enabled: cronjobCfg.Enabled,
-		timeout: cronjobCfg.Timeout,
-		epochs:  newEpochInfo(epochCfg),
+		enabled:   cronjobCfg.Enabled,
+		timeout:   cronjobCfg.Timeout,
+		epochs:    newEpochInfo(epochCfg),
+		batchSize: cronjobCfg.BatchSize,
 	}
 }
 

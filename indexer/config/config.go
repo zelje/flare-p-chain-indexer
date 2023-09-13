@@ -35,7 +35,7 @@ type IndexerConfig struct {
 type CronjobConfig struct {
 	Enabled   bool          `toml:"enabled"`
 	Timeout   time.Duration `toml:"timeout"`
-	BatchSize int           `toml:"batch_size"`
+	BatchSize int64         `toml:"batch_size"`
 }
 
 type MirrorConfig struct {
