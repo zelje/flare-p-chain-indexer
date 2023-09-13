@@ -128,7 +128,7 @@ func (c *mirrorCronJob) getEpochRange() (*epochRange, error) {
 		return nil, err
 	}
 	logger.Debug("Mirroring needed for epochs [%d, %d]", startEpoch, endEpoch)
-	return &epochRange{start: startEpoch, end: endEpoch}, nil
+	return c.getTrimmedEpochRange(startEpoch, endEpoch), nil
 }
 
 func (c *mirrorCronJob) getStartEpoch() (int64, error) {

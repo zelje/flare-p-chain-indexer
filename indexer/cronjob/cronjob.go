@@ -79,8 +79,10 @@ func (c *epochCronjob) getEpochRange(start int64, now time.Time) *epochRange {
 func (c *epochCronjob) getTrimmedEpochRange(start, end int64) *epochRange {
 	start = utils.Max(start, c.epochs.first)
 	batchSize := c.batchSize
-	if batchSize <= 0 {
+	if batchSize == 0 {
 		batchSize = defaultEpochBatchSize
+	} else if batchSize < 0 {
+		batchSize = end - start + 1
 	}
 	if end >= start+batchSize {
 		end = batchSize + start - 1
