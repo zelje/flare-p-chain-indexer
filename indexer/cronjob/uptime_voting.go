@@ -158,6 +158,7 @@ func (c *uptimeVotingCronjob) aggregationRange(now time.Time) (*epochRange, erro
 	} else {
 		firstEpochToAggregate = int64(lastAggregation.Epoch) + 1
 	}
+	logger.Debug("Aggregating needed for epochs [%d, %d]", firstEpochToAggregate, lastEpochToAggregate)
 	return c.getTrimmedEpochRange(firstEpochToAggregate, lastEpochToAggregate), nil
 }
 

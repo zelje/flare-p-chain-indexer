@@ -90,6 +90,7 @@ func (c *votingCronjob) Call() error {
 
 	// Last epoch that was submitted to the contract
 	epochRange := c.getEpochRange(int64(state.NextDBIndex), now)
+	logger.Debug("Voting needed for epochs [%d, %d]", epochRange.start, epochRange.end)
 	for e := epochRange.start; e <= epochRange.end; e++ {
 		start, end := c.epochs.getTimeRange(e)
 
