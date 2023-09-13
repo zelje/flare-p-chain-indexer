@@ -2,36 +2,42 @@ package cronjob
 
 import (
 	"flare-indexer/database"
-	"flare-indexer/indexer/config"
 	indexerctx "flare-indexer/indexer/context"
 	"flare-indexer/indexer/pchain"
 	"flare-indexer/logger"
 	"flare-indexer/utils"
 	"flare-indexer/utils/contracts/mirroring"
-	"flare-indexer/utils/contracts/voting"
 	"flare-indexer/utils/merkle"
 	"math/big"
 	"time"
 
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/pkg/errors"
-	"gorm.io/gorm"
 )
 
 const mirrorStateName = "mirror_cronjob"
 
 type mirrorCronJob struct {
 	epochCronjob
-	db                *gorm.DB
-	mirroringContract *mirroring.Mirroring
-	txOpts            *bind.TransactOpts
-	votingContract    *voting.Voting
-	time              utils.ShiftedTime
+	db        mirrorDB
+	contracts mirrorContracts
+	time      utils.ShiftedTime
 }
 
-func NewMirrorCronjob(ctx indexerctx.IndexerContext) (*mirrorCronJob, error) {
+type mirrorDB interface {
+	FetchState(name string) (database.State, error)
+	UpdateJobState(epoch int64) error
+	GetPChainTxsForEpoch(start, end time.Time) ([]database.PChainTxData, error)
+}
+
+type mirrorContracts interface {
+	GetMerkleRoot(epoch int64) ([32]byte, error)
+	MirrorStake(
+		stakeData *mirroring.IPChainStakeMirrorVerifierPChainStake,
+		merkleProof [][32]byte,
+	) error
+}
+
+func NewMirrorCronjob(ctx indexerctx.IndexerContext) (Cronjob, error) {
 	cfg := ctx.Config()
 
 	if !cfg.Mirror.Enabled {
@@ -43,52 +49,10 @@ func NewMirrorCronjob(ctx indexerctx.IndexerContext) (*mirrorCronJob, error) {
 		return nil, err
 	}
 
-	txOpts, err := TransactOptsFromPrivateKey(cfg.Chain.PrivateKey, cfg.Chain.ChainID)
-	if err != nil {
-		return nil, err
-	}
-
 	return &mirrorCronJob{
-		epochCronjob:      newEpochCronjob(&cfg.Mirror.CronjobConfig, &cfg.Epochs),
-		db:                ctx.DB(),
-		mirroringContract: contracts.mirroring,
-		txOpts:            txOpts,
-		votingContract:    contracts.voting,
-	}, nil
-}
-
-type mirrorJobContracts struct {
-	mirroring *mirroring.Mirroring
-	voting    *voting.Voting
-}
-
-func initMirrorJobContracts(cfg *config.Config) (*mirrorJobContracts, error) {
-	if cfg.Mirror.MirroringContract == (common.Address{}) {
-		return nil, errors.New("mirroring contract address not set")
-	}
-
-	if cfg.VotingCronjob.ContractAddress == (common.Address{}) {
-		return nil, errors.New("voting contract address not set")
-	}
-
-	eth, err := ethclient.Dial(cfg.Chain.EthRPCURL)
-	if err != nil {
-		return nil, err
-	}
-
-	mirroringContract, err := mirroring.NewMirroring(cfg.Mirror.MirroringContract, eth)
-	if err != nil {
-		return nil, err
-	}
-
-	votingContract, err := voting.NewVoting(cfg.VotingCronjob.ContractAddress, eth)
-	if err != nil {
-		return nil, err
-	}
-
-	return &mirrorJobContracts{
-		mirroring: mirroringContract,
-		voting:    votingContract,
+		epochCronjob: newEpochCronjob(&cfg.Mirror.CronjobConfig, &cfg.Epochs),
+		db:           newMirrorDBGorm(ctx.DB()),
+		contracts:    contracts,
 	}, nil
 }
 
@@ -117,7 +81,7 @@ func (c *mirrorCronJob) Call() error {
 
 	logger.Debug("mirroring epochs %d-%d", epochRange.start, epochRange.end)
 
-	idxState, err := database.FetchState(c.db, pchain.StateName)
+	idxState, err := c.db.FetchState(pchain.StateName)
 	if err != nil {
 		return err
 	}
@@ -137,7 +101,7 @@ func (c *mirrorCronJob) Call() error {
 
 	logger.Debug("successfully mirrored epochs %d-%d", epochRange.start, epochRange.end)
 
-	if err := c.updateJobState(epochRange.end); err != nil {
+	if err := c.db.UpdateJobState(epochRange.end); err != nil {
 		return err
 	}
 
@@ -147,24 +111,6 @@ func (c *mirrorCronJob) Call() error {
 func (c *mirrorCronJob) indexerBehind(idxState *database.State, epoch int64) bool {
 	epochEnd := c.epochs.getEndTime(epoch)
 	return epochEnd.After(idxState.Updated)
-}
-
-func (c *mirrorCronJob) updateJobState(epoch int64) error {
-	return c.db.Transaction(func(tx *gorm.DB) error {
-		jobState, err := database.FetchState(tx, mirrorStateName)
-		if err != nil {
-			return errors.Wrap(err, "database.FetchState")
-		}
-
-		if jobState.NextDBIndex >= uint64(epoch) {
-			logger.Debug("job state already up to date")
-			return nil
-		}
-
-		jobState.NextDBIndex = uint64(epoch)
-
-		return database.UpdateState(tx, &jobState)
-	})
 }
 
 var errNoEpochsToMirror = errors.New("no epochs to mirror")
@@ -186,7 +132,7 @@ func (c *mirrorCronJob) getEpochRange() (*epochRange, error) {
 }
 
 func (c *mirrorCronJob) getStartEpoch() (int64, error) {
-	jobState, err := database.FetchState(c.db, mirrorStateName)
+	jobState, err := c.db.FetchState(mirrorStateName)
 	if err != nil {
 		return 0, err
 	}
@@ -213,7 +159,7 @@ func (c *mirrorCronJob) getEndEpoch(startEpoch int64) (int64, error) {
 }
 
 func (c *mirrorCronJob) isEpochConfirmed(epoch int64) (bool, error) {
-	merkleRoot, err := c.votingContract.GetMerkleRoot(new(bind.CallOpts), big.NewInt(epoch))
+	merkleRoot, err := c.contracts.GetMerkleRoot(epoch)
 	if err != nil {
 		return false, errors.Wrap(err, "votingContract.GetMerkleRoot")
 	}
@@ -243,11 +189,7 @@ func (c *mirrorCronJob) mirrorEpoch(epoch int64) error {
 func (c *mirrorCronJob) getUnmirroredTxs(epoch int64) ([]database.PChainTxData, error) {
 	startTimestamp, endTimestamp := c.epochs.getTimeRange(epoch)
 
-	txs, err := database.GetPChainTxsForEpoch(&database.GetPChainTxsForEpochInput{
-		DB:             c.db,
-		StartTimestamp: startTimestamp,
-		EndTimestamp:   endTimestamp,
-	})
+	txs, err := c.db.GetPChainTxsForEpoch(startTimestamp, endTimestamp)
 	if err != nil {
 		return nil, err
 	}
@@ -286,7 +228,7 @@ func (c *mirrorCronJob) checkMerkleRoot(tree merkle.Tree, epoch int64) error {
 		return err
 	}
 
-	contractRoot, err := c.votingContract.GetMerkleRoot(new(bind.CallOpts), big.NewInt(epoch))
+	contractRoot, err := c.contracts.GetMerkleRoot(epoch)
 	if err != nil {
 		return errors.Wrap(err, "votingContract.GetMerkleRoot")
 	}
@@ -315,7 +257,8 @@ func (c *mirrorCronJob) mirrorTx(in *mirrorTxInput) error {
 		return err
 	}
 
-	_, err = c.mirroringContract.MirrorStake(c.txOpts, *stakeData, merkleProof)
+	logger.Debug("mirroring tx %s", *in.tx.TxID)
+	err = c.contracts.MirrorStake(stakeData, merkleProof)
 	if err != nil {
 		return errors.Wrap(err, "mirroringContract.MirrorStake")
 	}

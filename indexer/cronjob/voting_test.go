@@ -121,7 +121,7 @@ func createTestVotingClients(epochStart time.Time) (*votingCronjob, *votingCronj
 			pchain.NewPChainDataTransformer(transformPChainTx),
 		),
 	}
-	return cronjob1, cronjob2, mirror, indexer1, indexer2, nil
+	return cronjob1, cronjob2, mirror.(*mirrorCronJob), indexer1, indexer2, nil
 }
 
 func getMerkleRootFromContract(votingContract *voting.Voting, epoch int64) ([32]byte, error) {
