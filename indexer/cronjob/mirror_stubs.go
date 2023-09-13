@@ -5,7 +5,6 @@ package cronjob
 import (
 	"flare-indexer/database"
 	"flare-indexer/indexer/config"
-	"flare-indexer/indexer/pchain"
 	"flare-indexer/logger"
 	"flare-indexer/utils/contracts/mirroring"
 	"flare-indexer/utils/contracts/voting"
@@ -28,7 +27,7 @@ func newMirrorDBGorm(db *gorm.DB) mirrorDB {
 }
 
 func (m mirrorDBGorm) FetchState(name string) (database.State, error) {
-	return database.FetchState(m.db, pchain.StateName)
+	return database.FetchState(m.db, name)
 }
 
 func (m mirrorDBGorm) UpdateJobState(epoch int64) error {
