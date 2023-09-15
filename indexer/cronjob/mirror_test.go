@@ -1,3 +1,6 @@
+//go:build !integration
+// +build !integration
+
 package cronjob
 
 import (
@@ -10,15 +13,14 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ava-labs/avalanchego/ids"
 	"github.com/bradleyjkemp/cupaloy"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
 )
 
-// TODO this could go in TestMain but conflicts with the existing TestMain
-// defined in the same pkg.
-func initMirrorTest() {
+func TestMain(m *testing.M) {
 	cfg := config.Config{
 		Chain: globalConfig.ChainConfig{
 			ChainAddressHRP: "costwo",
@@ -29,11 +31,11 @@ func initMirrorTest() {
 		},
 	}
 	globalConfig.GlobalConfigCallback.Call(cfg)
+
+	m.Run()
 }
 
 func TestOneTransaction(t *testing.T) {
-	initMirrorTest()
-
 	epochs := initEpochs()
 
 	startTime := epochs.getStartTime(3)
@@ -63,12 +65,14 @@ func TestOneTransaction(t *testing.T) {
 		3: txHash,
 	}
 
-	testMirror(t, txs, merkleRoots, epochs)
+	contracts := testContracts{
+		merkleRoots: merkleRoots,
+	}
+
+	testMirror(t, txs, contracts, epochs)
 }
 
 func TestMultipleTransactionsInEpoch(t *testing.T) {
-	initMirrorTest()
-
 	epochs := initEpochs()
 
 	startTime := epochs.getStartTime(3)
@@ -105,12 +109,14 @@ func TestMultipleTransactionsInEpoch(t *testing.T) {
 		3: root,
 	}
 
-	testMirror(t, txsMap, merkleRoots, epochs)
+	contracts := testContracts{
+		merkleRoots: merkleRoots,
+	}
+
+	testMirror(t, txsMap, contracts, epochs)
 }
 
 func TestMultipleTransactionsInSeparateEpochs(t *testing.T) {
-	initMirrorTest()
-
 	epochs := initEpochs()
 
 	startTime := epochs.getStartTime(3)
@@ -150,7 +156,62 @@ func TestMultipleTransactionsInSeparateEpochs(t *testing.T) {
 		merkleRoots[int64(i)] = txHash
 	}
 
-	testMirror(t, txsMap, merkleRoots, epochs)
+	contracts := testContracts{
+		merkleRoots: merkleRoots,
+	}
+
+	testMirror(t, txsMap, contracts, epochs)
+}
+
+func TestAlreadyMirrored(t *testing.T) {
+	testMirrorErrors(t, "transaction already mirrored")
+}
+
+func TestStakingEnded(t *testing.T) {
+	testMirrorErrors(t, "staking already ended")
+}
+
+func testMirrorErrors(t *testing.T, errorMsg string) {
+	epochs := initEpochs()
+
+	startTime := epochs.getStartTime(3)
+	endTime := epochs.getEndTime(999)
+
+	txid := "5uZETr5SUKqGJLzFP5BeGxbXU5CFcCBQYPu288eX9R1QDQMjn"
+	tx := database.PChainTxData{
+		PChainTx: database.PChainTx{
+			ChainID:   "costwo",
+			NodeID:    "NodeID-CZYx3on11wwYXFoHwZtAQZT5unZ9JHMf6",
+			StartTime: &startTime,
+			EndTime:   &endTime,
+			TxID:      &txid,
+			Type:      database.PChainAddDelegatorTx,
+		},
+		InputAddress: "costwo18atl0e95w5ym6t8u5yrjpz35vqqzxfzrrsnq8u",
+	}
+
+	txs := map[int64][]database.PChainTxData{
+		3: {tx},
+	}
+
+	txHash, err := hashTransaction(&tx)
+	require.NoError(t, err)
+
+	merkleRoots := map[int64][32]byte{
+		3: txHash,
+	}
+
+	txidBytes, err := ids.FromString(*tx.TxID)
+	require.NoError(t, err)
+
+	contracts := testContracts{
+		merkleRoots: merkleRoots,
+		mirrorErrors: map[[32]byte]error{
+			txidBytes: errors.New(errorMsg),
+		},
+	}
+
+	testMirror(t, txs, contracts, epochs)
 }
 
 func initEpochs() epochInfo {
@@ -165,7 +226,7 @@ func initEpochs() epochInfo {
 func testMirror(
 	t *testing.T,
 	txs map[int64][]database.PChainTxData,
-	merkleRoots map[int64][32]byte,
+	contracts testContracts,
 	epochs epochInfo,
 ) {
 	db := testDB{
@@ -177,10 +238,6 @@ func testMirror(
 			mirrorStateName: {},
 		},
 		txs: txs,
-	}
-
-	contracts := testContracts{
-		merkleRoots: merkleRoots,
 	}
 
 	j := mirrorCronJob{
@@ -195,7 +252,6 @@ func testMirror(
 	err := j.Call()
 	require.NoError(t, err)
 
-	require.NotEmpty(t, contracts.mirroredStakes)
 	cupaloy.SnapshotT(t, contracts.mirroredStakes)
 }
 
@@ -226,6 +282,7 @@ func (db testDB) GetPChainTxsForEpoch(start, end time.Time) ([]database.PChainTx
 type testContracts struct {
 	merkleRoots    map[int64][32]byte
 	mirroredStakes []mirrorStakeInput
+	mirrorErrors   map[[32]byte]error
 }
 
 type mirrorStakeInput struct {
@@ -241,6 +298,10 @@ func (c *testContracts) MirrorStake(
 	stakeData *mirroring.IPChainStakeMirrorVerifierPChainStake,
 	merkleProof [][32]byte,
 ) error {
+	if err := c.mirrorErrors[stakeData.TxId]; err != nil {
+		return err
+	}
+
 	c.mirroredStakes = append(c.mirroredStakes, mirrorStakeInput{
 		stakeData:   stakeData,
 		merkleProof: merkleProof,
