@@ -109,8 +109,8 @@ func UnpackPChainStakingRequest(request string) (*api.ARPChainStaking, error) {
 	result := api.ARPChainStaking{}
 	result.AttestationType = api.AttestationType(binary.LittleEndian.Uint16(byteRequest[0:2]))
 	result.SourceId = api.SourceId(binary.LittleEndian.Uint32(byteRequest[2:6]))
-	result.MessageIntegrityCode = "0x" + hex.EncodeToString(byteRequest[6:38])
-	result.Id = "0x" + hex.EncodeToString(byteRequest[38:70])
+	result.MessageIntegrityCode = utils.BytesToHexString(byteRequest[6:38])
+	result.Id = utils.BytesToHexString(byteRequest[38:70])
 	result.BlockNumber = binary.LittleEndian.Uint32(byteRequest[70:74])
 	return &result, nil
 }

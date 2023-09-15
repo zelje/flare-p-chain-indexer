@@ -6,6 +6,7 @@ import (
 	"flare-indexer/logger"
 	"flare-indexer/utils"
 	"flare-indexer/utils/contracts/voting"
+	"flare-indexer/utils/staking"
 	"fmt"
 	"math/big"
 	"sort"
@@ -64,7 +65,7 @@ func NewUptimeVotingCronjob(ctx context.IndexerContext) (*uptimeVotingCronjob, e
 		epochCronjob: epochCronjob{
 			enabled: config.EnableVoting,
 			timeout: config.Timeout,
-			epochs:  newEpochInfo(&ctx.Config().UptimeCronjob.EpochConfig),
+			epochs:  staking.NewEpochInfo(&ctx.Config().UptimeCronjob.EpochConfig),
 		},
 		lastAggregatedEpoch: -1,
 		uptimeThreshold:     config.UptimeThreshold,
@@ -137,7 +138,7 @@ func (c *uptimeVotingCronjob) Call() error {
 }
 
 func (c *uptimeVotingCronjob) aggregationRange(now time.Time) (*epochRange, error) {
-	currentAggregationEpoch := c.epochs.getEpochIndex(now)
+	currentAggregationEpoch := c.epochs.GetEpochIndex(now)
 	lastEpochToAggregate := currentAggregationEpoch - 1
 
 	// If we are sure that we have aggregated all the epochs up to lastEpochToAggregate, we can skip
@@ -163,7 +164,7 @@ func (c *uptimeVotingCronjob) aggregationRange(now time.Time) (*epochRange, erro
 }
 
 func (c *uptimeVotingCronjob) aggregateEpoch(epoch int64) ([]*database.UptimeAggregation, error) {
-	epochStart, epochEnd := c.epochs.getTimeRange(epoch)
+	epochStart, epochEnd := c.epochs.GetTimeRange(epoch)
 
 	// Get start and end times for all staking intervals that overlap with the current epoch
 	stakingIntervals, err := fetchNodeStakingIntervals(c.db, epochStart, epochEnd)
@@ -197,7 +198,7 @@ func (c *uptimeVotingCronjob) aggregateNode(epoch int64, nodeID string, stakingI
 		return stakingIntervals[i].nodeID >= nodeID
 	})
 
-	epochStart, epochEnd := c.epochs.getTimeRange(epoch)
+	epochStart, epochEnd := c.epochs.GetTimeRange(epoch)
 	nodeConnectedTime := int64(0)
 	stakingDuration := int64(0)
 	for ; idx < len(stakingIntervals) && stakingIntervals[idx].nodeID == nodeID; idx++ {

@@ -120,6 +120,29 @@ func (r *swaggerRouter) Finalize() {
 // an ApiResponseWrapper object and returned as json
 // Openapi definitions are generated from the request and response objects
 func NewRouteHandler[R interface{}, T interface{}](handler func(request R) (T, *ErrorHandler), method string, requestObject R, respObject T) RouteHandler {
+	wrappedRespObject := api.ApiResponseWrapper[T]{Data: respObject}
+	return wrappedRouteHandler(handler, func(w http.ResponseWriter, resp T) {
+		WriteApiResponseOk(w, resp)
+	}, method, requestObject, wrappedRespObject)
+}
+
+// Route handler factory
+// Request passed to handler is the request body parsed to a struct of type R.
+// The response of handler is an object of type T
+// Openapi definitions are generated from the request and response objects
+func NewClassicRouteHandler[R interface{}, T interface{}](handler func(request R) (T, *ErrorHandler), method string, requestObject R, respObject T) RouteHandler {
+	return wrappedRouteHandler(handler, func(w http.ResponseWriter, resp T) {
+		WriteResponse(w, resp)
+	}, method, requestObject, respObject)
+}
+
+func wrappedRouteHandler[R interface{}, T interface{}, S interface{}](
+	handler func(R) (T, *ErrorHandler),
+	responseWriter func(http.ResponseWriter, T),
+	method string,
+	requestObject R,
+	respObject S,
+) RouteHandler {
 	routeHandler := func(w http.ResponseWriter, r *http.Request) {
 		var request R
 		if !DecodeBody(w, r, &request) {
@@ -130,9 +153,8 @@ func NewRouteHandler[R interface{}, T interface{}](handler func(request R) (T, *
 			err.Handler(w)
 			return
 		}
-		WriteApiResponseOk(w, resp)
+		responseWriter(w, resp)
 	}
-	wrappedRespObject := api.ApiResponseWrapper[T]{Data: respObject}
 	swaggerDefinitions := swagger.Definitions{
 		RequestBody: &swagger.ContentValue{
 			Content: swagger.Content{
@@ -142,7 +164,7 @@ func NewRouteHandler[R interface{}, T interface{}](handler func(request R) (T, *
 		Responses: map[int]swagger.ContentValue{
 			200: {
 				Content: swagger.Content{
-					"application/json": {Value: wrappedRespObject},
+					"application/json": {Value: respObject},
 				},
 			},
 		},
@@ -202,6 +224,14 @@ func InternalServerErrorHandler(err error) *ErrorHandler {
 	return &ErrorHandler{
 		Handler: func(w http.ResponseWriter) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
+		},
+	}
+}
+
+func HttpErrorHandler(code int, err string) *ErrorHandler {
+	return &ErrorHandler{
+		Handler: func(w http.ResponseWriter) {
+			http.Error(w, err, code)
 		},
 	}
 }

@@ -31,7 +31,7 @@ func uptimeVotingCronjobTestConfig(epochStart time.Time) *config.Config {
 				Enabled: true,
 				Timeout: 30 * time.Second,
 			},
-			EpochConfig: config.EpochConfig{
+			EpochConfig: globalConfig.EpochConfig{
 				Start:  utils.Timestamp{Time: epochStart},
 				Period: 90 * time.Second,
 			},

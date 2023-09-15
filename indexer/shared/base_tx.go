@@ -2,7 +2,7 @@ package shared
 
 import (
 	"flare-indexer/database"
-	"flare-indexer/utils"
+	"flare-indexer/utils/chain"
 	"fmt"
 
 	"github.com/ava-labs/avalanchego/vms/components/avax"
@@ -60,7 +60,7 @@ func UpdateTransferableOutput(dbOut *database.TxOutput, out verify.State) error 
 		return fmt.Errorf("TransferableOutput has 0 or more than one address")
 	}
 
-	addr, err := utils.FormatAddressBytes(to.Addrs[0].Bytes())
+	addr, err := chain.FormatAddressBytes(to.Addrs[0].Bytes())
 	if err != nil {
 		return err
 	}
@@ -79,7 +79,7 @@ func RewardsOwnerAddress(owner fx.Owner) (string, error) {
 	if len(oo.Addrs) != 1 {
 		return "", fmt.Errorf("rewards owner has 0 or more than one address")
 	}
-	return utils.FormatAddressBytes(oo.Addrs[0].Bytes())
+	return chain.FormatAddressBytes(oo.Addrs[0].Bytes())
 }
 
 // Create inputs to BaseTx. Note that addresses of inputs are are not set. They should be updated from

@@ -6,7 +6,6 @@ import (
 	"flare-indexer/services/routes"
 	"flare-indexer/services/utils"
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -25,6 +24,7 @@ func main() {
 	routes.AddStakerRoutes(router, ctx)
 	routes.AddTransactionRoutes(router, ctx)
 	routes.AddQueryRoutes(router, ctx)
+	routes.AddMirroringRoutes(router, ctx)
 
 	router.Finalize()
 
@@ -37,8 +37,5 @@ func main() {
 		// ReadTimeout:  15 * time.Second,
 	}
 	logger.Info("Starting server on %s", address)
-	go func() {
-		err := srv.ListenAndServe()
-		log.Fatal(err)
-	}()
+	srv.ListenAndServe()
 }

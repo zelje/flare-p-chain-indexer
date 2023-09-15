@@ -2,7 +2,6 @@ package config
 
 import (
 	"flare-indexer/config"
-	"flare-indexer/utils"
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -18,7 +17,7 @@ type Config struct {
 	UptimeCronjob UptimeConfig        `toml:"uptime_cronjob"`
 	Mirror        MirrorConfig        `toml:"mirroring_cronjob"`
 	VotingCronjob VotingConfig        `toml:"voting_cronjob"`
-	Epochs        EpochConfig         `toml:"epochs"`
+	Epochs        config.EpochConfig  `toml:"epochs"`
 }
 
 type MetricsConfig struct {
@@ -48,15 +47,9 @@ type VotingConfig struct {
 	ContractAddress common.Address `toml:"contract_address" envconfig:"VOTING_CONTRACT_ADDRESS"`
 }
 
-type EpochConfig struct {
-	Period time.Duration   `toml:"period" envconfig:"EPOCH_PERIOD"`
-	Start  utils.Timestamp `toml:"start" envconfig:"EPOCH_TIME"`
-	First  int64           `toml:"first" envconfig:"EPOCH_FIRST"`
-}
-
 type UptimeConfig struct {
 	CronjobConfig
-	EpochConfig
+	config.EpochConfig
 	EnableVoting    bool          `toml:"enable_voting"`
 	VotingInterval  time.Duration `toml:"voting_interval"`
 	UptimeThreshold float64       `toml:"uptime_threshold"`
@@ -85,7 +78,7 @@ func newConfig() *Config {
 		Chain: config.ChainConfig{
 			NodeURL: "http://localhost:9650/",
 		},
-		Epochs: EpochConfig{
+		Epochs: config.EpochConfig{
 			Period: 90 * time.Second,
 		},
 	}

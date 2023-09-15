@@ -42,7 +42,7 @@ func votingCronjobTestConfig(epochStart time.Time, dbName string, privateKey str
 			},
 			MirroringContract: common.HexToAddress("0x8858eeB3DfffA017D4BCE9801D340D36Cf895CCf"),
 		},
-		Epochs: config.EpochConfig{
+		Epochs: globalConfig.EpochConfig{
 			Start:  utils.Timestamp{Time: epochStart},
 			Period: 90 * time.Second,
 		},

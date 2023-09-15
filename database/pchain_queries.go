@@ -141,6 +141,15 @@ func FetchPChainTxFull(db *gorm.DB, txID string) (*PChainTx, []PChainTxInput, []
 	return &tx, inputs, outputs, nil
 }
 
+func FetchPChainTx(db *gorm.DB, txID string) (*PChainTx, error) {
+	var tx PChainTx
+	err := db.Where(&PChainTx{TxID: &txID}).First(&tx).Error
+	if err != nil {
+		return nil, err
+	}
+	return &tx, nil
+}
+
 type PChainTxData struct {
 	PChainTx
 	InputAddress string

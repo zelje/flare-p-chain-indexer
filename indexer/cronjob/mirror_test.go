@@ -7,6 +7,7 @@ import (
 	"flare-indexer/indexer/pchain"
 	"flare-indexer/utils"
 	"flare-indexer/utils/contracts/mirroring"
+	"flare-indexer/utils/staking"
 	"testing"
 	"time"
 
@@ -36,8 +37,8 @@ func TestOneTransaction(t *testing.T) {
 
 	epochs := initEpochs()
 
-	startTime := epochs.getStartTime(3)
-	endTime := epochs.getEndTime(999)
+	startTime := epochs.GetStartTime(3)
+	endTime := epochs.GetEndTime(999)
 
 	txid := "5uZETr5SUKqGJLzFP5BeGxbXU5CFcCBQYPu288eX9R1QDQMjn"
 	tx := database.PChainTxData{
@@ -56,7 +57,7 @@ func TestOneTransaction(t *testing.T) {
 		3: {tx},
 	}
 
-	txHash, err := hashTransaction(&tx)
+	txHash, err := staking.HashTransaction(&tx)
 	require.NoError(t, err)
 
 	merkleRoots := map[int64][32]byte{
@@ -71,8 +72,8 @@ func TestMultipleTransactionsInEpoch(t *testing.T) {
 
 	epochs := initEpochs()
 
-	startTime := epochs.getStartTime(3)
-	endTime := epochs.getEndTime(999)
+	startTime := epochs.GetStartTime(3)
+	endTime := epochs.GetEndTime(999)
 
 	txs := make([]database.PChainTxData, 3)
 	txIDs := []string{
@@ -113,8 +114,8 @@ func TestMultipleTransactionsInSeparateEpochs(t *testing.T) {
 
 	epochs := initEpochs()
 
-	startTime := epochs.getStartTime(3)
-	endTime := epochs.getEndTime(999)
+	startTime := epochs.GetStartTime(3)
+	endTime := epochs.GetEndTime(999)
 
 	txs := make([]database.PChainTxData, 3)
 	txIDs := []string{
@@ -144,7 +145,7 @@ func TestMultipleTransactionsInSeparateEpochs(t *testing.T) {
 
 	merkleRoots := make(map[int64][32]byte, 3)
 	for i := 0; i < 3; i++ {
-		txHash, err := hashTransaction(&txs[i])
+		txHash, err := staking.HashTransaction(&txs[i])
 		require.NoError(t, err)
 
 		merkleRoots[int64(i)] = txHash
@@ -153,26 +154,26 @@ func TestMultipleTransactionsInSeparateEpochs(t *testing.T) {
 	testMirror(t, txsMap, merkleRoots, epochs)
 }
 
-func initEpochs() epochInfo {
-	epochCfg := config.EpochConfig{
+func initEpochs() staking.EpochInfo {
+	epochCfg := globalConfig.EpochConfig{
 		Period: 180 * time.Second,
 		Start:  utils.Timestamp{Time: time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC)},
 	}
 
-	return newEpochInfo(&epochCfg)
+	return staking.NewEpochInfo(&epochCfg)
 }
 
 func testMirror(
 	t *testing.T,
 	txs map[int64][]database.PChainTxData,
 	merkleRoots map[int64][32]byte,
-	epochs epochInfo,
+	epochs staking.EpochInfo,
 ) {
 	db := testDB{
 		epochs: epochs,
 		states: map[string]database.State{
 			pchain.StateName: {
-				Updated: epochs.getEndTime(999),
+				Updated: epochs.GetEndTime(999),
 			},
 			mirrorStateName: {},
 		},
@@ -200,7 +201,7 @@ func testMirror(
 }
 
 type testDB struct {
-	epochs epochInfo
+	epochs staking.EpochInfo
 	states map[string]database.State
 	txs    map[int64][]database.PChainTxData
 }
@@ -219,7 +220,7 @@ func (db testDB) UpdateJobState(epoch int64) error {
 }
 
 func (db testDB) GetPChainTxsForEpoch(start, end time.Time) ([]database.PChainTxData, error) {
-	epoch := db.epochs.getEpochIndex(start)
+	epoch := db.epochs.GetEpochIndex(start)
 	return db.txs[epoch], nil
 }
 

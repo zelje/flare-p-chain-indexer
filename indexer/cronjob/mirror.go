@@ -8,6 +8,7 @@ import (
 	"flare-indexer/utils"
 	"flare-indexer/utils/contracts/mirroring"
 	"flare-indexer/utils/merkle"
+	"flare-indexer/utils/staking"
 	"math/big"
 	"time"
 
@@ -61,7 +62,7 @@ func (c *mirrorCronJob) Name() string {
 }
 
 func (c *mirrorCronJob) Timeout() time.Duration {
-	return c.epochs.period
+	return c.epochs.Period
 }
 
 func (c *mirrorCronJob) OnStart() error {
@@ -109,7 +110,7 @@ func (c *mirrorCronJob) Call() error {
 }
 
 func (c *mirrorCronJob) indexerBehind(idxState *database.State, epoch int64) bool {
-	epochEnd := c.epochs.getEndTime(epoch)
+	epochEnd := c.epochs.GetEndTime(epoch)
 	return epochEnd.After(idxState.Updated)
 }
 
@@ -141,7 +142,7 @@ func (c *mirrorCronJob) getStartEpoch() (int64, error) {
 }
 
 func (c *mirrorCronJob) getEndEpoch(startEpoch int64) (int64, error) {
-	currEpoch := c.epochs.getEpochIndex(c.time.Now())
+	currEpoch := c.epochs.GetEpochIndex(c.time.Now())
 	logger.Debug("current epoch: %d", currEpoch)
 
 	for epoch := currEpoch; epoch > startEpoch; epoch-- {
@@ -187,18 +188,18 @@ func (c *mirrorCronJob) mirrorEpoch(epoch int64) error {
 }
 
 func (c *mirrorCronJob) getUnmirroredTxs(epoch int64) ([]database.PChainTxData, error) {
-	startTimestamp, endTimestamp := c.epochs.getTimeRange(epoch)
+	startTimestamp, endTimestamp := c.epochs.GetTimeRange(epoch)
 
 	txs, err := c.db.GetPChainTxsForEpoch(startTimestamp, endTimestamp)
 	if err != nil {
 		return nil, err
 	}
 
-	return dedupeTxs(txs), nil
+	return staking.DedupeTxs(txs), nil
 }
 
 func (c *mirrorCronJob) mirrorTxs(txs []database.PChainTxData, epochID int64) error {
-	merkleTree, err := buildTree(txs)
+	merkleTree, err := staking.BuildTree(txs)
 	if err != nil {
 		return err
 	}
@@ -247,12 +248,12 @@ type mirrorTxInput struct {
 }
 
 func (c *mirrorCronJob) mirrorTx(in *mirrorTxInput) error {
-	stakeData, err := toStakeData(in.tx)
+	stakeData, err := staking.ToStakeData(in.tx)
 	if err != nil {
 		return err
 	}
 
-	merkleProof, err := getMerkleProof(in.merkleTree, in.tx)
+	merkleProof, err := staking.GetMerkleProof(in.merkleTree, in.tx)
 	if err != nil {
 		return err
 	}
@@ -264,36 +265,4 @@ func (c *mirrorCronJob) mirrorTx(in *mirrorTxInput) error {
 	}
 
 	return nil
-}
-
-func getTxType(txType database.PChainTxType) (uint8, error) {
-	switch txType {
-	case database.PChainAddValidatorTx:
-		return 0, nil
-
-	case database.PChainAddDelegatorTx:
-		return 1, nil
-
-	default:
-		return 0, errors.New("invalid tx type")
-	}
-}
-
-func getMerkleProof(merkleTree merkle.Tree, tx *database.PChainTxData) ([][32]byte, error) {
-	hash, err := hashTransaction(tx)
-	if err != nil {
-		return nil, err
-	}
-
-	proof, err := merkleTree.GetProofFromHash(hash)
-	if err != nil {
-		return nil, errors.Wrap(err, "merkleTree.GetProof")
-	}
-
-	proofBytes := make([][32]byte, len(proof))
-	for i := range proof {
-		proofBytes[i] = [32]byte(proof[i])
-	}
-
-	return proofBytes, nil
 }
