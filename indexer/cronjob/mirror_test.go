@@ -1,3 +1,6 @@
+//go:build !integration
+// +build !integration
+
 package cronjob
 
 import (
@@ -17,9 +20,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// TODO this could go in TestMain but conflicts with the existing TestMain
-// defined in the same pkg.
-func initMirrorTest() {
+func TestMain(m *testing.M) {
 	cfg := config.Config{
 		Chain: globalConfig.ChainConfig{
 			ChainAddressHRP: "costwo",
@@ -30,11 +31,11 @@ func initMirrorTest() {
 		},
 	}
 	globalConfig.GlobalConfigCallback.Call(cfg)
+
+	m.Run()
 }
 
 func TestOneTransaction(t *testing.T) {
-	initMirrorTest()
-
 	epochs := initEpochs()
 
 	startTime := epochs.getStartTime(3)
@@ -72,8 +73,6 @@ func TestOneTransaction(t *testing.T) {
 }
 
 func TestMultipleTransactionsInEpoch(t *testing.T) {
-	initMirrorTest()
-
 	epochs := initEpochs()
 
 	startTime := epochs.getStartTime(3)
@@ -118,8 +117,6 @@ func TestMultipleTransactionsInEpoch(t *testing.T) {
 }
 
 func TestMultipleTransactionsInSeparateEpochs(t *testing.T) {
-	initMirrorTest()
-
 	epochs := initEpochs()
 
 	startTime := epochs.getStartTime(3)
@@ -175,8 +172,6 @@ func TestStakingEnded(t *testing.T) {
 }
 
 func testMirrorErrors(t *testing.T, errorMsg string) {
-	initMirrorTest()
-
 	epochs := initEpochs()
 
 	startTime := epochs.getStartTime(3)
