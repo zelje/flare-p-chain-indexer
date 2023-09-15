@@ -10,6 +10,7 @@ import (
 	"flare-indexer/utils/merkle"
 	"flare-indexer/utils/staking"
 	"math/big"
+	"strings"
 	"time"
 
 	"github.com/pkg/errors"
@@ -261,6 +262,16 @@ func (c *mirrorCronJob) mirrorTx(in *mirrorTxInput) error {
 	logger.Debug("mirroring tx %s", *in.tx.TxID)
 	err = c.contracts.MirrorStake(stakeData, merkleProof)
 	if err != nil {
+		if strings.Contains(err.Error(), "transaction already mirrored") {
+			logger.Debug("tx %s already mirrored", *in.tx.TxID)
+			return nil
+		}
+
+		if strings.Contains(err.Error(), "staking already ended") {
+			logger.Debug("staking already ended for tx %s", *in.tx.TxID)
+			return nil
+		}
+
 		return errors.Wrap(err, "mirroringContract.MirrorStake")
 	}
 

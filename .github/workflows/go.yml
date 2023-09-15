@@ -33,3 +33,6 @@ jobs:
     - name: Build executables
       run: go build ./...
 
+    - name: Run unit-tests
+      run: go test -v ./...
+
