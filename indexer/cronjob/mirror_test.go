@@ -69,7 +69,9 @@ func TestOneTransaction(t *testing.T) {
 		merkleRoots: merkleRoots,
 	}
 
-	testMirror(t, txs, contracts, epochs)
+	db := testMirror(t, txs, contracts, epochs)
+
+	require.Equal(t, db.states[mirrorStateName].NextDBIndex, uint64(3))
 }
 
 func TestMultipleTransactionsInEpoch(t *testing.T) {
@@ -113,7 +115,9 @@ func TestMultipleTransactionsInEpoch(t *testing.T) {
 		merkleRoots: merkleRoots,
 	}
 
-	testMirror(t, txsMap, contracts, epochs)
+	db := testMirror(t, txsMap, contracts, epochs)
+
+	require.Equal(t, db.states[mirrorStateName].NextDBIndex, uint64(3))
 }
 
 func TestMultipleTransactionsInSeparateEpochs(t *testing.T) {
@@ -160,7 +164,9 @@ func TestMultipleTransactionsInSeparateEpochs(t *testing.T) {
 		merkleRoots: merkleRoots,
 	}
 
-	testMirror(t, txsMap, contracts, epochs)
+	db := testMirror(t, txsMap, contracts, epochs)
+
+	require.Equal(t, db.states[mirrorStateName].NextDBIndex, uint64(2))
 }
 
 func TestAlreadyMirrored(t *testing.T) {
@@ -211,7 +217,9 @@ func testMirrorErrors(t *testing.T, errorMsg string) {
 		},
 	}
 
-	testMirror(t, txs, contracts, epochs)
+	db := testMirror(t, txs, contracts, epochs)
+
+	require.Equal(t, db.states[mirrorStateName].NextDBIndex, uint64(3))
 }
 
 func initEpochs() epochInfo {
@@ -228,7 +236,7 @@ func testMirror(
 	txs map[int64][]database.PChainTxData,
 	contracts testContracts,
 	epochs epochInfo,
-) {
+) *testDB {
 	db := testDB{
 		epochs: epochs,
 		states: map[string]database.State{
@@ -253,6 +261,8 @@ func testMirror(
 	require.NoError(t, err)
 
 	cupaloy.SnapshotT(t, contracts.mirroredStakes)
+
+	return &db
 }
 
 type testDB struct {
@@ -271,6 +281,11 @@ func (db testDB) FetchState(name string) (database.State, error) {
 }
 
 func (db testDB) UpdateJobState(epoch int64) error {
+	db.states[mirrorStateName] = database.State{
+		Name:        mirrorStateName,
+		NextDBIndex: uint64(epoch),
+	}
+
 	return nil
 }
 
