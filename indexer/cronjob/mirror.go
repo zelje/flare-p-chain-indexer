@@ -272,6 +272,11 @@ func (c *mirrorCronJob) mirrorTx(in *mirrorTxInput) error {
 			return nil
 		}
 
+		if strings.Contains(err.Error(), "unknown staking address") {
+			logger.Info("unknown staking address for tx %s", *in.tx.TxID)
+			return nil
+		}
+
 		return errors.Wrap(err, "mirroringContract.MirrorStake")
 	}
 
