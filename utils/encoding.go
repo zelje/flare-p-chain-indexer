@@ -122,7 +122,3 @@ func Hex20ToBytes20(str string) (result [20]byte, err error) {
 	copy(result[:], strBytes)
 	return
 }
-
-func BytesToHexString(bytes []byte) string {
-	return hexPrefix + hex.EncodeToString(bytes)
-}

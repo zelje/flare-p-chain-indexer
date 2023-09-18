@@ -236,7 +236,7 @@ func testMirror(
 			pchain.StateName: {
 				Updated: epochs.GetEndTime(999),
 			},
-			staking.MirrorStateName: {},
+			mirrorStateName: {},
 		},
 		txs: txs,
 	}

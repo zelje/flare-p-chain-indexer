@@ -76,7 +76,7 @@ type testDB struct {
 	txs map[string]database.PChainTxData
 }
 
-func newTestDB(txs map[string]database.PChainTxData) staking.MirrorDB {
+func newTestDB(txs map[string]database.PChainTxData) mirrorDB {
 	return &testDB{txs}
 }
 

@@ -5,12 +5,13 @@ import (
 	"flare-indexer/database"
 	"flare-indexer/services/context"
 	"flare-indexer/services/utils"
-	globalUtils "flare-indexer/utils"
 	"flare-indexer/utils/contracts/mirroring"
 	"flare-indexer/utils/staking"
 	"fmt"
 	"net/http"
+	"time"
 
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"gorm.io/gorm"
 )
 
@@ -36,14 +37,19 @@ type MirroringResponse struct {
 
 type GetMirroringResponse []MirroringResponse
 
+type mirrorDB interface {
+	GetPChainTxsForEpoch(start, end time.Time) ([]database.PChainTxData, error)
+	GetPChainTx(txID string) (*database.PChainTx, error)
+}
+
 type mirroringRouteHandlers struct {
-	db     staking.MirrorDB
+	db     mirrorDB
 	epochs staking.EpochInfo
 }
 
 func newMirroringRouteHandlers(ctx context.ServicesContext) *mirroringRouteHandlers {
 	return &mirroringRouteHandlers{
-		db:     staking.NewMirrorDBGorm(ctx.DB()),
+		db:     NewMirrorDBGorm(ctx.DB()),
 		epochs: staking.NewEpochInfo(&ctx.Config().Epochs),
 	}
 }
@@ -110,20 +116,20 @@ func (rh *mirroringRouteHandlers) createMirroringData(tx *database.PChainTx) ([]
 		}
 		merkleProofStrings := make([]string, len(merkleProof))
 		for i, proof := range merkleProof {
-			merkleProofStrings[i] = globalUtils.BytesToHexString(proof[:])
+			merkleProofStrings[i] = hexutil.Encode(proof[:])
 		}
 		mirroringData = append(mirroringData, MirroringResponse{
 			StakeData: MirroringStakeData{
-				TxID:         globalUtils.BytesToHexString(stakeData.TxId[:]),
+				TxID:         hexutil.Encode(stakeData.TxId[:]),
 				StakingType:  stakeData.StakingType,
-				InputAddress: globalUtils.BytesToHexString(stakeData.InputAddress[:]),
-				NodeId:       globalUtils.BytesToHexString(stakeData.NodeId[:]),
+				InputAddress: hexutil.Encode(stakeData.InputAddress[:]),
+				NodeId:       hexutil.Encode(stakeData.NodeId[:]),
 				StartTime:    stakeData.StartTime,
 				EndTime:      stakeData.EndTime,
 				Weight:       stakeData.Weight,
 			},
 			MerkleProof: merkleProofStrings,
-			TxInput:     globalUtils.BytesToHexString(txDataBytes),
+			TxInput:     hexutil.Encode(txDataBytes),
 		})
 	}
 	if len(mirroringData) == 0 {
@@ -142,4 +148,24 @@ func createMirrorTransactionBytes(stakeData *mirroring.IPChainStakeMirrorVerifie
 		return nil, err
 	}
 	return packed, nil
+}
+
+type mirrorDBGorm struct {
+	db *gorm.DB
+}
+
+func NewMirrorDBGorm(db *gorm.DB) mirrorDBGorm {
+	return mirrorDBGorm{db: db}
+}
+
+func (m mirrorDBGorm) GetPChainTxsForEpoch(start, end time.Time) ([]database.PChainTxData, error) {
+	return database.GetPChainTxsForEpoch(&database.GetPChainTxsForEpochInput{
+		DB:             m.db,
+		StartTimestamp: start,
+		EndTimestamp:   end,
+	})
+}
+
+func (m mirrorDBGorm) GetPChainTx(txID string) (*database.PChainTx, error) {
+	return database.FetchPChainTx(m.db, txID)
 }
