@@ -1,6 +1,7 @@
 package cronjob
 
 import (
+	globalConfig "flare-indexer/config"
 	"flare-indexer/database"
 	"flare-indexer/indexer/config"
 	"flare-indexer/indexer/pchain"
@@ -115,8 +116,8 @@ func TestVotes(t *testing.T) {
 	require.Equal(t, updatedState.NextDBIndex, uint64(5))
 }
 
-func timeRangeForEpoch(epochs epochCronjob, epoch int64) timeRange {
-	start, end := epochs.epochs.getTimeRange(epoch)
+func timeRangeForEpoch(cj epochCronjob, epoch int64) timeRange {
+	start, end := cj.epochs.GetTimeRange(epoch)
 
 	return timeRange{start, end}
 }
@@ -151,7 +152,7 @@ func initEpochCronjob() epochCronjob {
 		BatchSize: 5,
 	}
 
-	epochCfg := config.EpochConfig{
+	epochCfg := globalConfig.EpochConfig{
 		Period: 180 * time.Second,
 		Start:  utils.Timestamp{Time: time.Now().Add(-time.Hour)},
 	}

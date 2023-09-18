@@ -22,7 +22,7 @@ type mirrorDBGorm struct {
 	db *gorm.DB
 }
 
-func newMirrorDBGorm(db *gorm.DB) mirrorDB {
+func NewMirrorDBGorm(db *gorm.DB) mirrorDB {
 	return mirrorDBGorm{db: db}
 }
 

@@ -2,8 +2,10 @@ package config
 
 import (
 	"flag"
+	"flare-indexer/utils"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/BurntSushi/toml"
 	"github.com/kelseyhightower/envconfig"
@@ -47,6 +49,12 @@ type ChainConfig struct {
 	EthRPCURL       string `toml:"eth_rpc_url" envconfig:"ETH_RPC_URL"`
 	ApiKey          string `toml:"api_key" envconfig:"API_KEY"`
 	PrivateKey      string `toml:"private_key" envconfig:"PRIVATE_KEY"`
+}
+
+type EpochConfig struct {
+	Period time.Duration   `toml:"period" envconfig:"EPOCH_PERIOD"`
+	Start  utils.Timestamp `toml:"start" envconfig:"EPOCH_TIME"`
+	First  int64           `toml:"first" envconfig:"EPOCH_FIRST"`
 }
 
 func ParseConfigFile(cfg interface{}, fileName string, allowMissing bool) error {

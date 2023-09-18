@@ -19,7 +19,7 @@
             "request": "launch",
             "mode": "auto",
             "program": "${workspaceFolder}/services/main/services.go",
-            "args": ["--config", "${workspaceFolder}/config.costwo.toml"],
+            "args": ["--config", "${workspaceFolder}/config.costwo_services.toml"],
             "cwd": "${workspaceFolder}"
         },
         {
@@ -37,7 +37,7 @@
             "request": "launch",
             "mode": "auto",
             "program": "${workspaceFolder}/services/main/services.go",
-            "args": ["--config", "${workspaceFolder}/config.local.toml"],
+            "args": ["--config", "${workspaceFolder}/config.local_services.toml"],
             "cwd": "${workspaceFolder}"
         }
     ]

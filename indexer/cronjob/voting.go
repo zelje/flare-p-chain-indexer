@@ -6,6 +6,7 @@ import (
 	"flare-indexer/indexer/pchain"
 	"flare-indexer/logger"
 	"flare-indexer/utils"
+	"flare-indexer/utils/staking"
 	"math/big"
 	"time"
 
@@ -87,7 +88,7 @@ func (c *votingCronjob) Call() error {
 	epochRange := c.getEpochRange(int64(state.NextDBIndex), now)
 	logger.Debug("Voting needed for epochs [%d, %d]", epochRange.start, epochRange.end)
 	for e := epochRange.start; e <= epochRange.end; e++ {
-		start, end := c.epochs.getTimeRange(e)
+		start, end := c.epochs.GetTimeRange(e)
 
 		if end.After(idxState.Updated) {
 			logger.Debug("Skipping epoch %d because it is not fully indexed", e)
@@ -114,7 +115,7 @@ func (c *votingCronjob) Call() error {
 }
 
 func (c *votingCronjob) submitVotes(e int64, votingData []database.PChainTxData) error {
-	votingData = dedupeTxs(votingData)
+	votingData = staking.DedupeTxs(votingData)
 
 	shouldVote, err := c.contract.ShouldVote(big.NewInt(e))
 	if err != nil {
@@ -128,7 +129,7 @@ func (c *votingCronjob) submitVotes(e int64, votingData []database.PChainTxData)
 	if len(votingData) == 0 {
 		merkleRoot = zeroBytesHash
 	} else {
-		merkleRoot, err = getMerkleRoot(votingData)
+		merkleRoot, err = staking.GetMerkleRoot(votingData)
 		if err != nil {
 			return err
 		}

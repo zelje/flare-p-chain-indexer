@@ -9,6 +9,7 @@ type Config struct {
 	Logger   config.LoggerConfig `toml:"logger"`
 	Chain    config.ChainConfig  `toml:"chain"`
 	Services ServicesConfig      `toml:"services"`
+	Epochs   config.EpochConfig  `toml:"epochs"`
 }
 
 type ServicesConfig struct {

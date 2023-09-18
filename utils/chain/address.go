@@ -1,4 +1,4 @@
-package utils
+package chain
 
 import (
 	"flare-indexer/config"

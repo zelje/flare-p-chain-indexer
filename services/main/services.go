@@ -6,8 +6,10 @@ import (
 	"flare-indexer/services/routes"
 	"flare-indexer/services/utils"
 	"fmt"
-	"log"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/gorilla/mux"
 )
@@ -25,6 +27,7 @@ func main() {
 	routes.AddStakerRoutes(router, ctx)
 	routes.AddTransactionRoutes(router, ctx)
 	routes.AddQueryRoutes(router, ctx)
+	routes.AddMirroringRoutes(router, ctx)
 
 	router.Finalize()
 
@@ -36,9 +39,18 @@ func main() {
 		// WriteTimeout: 15 * time.Second,
 		// ReadTimeout:  15 * time.Second,
 	}
-	logger.Info("Starting server on %s", address)
+
+	cancelChan := make(chan os.Signal, 1)
+	signal.Notify(cancelChan, os.Interrupt, syscall.SIGTERM)
+
 	go func() {
+		logger.Info("Starting server on %s", address)
 		err := srv.ListenAndServe()
-		log.Fatal(err)
+		if err != nil {
+			logger.Error("Server error: %v", err)
+		}
 	}()
+
+	<-cancelChan
+	logger.Info("Shutting down server")
 }
