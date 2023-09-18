@@ -80,14 +80,6 @@ func newTestDB(txs map[string]database.PChainTxData) mirrorDB {
 	return &testDB{txs}
 }
 
-func (db testDB) FetchState(name string) (database.State, error) {
-	return database.State{}, nil
-}
-
-func (db testDB) UpdateJobState(epoch int64) error {
-	return nil
-}
-
 func (db testDB) GetPChainTxsForEpoch(start, end time.Time) ([]database.PChainTxData, error) {
 	var txs []database.PChainTxData
 	for _, tx := range db.txs {

@@ -7,6 +7,9 @@ import (
 	"flare-indexer/services/utils"
 	"fmt"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/gorilla/mux"
 )
@@ -36,6 +39,18 @@ func main() {
 		// WriteTimeout: 15 * time.Second,
 		// ReadTimeout:  15 * time.Second,
 	}
-	logger.Info("Starting server on %s", address)
-	srv.ListenAndServe()
+
+	cancelChan := make(chan os.Signal, 1)
+	signal.Notify(cancelChan, os.Interrupt, syscall.SIGTERM)
+
+	go func() {
+		logger.Info("Starting server on %s", address)
+		err := srv.ListenAndServe()
+		if err != nil {
+			logger.Error("Server error: %v", err)
+		}
+	}()
+
+	<-cancelChan
+	logger.Info("Shutting down server")
 }
