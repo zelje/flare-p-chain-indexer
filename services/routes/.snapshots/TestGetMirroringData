@@ -1,0 +1,22 @@
+(api.ApiResponseWrapper[flare-indexer/services/routes.GetMirroringResponse]) {
+  Data: (routes.GetMirroringResponse) (len=1) {
+    (routes.MirroringResponse) {
+      StakeData: (routes.MirroringStakeData) {
+        TxID: (string) (len=66) "0xb56c9750e2d172d825ed6a4ed5248c6270486fa87cebe638fa289cbb60e46049",
+        StakingType: (uint8) 1,
+        InputAddress: (string) (len=42) "0x9d18c04fc87d206177303996c1d366d6cb401752",
+        NodeId: (string) (len=42) "0x9dfabb9df1e96c6391c44d7ba383fc0856f37796",
+        StartTime: (uint64) 1672531200,
+        EndTime: (uint64) 1675209600,
+        Weight: (uint64) 50000000000000
+      },
+      MerkleProof: ([]string) {
+      },
+      TxInput: (string) (len=586) "0x2e335805b56c9750e2d172d825ed6a4ed5248c6270486fa87cebe638fa289cbb60e4604900000000000000000000000000000000000000000000000000000000000000019d18c04fc87d206177303996c1d366d6cb4017520000000000000000000000009dfabb9df1e96c6391c44d7ba383fc0856f377960000000000000000000000000000000000000000000000000000000000000000000000000000000063b0cd000000000000000000000000000000000000000000000000000000000063d9ab8000000000000000000000000000000000000000000000000000002d79883d200000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000"
+    }
+  },
+  ErrorDetails: (string) "",
+  ErrorMessage: (string) "",
+  Status: (api.ApiResStatusEnum) (len=2) "OK",
+  ValidationErrorDetails: (*api.ApiValidationErrorDetails)(<nil>)
+}

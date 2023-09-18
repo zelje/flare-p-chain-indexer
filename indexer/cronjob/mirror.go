@@ -16,19 +16,11 @@ import (
 	"github.com/pkg/errors"
 )
 
-const mirrorStateName = "mirror_cronjob"
-
 type mirrorCronJob struct {
 	epochCronjob
-	db        mirrorDB
+	db        staking.MirrorDB
 	contracts mirrorContracts
 	time      utils.ShiftedTime
-}
-
-type mirrorDB interface {
-	FetchState(name string) (database.State, error)
-	UpdateJobState(epoch int64) error
-	GetPChainTxsForEpoch(start, end time.Time) ([]database.PChainTxData, error)
 }
 
 type mirrorContracts interface {
@@ -53,7 +45,7 @@ func NewMirrorCronjob(ctx indexerctx.IndexerContext) (Cronjob, error) {
 
 	return &mirrorCronJob{
 		epochCronjob: newEpochCronjob(&cfg.Mirror.CronjobConfig, &cfg.Epochs),
-		db:           newMirrorDBGorm(ctx.DB()),
+		db:           staking.NewMirrorDBGorm(ctx.DB()),
 		contracts:    contracts,
 	}, nil
 }
@@ -134,7 +126,7 @@ func (c *mirrorCronJob) getEpochRange() (*epochRange, error) {
 }
 
 func (c *mirrorCronJob) getStartEpoch() (int64, error) {
-	jobState, err := c.db.FetchState(mirrorStateName)
+	jobState, err := c.db.FetchState(staking.MirrorStateName)
 	if err != nil {
 		return 0, err
 	}

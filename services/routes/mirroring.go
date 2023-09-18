@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"errors"
 	"flare-indexer/database"
 	"flare-indexer/services/context"
 	"flare-indexer/services/utils"
@@ -36,25 +37,27 @@ type MirroringResponse struct {
 type GetMirroringResponse []MirroringResponse
 
 type mirroringRouteHandlers struct {
-	db     *gorm.DB
+	db     staking.MirrorDB
 	epochs staking.EpochInfo
 }
 
 func newMirroringRouteHandlers(ctx context.ServicesContext) *mirroringRouteHandlers {
 	return &mirroringRouteHandlers{
-		db:     ctx.DB(),
+		db:     staking.NewMirrorDBGorm(ctx.DB()),
 		epochs: staking.NewEpochInfo(&ctx.Config().Epochs),
 	}
 }
 
 func (rh *mirroringRouteHandlers) listMirroringTransactions() utils.RouteHandler {
-	handler := func(request GetMirroringRequest) (GetMirroringResponse, *utils.ErrorHandler) {
-		tx, err := database.FetchPChainTx(rh.db, request.TxID)
+	handler := func(params map[string]string) (GetMirroringResponse, *utils.ErrorHandler) {
+		txID := params["tx_id"]
+		tx, err := rh.db.GetPChainTx(txID)
 		if err != nil {
-			return GetMirroringResponse{}, utils.InternalServerErrorHandler(err)
-		}
-		if tx == nil {
-			return GetMirroringResponse{}, utils.HttpErrorHandler(http.StatusNotFound, "tx not found")
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return GetMirroringResponse{}, utils.HttpErrorHandler(http.StatusBadRequest, "tx not found")
+			} else {
+				return GetMirroringResponse{}, utils.InternalServerErrorHandler(err)
+			}
 		}
 		response, err := rh.createMirroringData(tx)
 		if err != nil {
@@ -62,24 +65,23 @@ func (rh *mirroringRouteHandlers) listMirroringTransactions() utils.RouteHandler
 		}
 		return response, nil
 	}
-	return utils.NewRouteHandler(handler, http.MethodPost, GetMirroringRequest{}, GetMirroringResponse{})
+
+	return utils.NewParamRouteHandler(handler, http.MethodGet,
+		map[string]string{"tx_id:[0-9a-zA-Z]+": "Transaction ID"},
+		GetMirroringResponse{})
 }
 
 func AddMirroringRoutes(router utils.Router, ctx context.ServicesContext) {
 	rh := newMirroringRouteHandlers(ctx)
 
 	mirroringSubrouter := router.WithPrefix("/mirroring", "Mirroring")
-	mirroringSubrouter.AddRoute("/tx_data", rh.listMirroringTransactions())
+	mirroringSubrouter.AddRoute("/tx_data/{tx_id:[0-9a-zA-Z]+}", rh.listMirroringTransactions())
 }
 
 func (rh *mirroringRouteHandlers) createMirroringData(tx *database.PChainTx) ([]MirroringResponse, error) {
 	epoch := rh.epochs.GetEpochIndex(*tx.StartTime)
 	startTimestamp, endTimestamp := rh.epochs.GetTimeRange(epoch)
-	txs, err := database.GetPChainTxsForEpoch(&database.GetPChainTxsForEpochInput{
-		DB:             rh.db,
-		StartTimestamp: startTimestamp,
-		EndTimestamp:   endTimestamp,
-	})
+	txs, err := rh.db.GetPChainTxsForEpoch(startTimestamp, endTimestamp)
 	if err != nil {
 		return nil, err
 	}
@@ -125,7 +127,7 @@ func (rh *mirroringRouteHandlers) createMirroringData(tx *database.PChainTx) ([]
 		})
 	}
 	if len(mirroringData) == 0 {
-		return nil, fmt.Errorf("no mirroring data found for tx %s", tx.ID)
+		return nil, fmt.Errorf("no mirroring data found for tx %s", *tx.TxID)
 	}
 	return mirroringData, nil
 }

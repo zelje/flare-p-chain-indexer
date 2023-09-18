@@ -236,7 +236,7 @@ func testMirror(
 			pchain.StateName: {
 				Updated: epochs.GetEndTime(999),
 			},
-			mirrorStateName: {},
+			staking.MirrorStateName: {},
 		},
 		txs: txs,
 	}
@@ -278,6 +278,10 @@ func (db testDB) UpdateJobState(epoch int64) error {
 func (db testDB) GetPChainTxsForEpoch(start, end time.Time) ([]database.PChainTxData, error) {
 	epoch := db.epochs.GetEpochIndex(start)
 	return db.txs[epoch], nil
+}
+
+func (db testDB) GetPChainTx(txID string) (*database.PChainTx, error) {
+	return nil, nil
 }
 
 type testContracts struct {
