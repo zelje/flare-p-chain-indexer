@@ -4,7 +4,6 @@ import (
 	"flare-indexer/database"
 	"flare-indexer/services/context"
 	"flare-indexer/services/utils"
-	"flare-indexer/utils/staking"
 	"net/http"
 	"strings"
 	"time"
@@ -29,13 +28,13 @@ type GetStakerRequest struct {
 }
 
 type GetStakerResponse struct {
-	Type           uint8    `json:"type"` // 0 = validator, 1 = delegator
-	TxID           string   `json:"txID"`
-	NodeID         string   `json:"nodeID"`
-	StartTime      int64    `json:"startTime"`
-	EndTime        int64    `json:"endTime"`
-	Weight         uint64   `json:"weight"`
-	InputAddresses []string `json:"inputAddresses"`
+	TxID           string    `json:"txID"`
+	NodeID         string    `json:"nodeID"`
+	StartTime      time.Time `json:"startTime"`
+	EndTime        time.Time `json:"endTime"`
+	Weight         uint64    `json:"weight"`
+	FeePercentage  uint32    `json:"feePercentage"`
+	InputAddresses []string  `json:"inputAddresses"`
 }
 
 type stakerRouteHandlers struct {
@@ -60,23 +59,21 @@ func (rh *stakerRouteHandlers) listStakingTransactions(txType database.PChainTxT
 	return utils.NewRouteHandler(handler, http.MethodPost, GetStakerTxRequest{}, GetStakerTxResponse{})
 }
 
-func (rh *stakerRouteHandlers) listStakers() utils.RouteHandler {
+func (rh *stakerRouteHandlers) listStakers(txType database.PChainTxType) utils.RouteHandler {
 	handler := func(request GetStakerRequest) ([]GetStakerResponse, *utils.ErrorHandler) {
-		stakerTxData, err := database.FetchPChainStakingData(rh.db, request.Time, request.Offset, request.Limit)
+		stakerTxData, err := database.FetchPChainStakingData(rh.db, request.Time, txType, request.Offset, request.Limit)
 		if err != nil {
 			return nil, utils.InternalServerErrorHandler(err)
 		}
 		stakers := make([]GetStakerResponse, len(stakerTxData))
 		for i, tx := range stakerTxData {
-			txType, _ := staking.GetTxType(tx.Type) // ignore error, query filters only valid types
-
 			stakers[i] = GetStakerResponse{
-				Type:           txType,
 				TxID:           *tx.TxID,
 				NodeID:         tx.NodeID,
-				StartTime:      tx.StartTime.Unix(),
-				EndTime:        tx.EndTime.Unix(),
+				StartTime:      *tx.StartTime,
+				EndTime:        *tx.EndTime,
 				Weight:         tx.Weight,
+				FeePercentage:  tx.FeePercentage,
 				InputAddresses: strings.Split(tx.InputAddress, ","),
 			}
 		}
@@ -90,11 +87,9 @@ func AddStakerRoutes(router utils.Router, ctx context.ServicesContext) {
 
 	validatorSubrouter := router.WithPrefix("/validators", "Staking")
 	validatorSubrouter.AddRoute("/transactions", vr.listStakingTransactions(database.PChainAddValidatorTx))
+	validatorSubrouter.AddRoute("/list", vr.listStakers(database.PChainAddValidatorTx))
 
 	delegatorSubrouter := router.WithPrefix("/delegators", "Staking")
 	delegatorSubrouter.AddRoute("/transactions", vr.listStakingTransactions(database.PChainAddDelegatorTx))
-
-	listStakersSubrouter := router.WithPrefix("/stakers", "Staking")
-	listStakersSubrouter.AddRoute("/list", vr.listStakers())
-
+	delegatorSubrouter.AddRoute("/list", vr.listStakers(database.PChainAddDelegatorTx))
 }
