@@ -1,22 +1,17 @@
 package cronjob
 
 import (
-	"context"
 	"flare-indexer/database"
-	"flare-indexer/indexer/config"
 	indexerctx "flare-indexer/indexer/context"
 	"flare-indexer/indexer/pchain"
 	"flare-indexer/logger"
 	"flare-indexer/utils"
-	"flare-indexer/utils/contracts/voting"
 	"flare-indexer/utils/staking"
 	"math/big"
+	"time"
 
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/ethclient"
-	"gorm.io/gorm"
 )
 
 const (
@@ -31,12 +26,22 @@ var (
 type votingCronjob struct {
 	epochCronjob
 
-	db             *gorm.DB
-	votingContract *voting.Voting
-	txOpts         *bind.TransactOpts
+	db       votingDB
+	contract votingContract
 
 	// For testing to set "now" to some past date
 	time utils.ShiftedTime
+}
+
+type votingDB interface {
+	FetchState(name string) (database.State, error)
+	FetchPChainVotingData(start, end time.Time) ([]database.PChainTxData, error)
+	UpdateState(state *database.State) error
+}
+
+type votingContract interface {
+	ShouldVote(epoch *big.Int) (bool, error)
+	SubmitVote(epoch *big.Int, merkleRoot [32]byte) error
 }
 
 func NewVotingCronjob(ctx indexerctx.IndexerContext) (*votingCronjob, error) {
@@ -45,29 +50,17 @@ func NewVotingCronjob(ctx indexerctx.IndexerContext) (*votingCronjob, error) {
 		return &votingCronjob{}, nil
 	}
 
-	votingContract, err := newVotingContract(cfg)
-	if err != nil {
-		return nil, err
-	}
-	txOpts, err := TransactOptsFromPrivateKey(cfg.Chain.PrivateKey, cfg.Chain.ChainID)
+	db := &votingDBGorm{g: ctx.DB()}
+	contract, err := newVotingContractCChain(cfg)
 	if err != nil {
 		return nil, err
 	}
 
 	return &votingCronjob{
-		epochCronjob:   newEpochCronjob(&cfg.VotingCronjob.CronjobConfig, &cfg.Epochs),
-		db:             ctx.DB(),
-		votingContract: votingContract,
-		txOpts:         txOpts,
+		epochCronjob: newEpochCronjob(&cfg.VotingCronjob.CronjobConfig, &cfg.Epochs),
+		db:           db,
+		contract:     contract,
 	}, nil
-}
-
-func newVotingContract(cfg *config.Config) (*voting.Voting, error) {
-	eth, err := ethclient.Dial(cfg.Chain.EthRPCURL)
-	if err != nil {
-		return nil, err
-	}
-	return voting.NewVoting(cfg.VotingCronjob.ContractAddress, eth)
 }
 
 func (c *votingCronjob) Name() string {
@@ -79,14 +72,16 @@ func (c *votingCronjob) OnStart() error {
 }
 
 func (c *votingCronjob) Call() error {
-	idxState, err := database.FetchState(c.db, pchain.StateName)
+	idxState, err := c.db.FetchState(pchain.StateName)
 	if err != nil {
 		return err
 	}
-	state, err := database.FetchState(c.db, votingStateName)
+
+	state, err := c.db.FetchState(votingStateName)
 	if err != nil {
 		return err
 	}
+
 	now := c.time.Now()
 
 	// Last epoch that was submitted to the contract
@@ -100,7 +95,7 @@ func (c *votingCronjob) Call() error {
 			break
 		}
 
-		votingData, err := database.FetchPChainVotingData(c.db, start, end)
+		votingData, err := c.db.FetchPChainVotingData(start, end)
 		if err != nil {
 			return err
 		}
@@ -112,7 +107,7 @@ func (c *votingCronjob) Call() error {
 
 		// Update state
 		state.NextDBIndex = uint64(e + 1)
-		if err := database.UpdateState(c.db, &state); err != nil {
+		if err := c.db.UpdateState(&state); err != nil {
 			return err
 		}
 	}
@@ -121,12 +116,8 @@ func (c *votingCronjob) Call() error {
 
 func (c *votingCronjob) submitVotes(e int64, votingData []database.PChainTxData) error {
 	votingData = staking.DedupeTxs(votingData)
-	callOpts := &bind.CallOpts{
-		From:    c.txOpts.From,
-		Context: context.Background(),
-	}
 
-	shouldVote, err := c.votingContract.ShouldVote(callOpts, big.NewInt(e), c.txOpts.From)
+	shouldVote, err := c.contract.ShouldVote(big.NewInt(e))
 	if err != nil {
 		return err
 	}
@@ -143,6 +134,6 @@ func (c *votingCronjob) submitVotes(e int64, votingData []database.PChainTxData)
 			return err
 		}
 	}
-	_, err = c.votingContract.SubmitVote(c.txOpts, big.NewInt(e), [32]byte(merkleRoot))
+	err = c.contract.SubmitVote(big.NewInt(e), [32]byte(merkleRoot))
 	return err
 }
