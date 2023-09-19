@@ -40,7 +40,12 @@ func newVotingContractCChain(cfg *config.Config) (votingContract, error) {
 		return nil, err
 	}
 
-	txOpts, err := TransactOptsFromPrivateKey(cfg.Chain.PrivateKey, cfg.Chain.ChainID)
+	privateKey, err := cfg.Chain.GetPrivateKey()
+	if err != nil {
+		return nil, err
+	}
+
+	txOpts, err := TransactOptsFromPrivateKey(privateKey, cfg.Chain.ChainID)
 	if err != nil {
 		return nil, err
 	}

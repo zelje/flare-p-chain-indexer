@@ -4,7 +4,9 @@ import (
 	"flag"
 	"flare-indexer/utils"
 	"fmt"
+	"log"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/BurntSushi/toml"
@@ -48,7 +50,23 @@ type ChainConfig struct {
 	ChainID         int    `toml:"chain_id" envconfig:"CHAIN_ID"`
 	EthRPCURL       string `toml:"eth_rpc_url" envconfig:"ETH_RPC_URL"`
 	ApiKey          string `toml:"api_key" envconfig:"API_KEY"`
-	PrivateKey      string `toml:"private_key" envconfig:"PRIVATE_KEY"`
+	// setting the private key in config file is deprecated, except in development and testing
+	// use private_key_file instead
+	PrivateKey     string `toml:"private_key" envconfig:"PRIVATE_KEY"`
+	PrivateKeyFile string `toml:"private_key_file" envconfig:"PRIVATE_KEY_FILE"`
+}
+
+func (cfg ChainConfig) GetPrivateKey() (string, error) {
+	if cfg.PrivateKeyFile == "" {
+		log.Print("WARNING: using private_key is deprecated, use private_key_file instead")
+		return cfg.PrivateKey, nil
+	} else {
+		content, err := os.ReadFile(cfg.PrivateKeyFile)
+		if err != nil {
+			return "", fmt.Errorf("error opening private key file: %w", err)
+		}
+		return strings.TrimSpace(string(content)), nil
+	}
 }
 
 type EpochConfig struct {
