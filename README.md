@@ -66,7 +66,7 @@ address_hrp = "localflare"  # HRP (human readable part) of chain -- used to prop
 chain_id = 162  # chain id
 eth_rpc_url = "http://localhost:9650/ext/C/rpc"  # Ethereum RPC URL
 api_key = ""    # API key (in case the node is protected by API key), adds ?x-apikey=... to all requests if not empty
-private_key = "0x00000000000000"  # private key of the account (for voting and mirroring clients), in hex
+private_key_file = "../credentials/pk.txt"  # file containing the private key of an account (for voting and mirroring clients), in hex
 
 [p_chain_indexer]
 enabled = true         # enable p-chain indexing
