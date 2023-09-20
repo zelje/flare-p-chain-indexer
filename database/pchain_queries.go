@@ -82,6 +82,36 @@ func FetchPChainStakingTransactions(
 	return utils.Map(validatorTxs, func(t PChainTx) string { return *t.TxID }), nil
 }
 
+// Returns a list of staking data for stakers active at specific time which include input addresses.
+// Request is paginated (offset, limit).
+func FetchPChainStakingData(
+	db *gorm.DB,
+	time time.Time,
+	txType PChainTxType,
+	offset int,
+	limit int,
+) ([]PChainTxData, error) {
+	var validatorTxs []PChainTxData
+
+	if limit <= 0 {
+		limit = 100
+	}
+	if offset < 0 {
+		offset = 0
+	}
+
+	query := db.
+		Table("p_chain_txes").
+		Joins("left join p_chain_tx_inputs as inputs on inputs.tx_id = p_chain_txes.tx_id").
+		Where("start_time <= ?", time).Where("? <= end_time", time).
+		Where("type = ?", txType).
+		Group("p_chain_txes.id").
+		Order("p_chain_txes.id").Offset(offset).Limit(limit).
+		Select("p_chain_txes.*, group_concat(distinct(inputs.address)) as input_address").
+		Scan(&validatorTxs)
+	return validatorTxs, query.Error
+}
+
 // Returns a list of transaction ids initiating transfers between chains (import/export transactions)
 func FetchPChainTransferTransactions(
 	db *gorm.DB,
