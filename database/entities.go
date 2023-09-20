@@ -29,11 +29,12 @@ type State struct {
 // Abstact entity, common columns for X-chain and P-chain transaction inputs
 type TxInput struct {
 	BaseEntity
+	InIdx   uint32 // Index of the input
 	TxID    string `gorm:"type:varchar(50);not null;index"` // Transaction ID
 	Amount  uint64
 	Address string `gorm:"type:varchar(60);index"`
 	OutTxID string `gorm:"type:varchar(50)"` // Transaction ID with output
-	OutIdx  uint32 // Index of the output transaction
+	OutIdx  uint32 // Index of the output
 }
 
 // Abstact entity, common columns for X-chain and P-chain transaction inputs
