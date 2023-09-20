@@ -6,6 +6,8 @@ import (
 	"flare-indexer/database"
 	"flare-indexer/indexer/config"
 	"flare-indexer/logger"
+	"flare-indexer/utils/chain"
+	"flare-indexer/utils/contracts/addresses"
 	"flare-indexer/utils/contracts/mirroring"
 	"flare-indexer/utils/contracts/voting"
 	"math/big"
@@ -57,9 +59,10 @@ func (m mirrorDBGorm) GetPChainTxsForEpoch(start, end time.Time) ([]database.PCh
 }
 
 type mirrorContractsCChain struct {
-	mirroring *mirroring.Mirroring
-	txOpts    *bind.TransactOpts
-	voting    *voting.Voting
+	mirroring     *mirroring.Mirroring
+	addressBinder *addresses.Binder
+	txOpts        *bind.TransactOpts
+	voting        *voting.Voting
 }
 
 func initMirrorJobContracts(cfg *config.Config) (mirrorContracts, error) {
@@ -86,6 +89,11 @@ func initMirrorJobContracts(cfg *config.Config) (mirrorContracts, error) {
 		return nil, err
 	}
 
+	addressBinderContract, err := addresses.NewBinder(cfg.Mirror.AddressBinderContract, eth)
+	if err != nil {
+		return nil, err
+	}
+
 	privateKey, err := cfg.Chain.GetPrivateKey()
 	if err != nil {
 		return nil, err
@@ -97,9 +105,10 @@ func initMirrorJobContracts(cfg *config.Config) (mirrorContracts, error) {
 	}
 
 	return &mirrorContractsCChain{
-		mirroring: mirroringContract,
-		txOpts:    txOpts,
-		voting:    votingContract,
+		mirroring:     mirroringContract,
+		addressBinder: addressBinderContract,
+		txOpts:        txOpts,
+		voting:        votingContract,
 	}, nil
 }
 
@@ -112,5 +121,22 @@ func (m mirrorContractsCChain) MirrorStake(
 	merkleProof [][32]byte,
 ) error {
 	_, err := m.mirroring.MirrorStake(m.txOpts, *stakeData, merkleProof)
+	return err
+}
+
+func (m mirrorContractsCChain) IsAddressRegistered(address string) (bool, error) {
+	addressBytes, err := chain.ParseAddress(address)
+	if err != nil {
+		return false, err
+	}
+	boundAddress, err := m.addressBinder.PAddressToCAddress(new(bind.CallOpts), addressBytes)
+	if err != nil {
+		return false, err
+	}
+	return boundAddress != (common.Address{}), nil
+}
+
+func (m mirrorContractsCChain) RegisterPublicKey(publicKey []byte) error {
+	_, err := m.addressBinder.RegisterPublicKey(m.txOpts, publicKey)
 	return err
 }

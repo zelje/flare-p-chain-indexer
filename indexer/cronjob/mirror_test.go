@@ -328,3 +328,11 @@ func (c *testContracts) MirrorStake(
 	})
 	return nil
 }
+
+func (c testContracts) IsAddressRegistered(address string) (bool, error) {
+	return false, nil
+}
+
+func (c testContracts) RegisterPublicKey(publicKey []byte) error {
+	return nil
+}

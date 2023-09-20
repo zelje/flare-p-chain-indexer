@@ -37,6 +37,8 @@ type mirrorContracts interface {
 		stakeData *mirroring.IPChainStakeMirrorVerifierPChainStake,
 		merkleProof [][32]byte,
 	) error
+	IsAddressRegistered(address string) (bool, error)
+	RegisterPublicKey(publicKey []byte) error
 }
 
 func NewMirrorCronjob(ctx indexerctx.IndexerContext) (Cronjob, error) {
@@ -259,6 +261,8 @@ func (c *mirrorCronJob) mirrorTx(in *mirrorTxInput) error {
 		return err
 	}
 
+	// Bind addresses if needed
+
 	logger.Debug("mirroring tx %s", *in.tx.TxID)
 	err = c.contracts.MirrorStake(stakeData, merkleProof)
 	if err != nil {
@@ -280,5 +284,15 @@ func (c *mirrorCronJob) mirrorTx(in *mirrorTxInput) error {
 		return errors.Wrap(err, "mirroringContract.MirrorStake")
 	}
 
+	return nil
+}
+
+func (c *mirrorCronJob) registerAddress(txID string, address string) error {
+	registered, err := c.contracts.IsAddressRegistered(address)
+	if err != nil || registered {
+		return err
+	}
+
+	// c.db.GetPChainTxBytes(txID)
 	return nil
 }
