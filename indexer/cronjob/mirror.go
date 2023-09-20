@@ -6,6 +6,7 @@ import (
 	"flare-indexer/indexer/pchain"
 	"flare-indexer/logger"
 	"flare-indexer/utils"
+	"flare-indexer/utils/chain"
 	"flare-indexer/utils/contracts/mirroring"
 	"flare-indexer/utils/merkle"
 	"flare-indexer/utils/staking"
@@ -29,6 +30,7 @@ type mirrorDB interface {
 	FetchState(name string) (database.State, error)
 	UpdateJobState(epoch int64) error
 	GetPChainTxsForEpoch(start, end time.Time) ([]database.PChainTxData, error)
+	GetPChainTx(txID string, address string) (*database.PChainTxData, error)
 }
 
 type mirrorContracts interface {
@@ -261,7 +263,12 @@ func (c *mirrorCronJob) mirrorTx(in *mirrorTxInput) error {
 		return err
 	}
 
-	// Bind addresses if needed
+	// Register addresses if needed, do not fail if not successful
+	if err := c.registerAddress(*in.tx.TxID, in.tx.InputAddress); err != nil {
+		logger.Error("error registering address: %s", err.Error())
+	} else {
+		logger.Info("registered address %s on address binder contract", in.tx.InputAddress)
+	}
 
 	logger.Debug("mirroring tx %s", *in.tx.TxID)
 	err = c.contracts.MirrorStake(stakeData, merkleProof)
@@ -292,7 +299,26 @@ func (c *mirrorCronJob) registerAddress(txID string, address string) error {
 	if err != nil || registered {
 		return err
 	}
-
-	// c.db.GetPChainTxBytes(txID)
+	tx, err := c.db.GetPChainTx(txID, address)
+	if err != nil {
+		return err
+	}
+	if tx == nil {
+		return errors.New("tx not found")
+	}
+	publicKeys, err := chain.PublicKeysFromPChainBlock(tx.Bytes)
+	if err != nil {
+		return err
+	}
+	if tx.InputIndex >= uint32(len(publicKeys)) {
+		return errors.New("input index out of range")
+	}
+	publicKey := publicKeys[tx.InputIndex]
+	for _, k := range publicKey {
+		err := c.contracts.RegisterPublicKey(k.Bytes())
+		if err != nil {
+			return errors.Wrap(err, "mirroringContract.RegisterPublicKey")
+		}
+	}
 	return nil
 }

@@ -58,6 +58,10 @@ func (m mirrorDBGorm) GetPChainTxsForEpoch(start, end time.Time) ([]database.PCh
 	})
 }
 
+func (m mirrorDBGorm) GetPChainTx(txID string, address string) (*database.PChainTxData, error) {
+	return database.FetchPChainTxData(m.db, txID, address)
+}
+
 type mirrorContractsCChain struct {
 	mirroring     *mirroring.Mirroring
 	addressBinder *addresses.Binder

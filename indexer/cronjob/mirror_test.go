@@ -53,6 +53,7 @@ func TestOneTransaction(t *testing.T) {
 			Type:      database.PChainAddDelegatorTx,
 		},
 		InputAddress: "costwo18atl0e95w5ym6t8u5yrjpz35vqqzxfzrrsnq8u",
+		InputIndex:   0,
 	}
 
 	txs := map[int64][]database.PChainTxData{
@@ -99,6 +100,7 @@ func TestMultipleTransactionsInEpoch(t *testing.T) {
 				Type:      database.PChainAddDelegatorTx,
 			},
 			InputAddress: "costwo18atl0e95w5ym6t8u5yrjpz35vqqzxfzrrsnq8u",
+			InputIndex:   0,
 		}
 	}
 
@@ -295,7 +297,7 @@ func (db testDB) GetPChainTxsForEpoch(start, end time.Time) ([]database.PChainTx
 	return db.txs[epoch], nil
 }
 
-func (db testDB) GetPChainTx(txID string) (*database.PChainTx, error) {
+func (db testDB) GetPChainTx(txID string, address string) (*database.PChainTxData, error) {
 	return nil, nil
 }
 
