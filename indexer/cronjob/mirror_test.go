@@ -332,7 +332,7 @@ func (c *testContracts) MirrorStake(
 }
 
 func (c testContracts) IsAddressRegistered(address string) (bool, error) {
-	return false, nil
+	return true, nil
 }
 
 func (c testContracts) RegisterPublicKey(publicKey []byte) error {
