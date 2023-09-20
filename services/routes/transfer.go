@@ -29,15 +29,15 @@ func newTransferRouteHandlers(ctx context.ServicesContext) *transferRouteHandler
 }
 
 func (rh *transferRouteHandlers) listTransferTransactions(txType database.PChainTxType) utils.RouteHandler {
-	handler := func(request GetStakerRequest) (GetStakerResponse, *utils.ErrorHandler) {
+	handler := func(request GetStakerTxRequest) (GetStakerTxResponse, *utils.ErrorHandler) {
 		txIDs, err := database.FetchPChainTransferTransactions(rh.db, txType,
 			request.Address, request.Offset, request.Limit)
 		if err != nil {
-			return GetStakerResponse{}, utils.InternalServerErrorHandler(err)
+			return GetStakerTxResponse{}, utils.InternalServerErrorHandler(err)
 		}
-		return GetStakerResponse{TxIDs: txIDs}, nil
+		return GetStakerTxResponse{TxIDs: txIDs}, nil
 	}
-	return utils.NewRouteHandler(handler, http.MethodPost, GetStakerRequest{}, GetStakerResponse{})
+	return utils.NewRouteHandler(handler, http.MethodPost, GetStakerTxRequest{}, GetStakerTxResponse{})
 }
 
 func AddTransferRoutes(router utils.Router, ctx context.ServicesContext) {
