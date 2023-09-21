@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/utils/crypto"
 	"github.com/bradleyjkemp/cupaloy"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
@@ -53,6 +54,7 @@ func TestOneTransaction(t *testing.T) {
 			Type:      database.PChainAddDelegatorTx,
 		},
 		InputAddress: "costwo18atl0e95w5ym6t8u5yrjpz35vqqzxfzrrsnq8u",
+		InputIndex:   0,
 	}
 
 	txs := map[int64][]database.PChainTxData{
@@ -99,6 +101,7 @@ func TestMultipleTransactionsInEpoch(t *testing.T) {
 				Type:      database.PChainAddDelegatorTx,
 			},
 			InputAddress: "costwo18atl0e95w5ym6t8u5yrjpz35vqqzxfzrrsnq8u",
+			InputIndex:   0,
 		}
 	}
 
@@ -295,7 +298,7 @@ func (db testDB) GetPChainTxsForEpoch(start, end time.Time) ([]database.PChainTx
 	return db.txs[epoch], nil
 }
 
-func (db testDB) GetPChainTx(txID string) (*database.PChainTx, error) {
+func (db testDB) GetPChainTx(txID string, address string) (*database.PChainTxData, error) {
 	return nil, nil
 }
 
@@ -326,5 +329,13 @@ func (c *testContracts) MirrorStake(
 		stakeData:   stakeData,
 		merkleProof: merkleProof,
 	})
+	return nil
+}
+
+func (c testContracts) IsAddressRegistered(address string) (bool, error) {
+	return true, nil
+}
+
+func (c testContracts) RegisterPublicKey(publicKey crypto.PublicKey) error {
 	return nil
 }

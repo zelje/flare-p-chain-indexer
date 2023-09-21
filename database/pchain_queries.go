@@ -180,9 +180,28 @@ func FetchPChainTx(db *gorm.DB, txID string) (*PChainTx, error) {
 	return &tx, nil
 }
 
+func FetchPChainTxData(db *gorm.DB, txID string, address string) (*PChainTxData, error) {
+	var txs []*PChainTxData
+	err := db.Table("p_chain_txes").
+		Joins("left join p_chain_tx_inputs as inputs on inputs.tx_id = p_chain_txes.tx_id").
+		Where("p_chain_txes.tx_id = ?", txID).
+		Where("inputs.address = ?", address).
+		Group("p_chain_txes.id").
+		Select("p_chain_txes.*, inputs.address as input_address, inputs.in_idx as input_index").
+		Scan(&txs).Error
+	if err != nil {
+		return nil, err
+	}
+	if len(txs) == 0 {
+		return nil, nil
+	}
+	return txs[0], nil
+}
+
 type PChainTxData struct {
 	PChainTx
 	InputAddress string
+	InputIndex   uint32
 }
 
 // Find P-chain transaction in given block height
@@ -197,7 +216,7 @@ func FindPChainTxInBlockHeight(db *gorm.DB,
 	err := db.Table("p_chain_txes").
 		Joins("left join p_chain_tx_inputs as inputs on inputs.tx_id = p_chain_txes.tx_id").
 		Where("p_chain_txes.block_height = ?", height).
-		Select("p_chain_txes.*, inputs.address as input_address").
+		Select("p_chain_txes.*, inputs.address as input_address, inputs.in_idx as input_index").
 		Scan(&txs).Error
 	if err != nil {
 		return nil, false, err
@@ -220,7 +239,7 @@ func FetchPChainVotingData(db *gorm.DB, from time.Time, to time.Time) ([]PChainT
 		Joins("left join p_chain_tx_inputs as inputs on inputs.tx_id = p_chain_txes.tx_id").
 		Where("type = ? OR type = ?", PChainAddValidatorTx, PChainAddDelegatorTx).
 		Where("start_time >= ?", from).Where("start_time < ?", to).
-		Select("p_chain_txes.*, inputs.address as input_address").
+		Select("p_chain_txes.*, inputs.address as input_address, inputs.in_idx as input_index").
 		Scan(&data)
 	return data, query.Error
 }
@@ -242,7 +261,7 @@ func GetPChainTxsForEpoch(in *GetPChainTxsForEpochInput) ([]PChainTxData, error)
 			in.DB.Where("p_chain_txes.type = ?", PChainAddDelegatorTx).
 				Or("p_chain_txes.type = ?", PChainAddValidatorTx),
 		).
-		Select("p_chain_txes.*, inputs.address as input_address").
+		Select("p_chain_txes.*, inputs.address as input_address, inputs.in_idx as input_index").
 		Find(&txs).
 		Error
 	if err != nil {

@@ -88,6 +88,7 @@ func InputsFromTxIns(txID string, ins []*avax.TransferableInput, creator InputCr
 	txIns := make([]Input, len(ins))
 	for ini, in := range ins {
 		txIns[ini] = creator.CreateInput(&database.TxInput{
+			InIdx:   uint32(ini),
 			TxID:    txID,
 			Amount:  in.In.Amount(),
 			OutTxID: in.TxID.String(),

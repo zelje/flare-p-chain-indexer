@@ -39,7 +39,8 @@ type CronjobConfig struct {
 
 type MirrorConfig struct {
 	CronjobConfig
-	MirroringContract common.Address `toml:"contract_address" envconfig:"MIRRORING_CONTRACT_ADDRESS"`
+	MirroringContract     common.Address `toml:"contract_address" envconfig:"MIRRORING_CONTRACT_ADDRESS"`
+	AddressBinderContract common.Address `toml:"address_binder_contract_address" envconfig:"ADDRESS_BINDER_CONTRACT_ADDRESS"`
 }
 
 type VotingConfig struct {

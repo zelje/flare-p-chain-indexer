@@ -12,14 +12,14 @@ func PChainTxOutputFromTxOutput(out *TxOutput) *PChainTxOutput {
 	}
 }
 
-func XChainTxInputFromTxInput(out *TxInput) *XChainTxInput {
+func XChainTxInputFromTxInput(in *TxInput) *XChainTxInput {
 	return &XChainTxInput{
-		TxInput: *out,
+		TxInput: *in,
 	}
 }
 
-func PChainTxInputFromTxInput(out *TxInput) *PChainTxInput {
+func PChainTxInputFromTxInput(in *TxInput) *PChainTxInput {
 	return &PChainTxInput{
-		TxInput: *out,
+		TxInput: *in,
 	}
 }
