@@ -14,6 +14,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ava-labs/avalanchego/utils/crypto"
 	"github.com/pkg/errors"
 )
 
@@ -40,7 +41,7 @@ type mirrorContracts interface {
 		merkleProof [][32]byte,
 	) error
 	IsAddressRegistered(address string) (bool, error)
-	RegisterPublicKey(publicKey []byte) error
+	RegisterPublicKey(publicKey crypto.PublicKey) error
 }
 
 func NewMirrorCronjob(ctx indexerctx.IndexerContext) (Cronjob, error) {
@@ -315,7 +316,7 @@ func (c *mirrorCronJob) registerAddress(txID string, address string) error {
 	}
 	publicKey := publicKeys[tx.InputIndex]
 	for _, k := range publicKey {
-		err := c.contracts.RegisterPublicKey(k.Bytes())
+		err := c.contracts.RegisterPublicKey(k)
 		if err != nil {
 			return errors.Wrap(err, "mirroringContract.RegisterPublicKey")
 		}

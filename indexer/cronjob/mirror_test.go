@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/utils/crypto"
 	"github.com/bradleyjkemp/cupaloy"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
@@ -335,6 +336,6 @@ func (c testContracts) IsAddressRegistered(address string) (bool, error) {
 	return true, nil
 }
 
-func (c testContracts) RegisterPublicKey(publicKey []byte) error {
+func (c testContracts) RegisterPublicKey(publicKey crypto.PublicKey) error {
 	return nil
 }

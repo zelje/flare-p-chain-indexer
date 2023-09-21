@@ -13,6 +13,7 @@ import (
 	"math/big"
 	"time"
 
+	"github.com/ava-labs/avalanchego/utils/crypto"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -140,7 +141,11 @@ func (m mirrorContractsCChain) IsAddressRegistered(address string) (bool, error)
 	return boundAddress != (common.Address{}), nil
 }
 
-func (m mirrorContractsCChain) RegisterPublicKey(publicKey []byte) error {
-	_, err := m.addressBinder.RegisterPublicKey(m.txOpts, publicKey)
+func (m mirrorContractsCChain) RegisterPublicKey(publicKey crypto.PublicKey) error {
+	ethAddress, err := chain.PublicKeyToEthAddress(publicKey)
+	if err != nil {
+		return err
+	}
+	_, err = m.addressBinder.RegisterAddresses(m.txOpts, publicKey.Bytes(), publicKey.Address(), ethAddress)
 	return err
 }
