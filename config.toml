@@ -15,6 +15,8 @@ file = "./logs/flare-indexer.log"
 console = true
 
 [metrics]
+# used for prometheus metrics of the indexer
+# currently, no specific data are included in the metrics in addition to the default ones
 prometheus_address = "localhost:2112"
 
 [chain]
@@ -25,18 +27,47 @@ chain_id = 162
 eth_rpc_url = "http://localhost:9650/ext/bc/C/rpc"
 # api key may be needed for access to production nodes
 api_key = ""
+# private_key_file is needed for voting and mirroring clients
+private_key_file = "path/to/private/key/file"
 
 [x_chain_indexer]
 enabled = false
-timeout_millis = 1000
+timeout = "10s"
 start_index = 5
 batch_size = 10
 
 [p_chain_indexer]
 enabled = true
-timeout_millis = 1000
+timeout = "10s"
 start_index = 0
+batch_size = 10
 
 [uptime_cronjob]
 enabled = false
-timeout_seconds = 10
+timeout = "10s"
+enable_voting = false
+# start of the uptime voting epoch
+start = "2021-08-01T00:00:00Z"
+period = "90s"
+uptime_threshold = 0.8
+
+[epochs]
+# start of the voting/mirroring epoch
+start = "2021-08-01T00:00:00Z"
+period = "180s"
+# first epoch to be voted for (do not leav this empty since the first epoch is well back in time
+first = 1111
+
+[voting_cronjob]
+enabled = false
+timeout = "10s"
+# voting contract address
+contract_address = "0x0000000"
+
+[mirroring_cronjob]
+enabled = false
+timeout = "10s"
+# mirroring contract address
+contract_address = "0x0000000"
+# address binder contract address
+address_binder_contract_address = "0x0000000"
