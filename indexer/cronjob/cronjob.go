@@ -2,6 +2,7 @@ package cronjob
 
 import (
 	globalConfig "flare-indexer/config"
+	"flare-indexer/database"
 	"flare-indexer/indexer/config"
 	"flare-indexer/logger"
 	"flare-indexer/utils"
@@ -46,8 +47,9 @@ const (
 
 type epochCronjob struct {
 	enabled   bool
-	timeout   time.Duration
+	timeout   time.Duration // call cronjob every "timeout"
 	epochs    staking.EpochInfo
+	delay     time.Duration // voting delay
 	batchSize int64
 }
 
@@ -62,6 +64,7 @@ func newEpochCronjob(cronjobCfg *config.CronjobConfig, epochCfg *globalConfig.Ep
 		timeout:   cronjobCfg.Timeout,
 		epochs:    staking.NewEpochInfo(epochCfg),
 		batchSize: cronjobCfg.BatchSize,
+		delay:     cronjobCfg.Delay,
 	}
 }
 
@@ -91,4 +94,9 @@ func (c *epochCronjob) getTrimmedEpochRange(start, end int64) *epochRange {
 		end = batchSize + start - 1
 	}
 	return &epochRange{start, end}
+}
+
+func (c *epochCronjob) indexerBehind(idxState *database.State, epoch int64) bool {
+	epochEnd := c.epochs.GetEndTime(epoch)
+	return epochEnd.After(idxState.Updated.Add(-c.delay)) || idxState.NextDBIndex <= idxState.LastChainIndex
 }

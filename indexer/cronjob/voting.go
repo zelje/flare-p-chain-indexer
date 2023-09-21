@@ -90,9 +90,9 @@ func (c *votingCronjob) Call() error {
 	for e := epochRange.start; e <= epochRange.end; e++ {
 		start, end := c.epochs.GetTimeRange(e)
 
-		if end.After(idxState.Updated) {
-			logger.Debug("Skipping epoch %d because it is not fully indexed", e)
-			break
+		if c.indexerBehind(&idxState, e) {
+			logger.Debug("indexer is behind, skipping voting for epoch %d", e)
+			return nil
 		}
 
 		votingData, err := c.db.FetchPChainVotingData(start, end)
