@@ -30,9 +30,6 @@ type uptimeVotingCronjob struct {
 	// It is set to the last finished aggregation epoch
 	lastAggregatedEpoch int64
 
-	// A limited period after the end of the reward epoch to send the uptimes to the node
-	votingInterval time.Duration
-
 	uptimeThreshold float64
 
 	votingContract *voting.Voting
@@ -75,7 +72,6 @@ func NewUptimeVotingCronjob(ctx context.IndexerContext) (*uptimeVotingCronjob, e
 		},
 		lastAggregatedEpoch: -1,
 		uptimeThreshold:     config.UptimeThreshold,
-		votingInterval:      config.VotingInterval,
 		votingContract:      votingContract,
 		txOpts:              txOpts,
 		db:                  ctx.DB(),

@@ -148,6 +148,7 @@ func TestMultipleTransactionsInSeparateEpochs(t *testing.T) {
 				Type:      database.PChainAddDelegatorTx,
 			},
 			InputAddress: "costwo18atl0e95w5ym6t8u5yrjpz35vqqzxfzrrsnq8u",
+			InputIndex:   0,
 		}
 	}
 
@@ -198,6 +199,7 @@ func testMirrorErrors(t *testing.T, errorMsg string) {
 			Type:      database.PChainAddDelegatorTx,
 		},
 		InputAddress: "costwo18atl0e95w5ym6t8u5yrjpz35vqqzxfzrrsnq8u",
+		InputIndex:   0,
 	}
 
 	txs := map[int64][]database.PChainTxData{
@@ -245,7 +247,9 @@ func testMirror(
 		epochs: epochs,
 		states: map[string]database.State{
 			pchain.StateName: {
-				Updated: epochs.GetEndTime(999),
+				Updated:        epochs.GetEndTime(999),
+				NextDBIndex:    3,
+				LastChainIndex: 2,
 			},
 			mirrorStateName: {},
 		},

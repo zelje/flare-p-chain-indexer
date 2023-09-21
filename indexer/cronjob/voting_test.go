@@ -83,7 +83,9 @@ func TestVotes(t *testing.T) {
 	db := votingDBTest{
 		states: map[string]database.State{
 			pchain.StateName: {
-				Updated: time.Now(),
+				Updated:        time.Now(),
+				NextDBIndex:    3,
+				LastChainIndex: 2,
 			},
 		},
 		votingData: map[timeRange][]database.PChainTxData{

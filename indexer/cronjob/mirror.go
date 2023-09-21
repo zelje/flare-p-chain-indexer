@@ -115,11 +115,6 @@ func (c *mirrorCronJob) Call() error {
 	return nil
 }
 
-func (c *mirrorCronJob) indexerBehind(idxState *database.State, epoch int64) bool {
-	epochEnd := c.epochs.GetEndTime(epoch)
-	return epochEnd.After(idxState.Updated)
-}
-
 var errNoEpochsToMirror = errors.New("no epochs to mirror")
 
 func (c *mirrorCronJob) getEpochRange() (*epochRange, error) {

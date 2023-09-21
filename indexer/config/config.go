@@ -35,6 +35,7 @@ type CronjobConfig struct {
 	Enabled   bool          `toml:"enabled"`
 	Timeout   time.Duration `toml:"timeout"`
 	BatchSize int64         `toml:"batch_size"`
+	Delay     time.Duration `toml:"delay"`
 }
 
 type MirrorConfig struct {
@@ -51,9 +52,8 @@ type VotingConfig struct {
 type UptimeConfig struct {
 	CronjobConfig
 	config.EpochConfig
-	EnableVoting    bool          `toml:"enable_voting"`
-	VotingInterval  time.Duration `toml:"voting_interval"`
-	UptimeThreshold float64       `toml:"uptime_threshold"`
+	EnableVoting    bool    `toml:"enable_voting"`
+	UptimeThreshold float64 `toml:"uptime_threshold"`
 }
 
 func newConfig() *Config {
