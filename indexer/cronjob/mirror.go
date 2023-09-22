@@ -270,17 +270,22 @@ func (c *mirrorCronJob) mirrorTx(in *mirrorTxInput) error {
 	err = c.contracts.MirrorStake(stakeData, merkleProof)
 	if err != nil {
 		if strings.Contains(err.Error(), "transaction already mirrored") {
-			logger.Debug("tx %s already mirrored", *in.tx.TxID)
+			logger.Info("tx %s already mirrored", *in.tx.TxID)
 			return nil
 		}
 
 		if strings.Contains(err.Error(), "staking already ended") {
-			logger.Debug("staking already ended for tx %s", *in.tx.TxID)
+			logger.Info("staking already ended for tx %s", *in.tx.TxID)
 			return nil
 		}
 
 		if strings.Contains(err.Error(), "unknown staking address") {
 			logger.Info("unknown staking address for tx %s", *in.tx.TxID)
+			return nil
+		}
+
+		if strings.Contains(err.Error(), "Max node ids exceeded") {
+			logger.Info("Max node ids exceeded for tx %s", *in.tx.TxID)
 			return nil
 		}
 
