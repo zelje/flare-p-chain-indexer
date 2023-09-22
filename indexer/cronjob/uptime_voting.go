@@ -30,6 +30,11 @@ type uptimeVotingCronjob struct {
 	// It is set to the last finished aggregation epoch
 	lastAggregatedEpoch int64
 
+	// Delete all uptimes that are older than the current epoch-deleteOldUptimesEpochThreshold
+	// If deleteOldUptimesEpochThreshold is set to 0, no uptimes will be deleted
+	// If it is set to > 0, minimum is 5
+	deleteOldUptimesEpochThreshold int64
+
 	uptimeThreshold float64
 
 	votingContract *voting.Voting
@@ -70,11 +75,12 @@ func NewUptimeVotingCronjob(ctx context.IndexerContext) (*uptimeVotingCronjob, e
 			timeout: config.Timeout,
 			epochs:  staking.NewEpochInfo(&ctx.Config().UptimeCronjob.EpochConfig),
 		},
-		lastAggregatedEpoch: -1,
-		uptimeThreshold:     config.UptimeThreshold,
-		votingContract:      votingContract,
-		txOpts:              txOpts,
-		db:                  ctx.DB(),
+		lastAggregatedEpoch:            -1,
+		deleteOldUptimesEpochThreshold: config.DeleteOldUptimesEpochThreshold,
+		uptimeThreshold:                config.UptimeThreshold,
+		votingContract:                 votingContract,
+		txOpts:                         txOpts,
+		db:                             ctx.DB(),
 	}, nil
 
 }
@@ -136,6 +142,12 @@ func (c *uptimeVotingCronjob) Call() error {
 		return fmt.Errorf("failed persisting uptime aggregations %w", err)
 	}
 	c.lastAggregatedEpoch = lastAggregatedEpoch
+
+	err = c.deleteOldUptimes()
+	if err != nil {
+		// Error is non-fatal, we only log it
+		logger.Error("Failed deleting old uptimes: %v", err)
+	}
 	return nil
 }
 
@@ -246,6 +258,25 @@ func (c *uptimeVotingCronjob) submitVotes(epoch int64, nodeAggregations []*datab
 	}
 	_, err := c.votingContract.SubmitValidatorUptimeVote(c.txOpts, big.NewInt(epoch), nodeIDs)
 	return err
+}
+
+func (c *uptimeVotingCronjob) deleteOldUptimes() error {
+	if c.deleteOldUptimesEpochThreshold <= 0 {
+		return nil
+	}
+
+	var lastEpochToDelete int64
+	if c.deleteOldUptimesEpochThreshold < 5 {
+		lastEpochToDelete = c.lastAggregatedEpoch - 5
+	} else {
+		lastEpochToDelete = c.lastAggregatedEpoch - c.deleteOldUptimesEpochThreshold
+	}
+	if lastEpochToDelete < 0 {
+		return nil
+	}
+
+	_, epochEnd := c.epochs.GetTimeRange(lastEpochToDelete)
+	return database.DeleteUptimesBefore(c.db, epochEnd)
 }
 
 type nodeStakingInterval struct {

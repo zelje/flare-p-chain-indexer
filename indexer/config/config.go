@@ -52,8 +52,9 @@ type VotingConfig struct {
 type UptimeConfig struct {
 	CronjobConfig
 	config.EpochConfig
-	EnableVoting    bool    `toml:"enable_voting"`
-	UptimeThreshold float64 `toml:"uptime_threshold"`
+	EnableVoting                   bool    `toml:"enable_voting"`
+	UptimeThreshold                float64 `toml:"uptime_threshold"`
+	DeleteOldUptimesEpochThreshold int64   `toml:"delete_old_uptimes_epoch_threshold"`
 }
 
 func newConfig() *Config {
