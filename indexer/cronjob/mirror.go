@@ -110,7 +110,7 @@ func (c *mirrorCronJob) Call() error {
 
 	logger.Debug("successfully mirrored epochs %d-%d", epochRange.start, epochRange.end)
 
-	if err := c.db.UpdateJobState(epochRange.end, false); err != nil {
+	if err := c.db.UpdateJobState(epochRange.end+1, false); err != nil {
 		return err
 	}
 
