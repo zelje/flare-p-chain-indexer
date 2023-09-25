@@ -33,14 +33,14 @@ func (m mirrorDBGorm) FetchState(name string) (database.State, error) {
 	return database.FetchState(m.db, name)
 }
 
-func (m mirrorDBGorm) UpdateJobState(epoch int64) error {
+func (m mirrorDBGorm) UpdateJobState(epoch int64, force bool) error {
 	return m.db.Transaction(func(tx *gorm.DB) error {
 		jobState, err := database.FetchState(tx, mirrorStateName)
 		if err != nil {
 			return errors.Wrap(err, "database.FetchState")
 		}
 
-		if jobState.NextDBIndex >= uint64(epoch) {
+		if !force && jobState.NextDBIndex >= uint64(epoch) {
 			logger.Debug("job state already up to date")
 			return nil
 		}

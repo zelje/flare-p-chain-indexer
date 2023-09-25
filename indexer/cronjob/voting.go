@@ -56,11 +56,17 @@ func NewVotingCronjob(ctx indexerctx.IndexerContext) (*votingCronjob, error) {
 		return nil, err
 	}
 
-	return &votingCronjob{
+	vc := &votingCronjob{
 		epochCronjob: newEpochCronjob(&cfg.VotingCronjob.CronjobConfig, &cfg.Epochs),
 		db:           db,
 		contract:     contract,
-	}, nil
+	}
+
+	err = vc.reset(ctx.Flags().ResetVotingCronjob)
+	if err != nil {
+		return nil, err
+	}
+	return vc, nil
 }
 
 func (c *votingCronjob) Name() string {
@@ -136,4 +142,23 @@ func (c *votingCronjob) submitVotes(e int64, votingData []database.PChainTxData)
 	}
 	err = c.contract.SubmitVote(big.NewInt(e), [32]byte(merkleRoot))
 	return err
+}
+
+func (c *votingCronjob) reset(firstEpoch int64) error {
+	if firstEpoch <= 0 {
+		return nil
+	}
+
+	logger.Info("Resetting voting cronjob state to epoch %d", firstEpoch)
+	state, err := c.db.FetchState(votingStateName)
+	if err != nil {
+		return err
+	}
+	state.NextDBIndex = uint64(firstEpoch)
+	err = c.db.UpdateState(&state)
+	if err != nil {
+		return err
+	}
+	c.epochs.First = firstEpoch
+	return nil
 }

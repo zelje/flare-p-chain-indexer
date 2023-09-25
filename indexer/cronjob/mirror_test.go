@@ -288,12 +288,11 @@ func (db testDB) FetchState(name string) (database.State, error) {
 	return state, nil
 }
 
-func (db testDB) UpdateJobState(epoch int64) error {
+func (db testDB) UpdateJobState(epoch int64, force bool) error {
 	db.states[mirrorStateName] = database.State{
 		Name:        mirrorStateName,
 		NextDBIndex: uint64(epoch),
 	}
-
 	return nil
 }
 

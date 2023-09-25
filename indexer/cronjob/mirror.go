@@ -29,7 +29,7 @@ type mirrorCronJob struct {
 
 type mirrorDB interface {
 	FetchState(name string) (database.State, error)
-	UpdateJobState(epoch int64) error
+	UpdateJobState(epoch int64, force bool) error
 	GetPChainTxsForEpoch(start, end time.Time) ([]database.PChainTxData, error)
 	GetPChainTx(txID string, address string) (*database.PChainTxData, error)
 }
@@ -56,11 +56,13 @@ func NewMirrorCronjob(ctx indexerctx.IndexerContext) (Cronjob, error) {
 		return nil, err
 	}
 
-	return &mirrorCronJob{
+	mc := &mirrorCronJob{
 		epochCronjob: newEpochCronjob(&cfg.Mirror.CronjobConfig, &cfg.Epochs),
 		db:           NewMirrorDBGorm(ctx.DB()),
 		contracts:    contracts,
-	}, nil
+	}
+	mc.reset(ctx.Flags().ResetMirrorCronjob)
+	return mc, nil
 }
 
 func (c *mirrorCronJob) Name() string {
@@ -108,7 +110,7 @@ func (c *mirrorCronJob) Call() error {
 
 	logger.Debug("successfully mirrored epochs %d-%d", epochRange.start, epochRange.end)
 
-	if err := c.db.UpdateJobState(epochRange.end); err != nil {
+	if err := c.db.UpdateJobState(epochRange.end, false); err != nil {
 		return err
 	}
 
@@ -321,5 +323,19 @@ func (c *mirrorCronJob) registerAddress(txID string, address string) error {
 			return errors.Wrap(err, "mirroringContract.RegisterPublicKey")
 		}
 	}
+	return nil
+}
+
+func (c *mirrorCronJob) reset(firstEpoch int64) error {
+	if firstEpoch <= 0 {
+		return nil
+	}
+
+	logger.Info("Resetting mirroring cronjob state to epoch %d", firstEpoch)
+	err := c.db.UpdateJobState(firstEpoch, true)
+	if err != nil {
+		return err
+	}
+	c.epochs.First = firstEpoch
 	return nil
 }

@@ -32,8 +32,7 @@ func (c Config) ChainConfig() config.ChainConfig {
 	return c.Chain
 }
 
-func BuildConfig() (*Config, error) {
-	cfgFileName := config.ConfigFileName()
+func BuildConfig(cfgFileName string) (*Config, error) {
 	cfg := newConfig()
 	err := config.ParseConfigFile(cfg, cfgFileName, false)
 	if err != nil {

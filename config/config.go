@@ -1,7 +1,6 @@
 package config
 
 import (
-	"flag"
 	"flare-indexer/utils"
 	"fmt"
 	"log"
@@ -98,10 +97,4 @@ func ReadEnv(cfg interface{}) error {
 		return fmt.Errorf("error reading env config: %w", err)
 	}
 	return nil
-}
-
-func ConfigFileName() string {
-	cfgFlag := flag.String("config", CONFIG_FILE, "Configuration file (toml format)")
-	flag.Parse()
-	return *cfgFlag
 }
