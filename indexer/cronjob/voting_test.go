@@ -63,6 +63,10 @@ func (c *votingContractTest) SubmitVote(epoch *big.Int, merkleRoot [32]byte) err
 	return nil
 }
 
+func (c *votingContractTest) EpochConfig() (time.Time, time.Duration, error) {
+	return time.Now(), 180 * time.Second, nil
+}
+
 func TestNoVotes(t *testing.T) {
 	db := &votingDBTest{}
 	contract := &votingContractTest{}

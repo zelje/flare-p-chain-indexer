@@ -12,6 +12,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -21,6 +22,8 @@ const (
 var (
 	zeroBytes     [32]byte    = [32]byte{}
 	zeroBytesHash common.Hash = crypto.Keccak256Hash(zeroBytes[:])
+
+	ErrEpochConfig = errors.New("epoch config mismatch")
 )
 
 type votingCronjob struct {
@@ -42,6 +45,7 @@ type votingDB interface {
 type votingContract interface {
 	ShouldVote(epoch *big.Int) (bool, error)
 	SubmitVote(epoch *big.Int, merkleRoot [32]byte) error
+	EpochConfig() (time.Time, time.Duration, error)
 }
 
 func NewVotingCronjob(ctx indexerctx.IndexerContext) (*votingCronjob, error) {
@@ -60,6 +64,11 @@ func NewVotingCronjob(ctx indexerctx.IndexerContext) (*votingCronjob, error) {
 		epochCronjob: newEpochCronjob(&cfg.VotingCronjob.CronjobConfig, &cfg.Epochs),
 		db:           db,
 		contract:     contract,
+	}
+
+	err = vc.verifyEpoch()
+	if err != nil {
+		return nil, err
 	}
 
 	err = vc.reset(ctx.Flags().ResetVotingCronjob)
@@ -160,5 +169,16 @@ func (c *votingCronjob) reset(firstEpoch int64) error {
 		return err
 	}
 	c.epochs.First = firstEpoch
+	return nil
+}
+
+func (c *votingCronjob) verifyEpoch() error {
+	start, period, err := c.contract.EpochConfig()
+	if err != nil {
+		return err
+	}
+	if c.epochs.Start != start || c.epochs.Period != period {
+		return ErrEpochConfig
+	}
 	return nil
 }

@@ -75,3 +75,13 @@ func (c *votingContractCChain) SubmitVote(epoch *big.Int, merkleRoot [32]byte) e
 	_, err := c.voting.SubmitVote(c.txOpts, epoch, merkleRoot)
 	return err
 }
+
+func (c *votingContractCChain) EpochConfig() (start time.Time, period time.Duration, err error) {
+	chainCfg, err := c.voting.GetEpochConfiguration(c.callOpts)
+	if err != nil {
+		return
+	}
+	start = time.Unix(chainCfg.FirstEpochStartTs.Int64(), 0)
+	period = time.Duration(chainCfg.EpochDurationSeconds.Int64()) * time.Second
+	return
+}
