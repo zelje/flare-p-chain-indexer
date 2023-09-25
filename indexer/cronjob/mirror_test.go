@@ -74,7 +74,7 @@ func TestOneTransaction(t *testing.T) {
 
 	db := testMirror(t, txs, contracts, epochs)
 
-	require.Equal(t, db.states[mirrorStateName].NextDBIndex, uint64(3))
+	require.Equal(t, db.states[mirrorStateName].NextDBIndex, uint64(4))
 }
 
 func TestMultipleTransactionsInEpoch(t *testing.T) {
@@ -121,7 +121,7 @@ func TestMultipleTransactionsInEpoch(t *testing.T) {
 
 	db := testMirror(t, txsMap, contracts, epochs)
 
-	require.Equal(t, db.states[mirrorStateName].NextDBIndex, uint64(3))
+	require.Equal(t, db.states[mirrorStateName].NextDBIndex, uint64(4))
 }
 
 func TestMultipleTransactionsInSeparateEpochs(t *testing.T) {
@@ -171,7 +171,7 @@ func TestMultipleTransactionsInSeparateEpochs(t *testing.T) {
 
 	db := testMirror(t, txsMap, contracts, epochs)
 
-	require.Equal(t, db.states[mirrorStateName].NextDBIndex, uint64(2))
+	require.Equal(t, db.states[mirrorStateName].NextDBIndex, uint64(3))
 }
 
 func TestAlreadyMirrored(t *testing.T) {
@@ -225,7 +225,7 @@ func testMirrorErrors(t *testing.T, errorMsg string) {
 
 	db := testMirror(t, txs, contracts, epochs)
 
-	require.Equal(t, db.states[mirrorStateName].NextDBIndex, uint64(3))
+	require.Equal(t, db.states[mirrorStateName].NextDBIndex, uint64(4))
 }
 
 func initEpochs() staking.EpochInfo {
