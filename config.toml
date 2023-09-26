@@ -50,9 +50,10 @@ enable_voting = false
 start = "2021-08-01T00:00:00Z"
 period = "90s"
 uptime_threshold = 0.8
+delete_old_uptimes_epoch_threshold = 5
 
 [epochs]
-# first epoch to be voted for (do not leav this empty since the first epoch is well back in time
+# first epoch to be voted for (do not leave this empty since the first epoch is well back in time)
 first = 1111
 
 [voting_cronjob]

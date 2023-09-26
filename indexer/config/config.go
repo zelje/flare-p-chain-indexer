@@ -2,6 +2,7 @@ package config
 
 import (
 	"flare-indexer/config"
+	"flare-indexer/utils"
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -50,9 +51,11 @@ type VotingConfig struct {
 type UptimeConfig struct {
 	CronjobConfig
 	config.EpochConfig
-	EnableVoting                   bool    `toml:"enable_voting"`
-	UptimeThreshold                float64 `toml:"uptime_threshold"`
-	DeleteOldUptimesEpochThreshold int64   `toml:"delete_old_uptimes_epoch_threshold"`
+	Period                         time.Duration   `toml:"period" envconfig:"UPTIME_EPOCH_PERIOD"`
+	Start                          utils.Timestamp `toml:"start" envconfig:"UPTIME_EPOCH_START"`
+	EnableVoting                   bool            `toml:"enable_voting"`
+	UptimeThreshold                float64         `toml:"uptime_threshold"`
+	DeleteOldUptimesEpochThreshold int64           `toml:"delete_old_uptimes_epoch_threshold"`
 }
 
 type ContractAddresses struct {
