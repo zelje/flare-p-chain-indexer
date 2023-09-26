@@ -65,6 +65,5 @@ enabled = false
 timeout = "10s"
 
 [contract_addresses]
-address_binder = "0x0000000"
 mirroring = "0x0000000"
 voting = "0x0000000"

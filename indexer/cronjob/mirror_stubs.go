@@ -95,7 +95,7 @@ func initMirrorJobContracts(cfg *config.Config) (mirrorContracts, error) {
 		return nil, err
 	}
 
-	addressBinderContract, err := addresses.NewBinder(cfg.ContractAddresses.AddressBinder, eth)
+	addressBinderContract, err := newAddressBinderContract(eth, mirroringContract)
 	if err != nil {
 		return nil, err
 	}
@@ -116,6 +116,17 @@ func initMirrorJobContracts(cfg *config.Config) (mirrorContracts, error) {
 		txOpts:        txOpts,
 		voting:        votingContract,
 	}, nil
+}
+
+func newAddressBinderContract(
+	eth *ethclient.Client, mirroringContract *mirroring.Mirroring,
+) (*addresses.Binder, error) {
+	addressBinderAddress, err := mirroringContract.AddressBinder(new(bind.CallOpts))
+	if err != nil {
+		return nil, err
+	}
+
+	return addresses.NewBinder(addressBinderAddress, eth)
 }
 
 func (m mirrorContractsCChain) GetMerkleRoot(epoch int64) ([32]byte, error) {
