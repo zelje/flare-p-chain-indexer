@@ -1,0 +1,51 @@
+[db]
+host = "localhost"   # from env DB_HOST
+port = 3306          # from env DB_PORT
+database = "flare_indexer"      # from env DB_DATABASE
+username = "flareindexeruser"   # from env DB_USERNAME
+password = ""                   # from env DB_PASSWORD
+log_queries = false
+
+[logger]
+level = "INFO"
+file = "./logs/flare-indexer.log"
+console = false
+
+[metrics]
+# used for prometheus metrics of the indexer
+# currently, no specific data are included in the metrics in addition to the default ones
+# prometheus_address = "localhost:2112"
+
+[chain]
+node_url = "https://coston2-api-tracer.flare.network"  # from env CHAIN_NODE_URL
+address_hrp = "costwo"
+chain_id = 114
+eth_rpc_url = "https://coston2-api.flare.network/ext/C/rpc"  # from env ETH_RPC_URL
+private_key_file = "./private_key.txt"  # from env PRIVATE_KEY_FILE
+
+[p_chain_indexer]
+enabled = true
+timeout = "10s"
+start_index = 0
+batch_size = 100
+
+[uptime_cronjob]
+enabled = true
+timeout = "30s"
+enable_voting = true
+# start of the uptime voting epoch
+start = "2021-08-01T00:00:00Z"
+period = "90s"
+uptime_threshold = 0.8
+
+[epochs]
+# start of the voting/mirroring epoch
+start = "2021-08-01T00:00:00Z"
+period = "180s"
+# first epoch to be voted for
+first = 183585  # from env EPOCH_FIRST
+
+[voting_cronjob]
+enabled = true
+timeout = "10s"
+contract_address = "0x0000000000000000000000000000000000000000"  # from env VOTING_CONTRACT_ADDRESS
