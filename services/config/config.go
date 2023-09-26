@@ -12,7 +12,7 @@ type Config struct {
 	Chain             config.ChainConfig       `toml:"chain"`
 	Services          ServicesConfig           `toml:"services"`
 	Epochs            config.EpochConfig       `toml:"epochs"`
-	ContractAddresses config.ContractAddresses `toml:"contractAddresses"`
+	ContractAddresses config.ContractAddresses `toml:"contract_addresses"`
 }
 
 type ServicesConfig struct {
