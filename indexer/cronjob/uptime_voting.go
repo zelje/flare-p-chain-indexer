@@ -69,11 +69,17 @@ func NewUptimeVotingCronjob(ctx context.IndexerContext) (*uptimeVotingCronjob, e
 	}
 
 	config := ctx.Config().UptimeCronjob
+
+	start, period, err := staking.GetEpochConfig(votingContract)
+	if err != nil {
+		return nil, err
+	}
+
 	return &uptimeVotingCronjob{
 		epochCronjob: epochCronjob{
 			enabled: config.EnableVoting,
 			timeout: config.Timeout,
-			epochs:  staking.NewEpochInfo(&ctx.Config().UptimeCronjob.EpochConfig),
+			epochs:  staking.NewEpochInfo(&ctx.Config().UptimeCronjob.EpochConfig, start, period),
 		},
 		lastAggregatedEpoch:            -1,
 		deleteOldUptimesEpochThreshold: config.DeleteOldUptimesEpochThreshold,

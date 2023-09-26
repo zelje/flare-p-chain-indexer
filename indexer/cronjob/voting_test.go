@@ -1,11 +1,10 @@
 package cronjob
 
 import (
-	globalConfig "flare-indexer/config"
 	"flare-indexer/database"
 	"flare-indexer/indexer/config"
 	"flare-indexer/indexer/pchain"
-	"flare-indexer/utils"
+	"flare-indexer/utils/staking"
 	"math/big"
 	"testing"
 	"time"
@@ -158,10 +157,10 @@ func initEpochCronjob() epochCronjob {
 		BatchSize: 5,
 	}
 
-	epochCfg := globalConfig.EpochConfig{
+	epochInfo := staking.EpochInfo{
 		Period: 180 * time.Second,
-		Start:  utils.Timestamp{Time: time.Now().Add(-time.Hour)},
+		Start:  time.Now().Add(-time.Hour),
 	}
 
-	return newEpochCronjob(&cronjobCfg, &epochCfg)
+	return newEpochCronjob(&cronjobCfg, epochInfo)
 }

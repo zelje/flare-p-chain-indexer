@@ -42,6 +42,7 @@ type mirrorContracts interface {
 	) error
 	IsAddressRegistered(address string) (bool, error)
 	RegisterPublicKey(publicKey crypto.PublicKey) error
+	EpochConfig() (time.Time, time.Duration, error)
 }
 
 func NewMirrorCronjob(ctx indexerctx.IndexerContext) (Cronjob, error) {
@@ -56,13 +57,22 @@ func NewMirrorCronjob(ctx indexerctx.IndexerContext) (Cronjob, error) {
 		return nil, err
 	}
 
+	start, period, err := contracts.EpochConfig()
+	if err != nil {
+		return nil, err
+	}
+
+	epochs := staking.NewEpochInfo(&cfg.Epochs, start, period)
+
 	mc := &mirrorCronJob{
-		epochCronjob: newEpochCronjob(&cfg.Mirror.CronjobConfig, &cfg.Epochs),
+		epochCronjob: newEpochCronjob(&cfg.Mirror.CronjobConfig, epochs),
 		db:           NewMirrorDBGorm(ctx.DB()),
 		contracts:    contracts,
 	}
-	mc.reset(ctx.Flags().ResetMirrorCronjob)
-	return mc, nil
+
+	err = mc.reset(ctx.Flags().ResetMirrorCronjob)
+
+	return mc, err
 }
 
 func (c *mirrorCronJob) Name() string {

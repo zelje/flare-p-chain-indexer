@@ -8,7 +8,6 @@ import (
 	"flare-indexer/database"
 	"flare-indexer/indexer/config"
 	"flare-indexer/indexer/pchain"
-	"flare-indexer/utils"
 	"flare-indexer/utils/contracts/mirroring"
 	"flare-indexer/utils/staking"
 	"testing"
@@ -21,6 +20,11 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
 )
+
+var epochInfo = staking.EpochInfo{
+	Period: 180 * time.Second,
+	Start:  time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC),
+}
 
 func TestMain(m *testing.M) {
 	cfg := config.Config{
@@ -38,10 +42,8 @@ func TestMain(m *testing.M) {
 }
 
 func TestOneTransaction(t *testing.T) {
-	epochs := initEpochs()
-
-	startTime := epochs.GetStartTime(3)
-	endTime := epochs.GetEndTime(999)
+	startTime := epochInfo.GetStartTime(3)
+	endTime := epochInfo.GetEndTime(999)
 
 	txid := "5uZETr5SUKqGJLzFP5BeGxbXU5CFcCBQYPu288eX9R1QDQMjn"
 	tx := database.PChainTxData{
@@ -72,16 +74,14 @@ func TestOneTransaction(t *testing.T) {
 		merkleRoots: merkleRoots,
 	}
 
-	db := testMirror(t, txs, contracts, epochs)
+	db := testMirror(t, txs, contracts)
 
 	require.Equal(t, db.states[mirrorStateName].NextDBIndex, uint64(4))
 }
 
 func TestMultipleTransactionsInEpoch(t *testing.T) {
-	epochs := initEpochs()
-
-	startTime := epochs.GetStartTime(3)
-	endTime := epochs.GetEndTime(999)
+	startTime := epochInfo.GetStartTime(3)
+	endTime := epochInfo.GetEndTime(999)
 
 	txs := make([]database.PChainTxData, 3)
 	txIDs := []string{
@@ -119,16 +119,14 @@ func TestMultipleTransactionsInEpoch(t *testing.T) {
 		merkleRoots: merkleRoots,
 	}
 
-	db := testMirror(t, txsMap, contracts, epochs)
+	db := testMirror(t, txsMap, contracts)
 
 	require.Equal(t, db.states[mirrorStateName].NextDBIndex, uint64(4))
 }
 
 func TestMultipleTransactionsInSeparateEpochs(t *testing.T) {
-	epochs := initEpochs()
-
-	startTime := epochs.GetStartTime(3)
-	endTime := epochs.GetEndTime(999)
+	startTime := epochInfo.GetStartTime(3)
+	endTime := epochInfo.GetEndTime(999)
 
 	txs := make([]database.PChainTxData, 3)
 	txIDs := []string{
@@ -169,7 +167,7 @@ func TestMultipleTransactionsInSeparateEpochs(t *testing.T) {
 		merkleRoots: merkleRoots,
 	}
 
-	db := testMirror(t, txsMap, contracts, epochs)
+	db := testMirror(t, txsMap, contracts)
 
 	require.Equal(t, db.states[mirrorStateName].NextDBIndex, uint64(3))
 }
@@ -183,10 +181,8 @@ func TestStakingEnded(t *testing.T) {
 }
 
 func testMirrorErrors(t *testing.T, errorMsg string) {
-	epochs := initEpochs()
-
-	startTime := epochs.GetStartTime(3)
-	endTime := epochs.GetEndTime(999)
+	startTime := epochInfo.GetStartTime(3)
+	endTime := epochInfo.GetEndTime(999)
 
 	txid := "5uZETr5SUKqGJLzFP5BeGxbXU5CFcCBQYPu288eX9R1QDQMjn"
 	tx := database.PChainTxData{
@@ -223,31 +219,21 @@ func testMirrorErrors(t *testing.T, errorMsg string) {
 		},
 	}
 
-	db := testMirror(t, txs, contracts, epochs)
+	db := testMirror(t, txs, contracts)
 
 	require.Equal(t, db.states[mirrorStateName].NextDBIndex, uint64(4))
-}
-
-func initEpochs() staking.EpochInfo {
-	epochCfg := globalConfig.EpochConfig{
-		Period: 180 * time.Second,
-		Start:  utils.Timestamp{Time: time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC)},
-	}
-
-	return staking.NewEpochInfo(&epochCfg)
 }
 
 func testMirror(
 	t *testing.T,
 	txs map[int64][]database.PChainTxData,
 	contracts testContracts,
-	epochs staking.EpochInfo,
 ) *testDB {
 	db := testDB{
-		epochs: epochs,
+		epochs: epochInfo,
 		states: map[string]database.State{
 			pchain.StateName: {
-				Updated:        epochs.GetEndTime(999),
+				Updated:        epochInfo.GetEndTime(999),
 				NextDBIndex:    3,
 				LastChainIndex: 2,
 			},
@@ -261,7 +247,7 @@ func testMirror(
 		contracts: &contracts,
 		epochCronjob: epochCronjob{
 			enabled: true,
-			epochs:  epochs,
+			epochs:  epochInfo,
 		},
 	}
 
@@ -341,4 +327,8 @@ func (c testContracts) IsAddressRegistered(address string) (bool, error) {
 
 func (c testContracts) RegisterPublicKey(publicKey crypto.PublicKey) error {
 	return nil
+}
+
+func (c testContracts) EpochConfig() (time.Time, time.Duration, error) {
+	return epochInfo.Start, epochInfo.Period, nil
 }

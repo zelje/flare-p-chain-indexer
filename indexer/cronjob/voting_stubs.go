@@ -4,6 +4,7 @@ import (
 	"flare-indexer/database"
 	"flare-indexer/indexer/config"
 	"flare-indexer/utils/contracts/voting"
+	"flare-indexer/utils/staking"
 	"math/big"
 	"time"
 
@@ -64,7 +65,7 @@ func newVotingContract(cfg *config.Config) (*voting.Voting, error) {
 	if err != nil {
 		return nil, err
 	}
-	return voting.NewVoting(cfg.VotingCronjob.ContractAddress, eth)
+	return voting.NewVoting(cfg.ContractAddresses.Voting, eth)
 }
 
 func (c *votingContractCChain) ShouldVote(epoch *big.Int) (bool, error) {
@@ -77,11 +78,5 @@ func (c *votingContractCChain) SubmitVote(epoch *big.Int, merkleRoot [32]byte) e
 }
 
 func (c *votingContractCChain) EpochConfig() (start time.Time, period time.Duration, err error) {
-	chainCfg, err := c.voting.GetEpochConfiguration(c.callOpts)
-	if err != nil {
-		return
-	}
-	start = time.Unix(chainCfg.FirstEpochStartTs.Int64(), 0)
-	period = time.Duration(chainCfg.EpochDurationSeconds.Int64()) * time.Second
-	return
+	return staking.GetEpochConfig(c.voting)
 }
