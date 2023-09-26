@@ -10,6 +10,7 @@ import (
 	"flare-indexer/utils/contracts/addresses"
 	"flare-indexer/utils/contracts/mirroring"
 	"flare-indexer/utils/contracts/voting"
+	"flare-indexer/utils/staking"
 	"math/big"
 	"time"
 
@@ -33,14 +34,14 @@ func (m mirrorDBGorm) FetchState(name string) (database.State, error) {
 	return database.FetchState(m.db, name)
 }
 
-func (m mirrorDBGorm) UpdateJobState(epoch int64) error {
+func (m mirrorDBGorm) UpdateJobState(epoch int64, force bool) error {
 	return m.db.Transaction(func(tx *gorm.DB) error {
 		jobState, err := database.FetchState(tx, mirrorStateName)
 		if err != nil {
 			return errors.Wrap(err, "database.FetchState")
 		}
 
-		if jobState.NextDBIndex >= uint64(epoch) {
+		if !force && jobState.NextDBIndex >= uint64(epoch) {
 			logger.Debug("job state already up to date")
 			return nil
 		}
@@ -71,11 +72,11 @@ type mirrorContractsCChain struct {
 }
 
 func initMirrorJobContracts(cfg *config.Config) (mirrorContracts, error) {
-	if cfg.Mirror.MirroringContract == (common.Address{}) {
+	if cfg.ContractAddresses.Mirroring == (common.Address{}) {
 		return nil, errors.New("mirroring contract address not set")
 	}
 
-	if cfg.VotingCronjob.ContractAddress == (common.Address{}) {
+	if cfg.ContractAddresses.Voting == (common.Address{}) {
 		return nil, errors.New("voting contract address not set")
 	}
 
@@ -84,17 +85,17 @@ func initMirrorJobContracts(cfg *config.Config) (mirrorContracts, error) {
 		return nil, err
 	}
 
-	mirroringContract, err := mirroring.NewMirroring(cfg.Mirror.MirroringContract, eth)
+	mirroringContract, err := mirroring.NewMirroring(cfg.ContractAddresses.Mirroring, eth)
 	if err != nil {
 		return nil, err
 	}
 
-	votingContract, err := voting.NewVoting(cfg.VotingCronjob.ContractAddress, eth)
+	votingContract, err := voting.NewVoting(cfg.ContractAddresses.Voting, eth)
 	if err != nil {
 		return nil, err
 	}
 
-	addressBinderContract, err := addresses.NewBinder(cfg.Mirror.AddressBinderContract, eth)
+	addressBinderContract, err := addresses.NewBinder(cfg.ContractAddresses.AddressBinder, eth)
 	if err != nil {
 		return nil, err
 	}
@@ -148,4 +149,8 @@ func (m mirrorContractsCChain) RegisterPublicKey(publicKey crypto.PublicKey) err
 	}
 	_, err = m.addressBinder.RegisterAddresses(m.txOpts, publicKey.Bytes(), publicKey.Address(), ethAddress)
 	return err
+}
+
+func (m mirrorContractsCChain) EpochConfig() (start time.Time, period time.Duration, err error) {
+	return staking.GetEpochConfig(m.voting)
 }

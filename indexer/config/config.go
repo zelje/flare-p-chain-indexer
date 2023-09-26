@@ -8,16 +8,17 @@ import (
 )
 
 type Config struct {
-	DB            config.DBConfig     `toml:"db"`
-	Logger        config.LoggerConfig `toml:"logger"`
-	Chain         config.ChainConfig  `toml:"chain"`
-	Metrics       MetricsConfig       `toml:"metrics"`
-	XChainIndexer IndexerConfig       `toml:"x_chain_indexer"`
-	PChainIndexer IndexerConfig       `toml:"p_chain_indexer"`
-	UptimeCronjob UptimeConfig        `toml:"uptime_cronjob"`
-	Mirror        MirrorConfig        `toml:"mirroring_cronjob"`
-	VotingCronjob VotingConfig        `toml:"voting_cronjob"`
-	Epochs        config.EpochConfig  `toml:"epochs"`
+	DB                config.DBConfig     `toml:"db"`
+	Logger            config.LoggerConfig `toml:"logger"`
+	Chain             config.ChainConfig  `toml:"chain"`
+	Metrics           MetricsConfig       `toml:"metrics"`
+	XChainIndexer     IndexerConfig       `toml:"x_chain_indexer"`
+	PChainIndexer     IndexerConfig       `toml:"p_chain_indexer"`
+	UptimeCronjob     UptimeConfig        `toml:"uptime_cronjob"`
+	Mirror            MirrorConfig        `toml:"mirroring_cronjob"`
+	VotingCronjob     VotingConfig        `toml:"voting_cronjob"`
+	Epochs            config.EpochConfig  `toml:"epochs"`
+	ContractAddresses ContractAddresses   `toml:"contract_addresses"`
 }
 
 type MetricsConfig struct {
@@ -40,20 +41,24 @@ type CronjobConfig struct {
 
 type MirrorConfig struct {
 	CronjobConfig
-	MirroringContract     common.Address `toml:"contract_address" envconfig:"MIRRORING_CONTRACT_ADDRESS"`
-	AddressBinderContract common.Address `toml:"address_binder_contract_address" envconfig:"ADDRESS_BINDER_CONTRACT_ADDRESS"`
 }
 
 type VotingConfig struct {
 	CronjobConfig
-	ContractAddress common.Address `toml:"contract_address" envconfig:"VOTING_CONTRACT_ADDRESS"`
 }
 
 type UptimeConfig struct {
 	CronjobConfig
 	config.EpochConfig
-	EnableVoting    bool    `toml:"enable_voting"`
-	UptimeThreshold float64 `toml:"uptime_threshold"`
+	EnableVoting                   bool    `toml:"enable_voting"`
+	UptimeThreshold                float64 `toml:"uptime_threshold"`
+	DeleteOldUptimesEpochThreshold int64   `toml:"delete_old_uptimes_epoch_threshold"`
+}
+
+type ContractAddresses struct {
+	config.ContractAddresses
+	AddressBinder common.Address `toml:"address_binder" envconfig:"ADDRESS_BINDER_CONTRACT_ADDRESS"`
+	Mirroring     common.Address `toml:"mirroring" envconfig:"MIRRORING_CONTRACT_ADDRESS"`
 }
 
 func newConfig() *Config {
@@ -79,9 +84,6 @@ func newConfig() *Config {
 		Chain: config.ChainConfig{
 			NodeURL: "http://localhost:9650/",
 		},
-		Epochs: config.EpochConfig{
-			Period: 90 * time.Second,
-		},
 	}
 }
 
@@ -93,8 +95,7 @@ func (c Config) ChainConfig() config.ChainConfig {
 	return c.Chain
 }
 
-func BuildConfig() (*Config, error) {
-	cfgFileName := config.ConfigFileName()
+func BuildConfig(cfgFileName string) (*Config, error) {
 	cfg := newConfig()
 	err := config.ParseConfigFile(cfg, cfgFileName, false)
 	if err != nil {

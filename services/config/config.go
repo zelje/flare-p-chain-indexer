@@ -2,18 +2,22 @@ package config
 
 import (
 	"flare-indexer/config"
+
+	"github.com/ethereum/go-ethereum/common"
 )
 
 type Config struct {
-	DB       config.DBConfig     `toml:"db"`
-	Logger   config.LoggerConfig `toml:"logger"`
-	Chain    config.ChainConfig  `toml:"chain"`
-	Services ServicesConfig      `toml:"services"`
-	Epochs   config.EpochConfig  `toml:"epochs"`
+	DB                config.DBConfig          `toml:"db"`
+	Logger            config.LoggerConfig      `toml:"logger"`
+	Chain             config.ChainConfig       `toml:"chain"`
+	Services          ServicesConfig           `toml:"services"`
+	Epochs            config.EpochConfig       `toml:"epochs"`
+	ContractAddresses config.ContractAddresses `toml:"contract_addresses"`
 }
 
 type ServicesConfig struct {
-	Address string `toml:"address"`
+	Address        string         `toml:"address"`
+	VotingContract common.Address `toml:"votingContract"`
 }
 
 func newConfig() *Config {
@@ -32,8 +36,7 @@ func (c Config) ChainConfig() config.ChainConfig {
 	return c.Chain
 }
 
-func BuildConfig() (*Config, error) {
-	cfgFileName := config.ConfigFileName()
+func BuildConfig(cfgFileName string) (*Config, error) {
 	cfg := newConfig()
 	err := config.ParseConfigFile(cfg, cfgFileName, false)
 	if err != nil {

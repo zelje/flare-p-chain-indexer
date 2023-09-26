@@ -3,15 +3,18 @@ package routes
 import (
 	"errors"
 	"flare-indexer/database"
+	"flare-indexer/services/config"
 	"flare-indexer/services/context"
 	"flare-indexer/services/utils"
 	"flare-indexer/utils/contracts/mirroring"
+	"flare-indexer/utils/contracts/voting"
 	"flare-indexer/utils/staking"
 	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/ethereum/go-ethereum/ethclient"
 	"gorm.io/gorm"
 )
 
@@ -47,11 +50,32 @@ type mirroringRouteHandlers struct {
 	epochs staking.EpochInfo
 }
 
-func newMirroringRouteHandlers(ctx context.ServicesContext) *mirroringRouteHandlers {
+func newMirroringRouteHandlers(ctx context.ServicesContext) (*mirroringRouteHandlers, error) {
+	cfg := ctx.Config()
+
+	start, period, err := getEpochStartAndPeriod(cfg)
+	if err != nil {
+		return nil, err
+	}
+
 	return &mirroringRouteHandlers{
 		db:     NewMirrorDBGorm(ctx.DB()),
-		epochs: staking.NewEpochInfo(&ctx.Config().Epochs),
+		epochs: staking.NewEpochInfo(&cfg.Epochs, start, period),
+	}, nil
+}
+
+func getEpochStartAndPeriod(cfg *config.Config) (time.Time, time.Duration, error) {
+	eth, err := ethclient.Dial(cfg.Chain.EthRPCURL)
+	if err != nil {
+		return time.Time{}, 0, err
 	}
+
+	votingContract, err := voting.NewVoting(cfg.ContractAddresses.Voting, eth)
+	if err != nil {
+		return time.Time{}, 0, err
+	}
+
+	return staking.GetEpochConfig(votingContract)
 }
 
 func (rh *mirroringRouteHandlers) listMirroringTransactions() utils.RouteHandler {
@@ -77,11 +101,16 @@ func (rh *mirroringRouteHandlers) listMirroringTransactions() utils.RouteHandler
 		GetMirroringResponse{})
 }
 
-func AddMirroringRoutes(router utils.Router, ctx context.ServicesContext) {
-	rh := newMirroringRouteHandlers(ctx)
+func AddMirroringRoutes(router utils.Router, ctx context.ServicesContext) error {
+	rh, err := newMirroringRouteHandlers(ctx)
+	if err != nil {
+		return err
+	}
 
 	mirroringSubrouter := router.WithPrefix("/mirroring", "Mirroring")
 	mirroringSubrouter.AddRoute("/tx_data/{tx_id:[0-9a-zA-Z]+}", rh.listMirroringTransactions())
+
+	return nil
 }
 
 func (rh *mirroringRouteHandlers) createMirroringData(tx *database.PChainTx) ([]MirroringResponse, error) {

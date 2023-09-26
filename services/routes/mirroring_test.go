@@ -6,7 +6,6 @@ import (
 	"flare-indexer/services/api"
 	"flare-indexer/services/config"
 	serviceUtils "flare-indexer/services/utils"
-	"flare-indexer/utils"
 	"flare-indexer/utils/staking"
 	"net/http"
 	"net/http/httptest"
@@ -65,10 +64,10 @@ func TestGetMirroringData(t *testing.T) {
 func newMirroringTestRouteHandlers(txs map[string]database.PChainTxData) *mirroringRouteHandlers {
 	return &mirroringRouteHandlers{
 		db: newTestDB(txs),
-		epochs: staking.NewEpochInfo(&globalConfig.EpochConfig{
+		epochs: staking.EpochInfo{
 			Period: 180 * time.Second,
-			Start:  utils.Timestamp{Time: time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC)},
-		}),
+			Start:  time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC),
+		},
 	}
 }
 

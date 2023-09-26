@@ -65,3 +65,7 @@ func PersistUptimeAggregations(db *gorm.DB, aggregations []*UptimeAggregation) e
 	}
 	return db.Create(aggregations).Error
 }
+
+func DeleteUptimesBefore(db *gorm.DB, timestamp time.Time) error {
+	return db.Where("timestamp < ?", timestamp).Delete(&UptimeCronjob{}).Error
+}

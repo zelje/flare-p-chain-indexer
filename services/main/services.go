@@ -5,7 +5,7 @@ import (
 	"flare-indexer/services/context"
 	"flare-indexer/services/routes"
 	"flare-indexer/services/utils"
-	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -17,8 +17,7 @@ import (
 func main() {
 	ctx, err := context.BuildContext()
 	if err != nil {
-		fmt.Printf("%v\n", err)
-		return
+		log.Fatal(err) // logger possibly not initialized here so use builtin log
 	}
 
 	muxRouter := mux.NewRouter()
@@ -27,7 +26,10 @@ func main() {
 	routes.AddStakerRoutes(router, ctx)
 	routes.AddTransactionRoutes(router, ctx)
 	routes.AddQueryRoutes(router, ctx)
-	routes.AddMirroringRoutes(router, ctx)
+
+	if err := routes.AddMirroringRoutes(router, ctx); err != nil {
+		logger.Fatal("Failed to add mirroring routes: %v", err)
+	}
 
 	router.Finalize()
 

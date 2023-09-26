@@ -29,7 +29,7 @@ type mirrorCronJob struct {
 
 type mirrorDB interface {
 	FetchState(name string) (database.State, error)
-	UpdateJobState(epoch int64) error
+	UpdateJobState(epoch int64, force bool) error
 	GetPChainTxsForEpoch(start, end time.Time) ([]database.PChainTxData, error)
 	GetPChainTx(txID string, address string) (*database.PChainTxData, error)
 }
@@ -42,6 +42,7 @@ type mirrorContracts interface {
 	) error
 	IsAddressRegistered(address string) (bool, error)
 	RegisterPublicKey(publicKey crypto.PublicKey) error
+	EpochConfig() (time.Time, time.Duration, error)
 }
 
 func NewMirrorCronjob(ctx indexerctx.IndexerContext) (Cronjob, error) {
@@ -56,11 +57,22 @@ func NewMirrorCronjob(ctx indexerctx.IndexerContext) (Cronjob, error) {
 		return nil, err
 	}
 
-	return &mirrorCronJob{
-		epochCronjob: newEpochCronjob(&cfg.Mirror.CronjobConfig, &cfg.Epochs),
+	start, period, err := contracts.EpochConfig()
+	if err != nil {
+		return nil, err
+	}
+
+	epochs := staking.NewEpochInfo(&cfg.Epochs, start, period)
+
+	mc := &mirrorCronJob{
+		epochCronjob: newEpochCronjob(&cfg.Mirror.CronjobConfig, epochs),
 		db:           NewMirrorDBGorm(ctx.DB()),
 		contracts:    contracts,
-	}, nil
+	}
+
+	err = mc.reset(ctx.Flags().ResetMirrorCronjob)
+
+	return mc, err
 }
 
 func (c *mirrorCronJob) Name() string {
@@ -108,7 +120,7 @@ func (c *mirrorCronJob) Call() error {
 
 	logger.Debug("successfully mirrored epochs %d-%d", epochRange.start, epochRange.end)
 
-	if err := c.db.UpdateJobState(epochRange.end); err != nil {
+	if err := c.db.UpdateJobState(epochRange.end+1, false); err != nil {
 		return err
 	}
 
@@ -321,5 +333,19 @@ func (c *mirrorCronJob) registerAddress(txID string, address string) error {
 			return errors.Wrap(err, "mirroringContract.RegisterPublicKey")
 		}
 	}
+	return nil
+}
+
+func (c *mirrorCronJob) reset(firstEpoch int64) error {
+	if firstEpoch <= 0 {
+		return nil
+	}
+
+	logger.Info("Resetting mirroring cronjob state to epoch %d", firstEpoch)
+	err := c.db.UpdateJobState(firstEpoch, true)
+	if err != nil {
+		return err
+	}
+	c.epochs.First = firstEpoch
 	return nil
 }

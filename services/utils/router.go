@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"flare-indexer/logger"
 	"flare-indexer/services/api"
 	"log"
 	"net/http"
@@ -223,7 +224,8 @@ func NewParamRouteHandler[T interface{}](
 func InternalServerErrorHandler(err error) *ErrorHandler {
 	return &ErrorHandler{
 		Handler: func(w http.ResponseWriter) {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			logger.Error("Internal error: %v", err)
+			http.Error(w, "Internal server error", http.StatusInternalServerError)
 		},
 	}
 }

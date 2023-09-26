@@ -1,6 +1,7 @@
 package context
 
 import (
+	"flag"
 	globalConfig "flare-indexer/config"
 	"flare-indexer/database"
 	"flare-indexer/services/config"
@@ -16,6 +17,10 @@ type ServicesContext interface {
 	EthRPCClient() *ethclient.Client
 }
 
+type ServicesFlags struct {
+	ConfigFileName string
+}
+
 type servicesContext struct {
 	config       *config.Config
 	db           *gorm.DB
@@ -23,26 +28,29 @@ type servicesContext struct {
 }
 
 func BuildContext() (ServicesContext, error) {
-	ctx := servicesContext{}
+	flags := parseServicesFlags()
 
-	cfg, err := config.BuildConfig()
+	cfg, err := config.BuildConfig(flags.ConfigFileName)
 	if err != nil {
 		return nil, err
 	}
-	ctx.config = cfg
 	globalConfig.GlobalConfigCallback.Call(cfg)
 
-	ctx.db, err = database.Connect(&cfg.DB)
+	db, err := database.Connect(&cfg.DB)
 	if err != nil {
 		return nil, err
 	}
 
-	ctx.ethRPCClient, err = ethclient.Dial(cfg.Chain.EthRPCURL)
+	ethRPCClient, err := ethclient.Dial(cfg.Chain.EthRPCURL)
 	if err != nil {
 		return nil, err
 	}
 
-	return &ctx, nil
+	return &servicesContext{
+		config:       cfg,
+		db:           db,
+		ethRPCClient: ethRPCClient,
+	}, nil
 }
 
 func (c *servicesContext) Config() *config.Config { return c.config }
@@ -50,3 +58,11 @@ func (c *servicesContext) Config() *config.Config { return c.config }
 func (c *servicesContext) DB() *gorm.DB { return c.db }
 
 func (c *servicesContext) EthRPCClient() *ethclient.Client { return c.ethRPCClient }
+
+func parseServicesFlags() *ServicesFlags {
+	cfgFlag := flag.String("config", globalConfig.CONFIG_FILE, "Configuration file (toml format)")
+	flag.Parse()
+	return &ServicesFlags{
+		ConfigFileName: *cfgFlag,
+	}
+}

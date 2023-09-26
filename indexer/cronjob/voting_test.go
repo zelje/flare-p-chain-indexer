@@ -1,11 +1,10 @@
 package cronjob
 
 import (
-	globalConfig "flare-indexer/config"
 	"flare-indexer/database"
 	"flare-indexer/indexer/config"
 	"flare-indexer/indexer/pchain"
-	"flare-indexer/utils"
+	"flare-indexer/utils/staking"
 	"math/big"
 	"testing"
 	"time"
@@ -61,6 +60,10 @@ func (c *votingContractTest) SubmitVote(epoch *big.Int, merkleRoot [32]byte) err
 
 	c.submittedVotes[epochInt] = merkleRoot
 	return nil
+}
+
+func (c *votingContractTest) EpochConfig() (time.Time, time.Duration, error) {
+	return time.Now(), 180 * time.Second, nil
 }
 
 func TestNoVotes(t *testing.T) {
@@ -154,10 +157,10 @@ func initEpochCronjob() epochCronjob {
 		BatchSize: 5,
 	}
 
-	epochCfg := globalConfig.EpochConfig{
+	epochInfo := staking.EpochInfo{
 		Period: 180 * time.Second,
-		Start:  utils.Timestamp{Time: time.Now().Add(-time.Hour)},
+		Start:  time.Now().Add(-time.Hour),
 	}
 
-	return newEpochCronjob(&cronjobCfg, &epochCfg)
+	return newEpochCronjob(&cronjobCfg, epochInfo)
 }
