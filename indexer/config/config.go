@@ -18,7 +18,6 @@ type Config struct {
 	UptimeCronjob     UptimeConfig        `toml:"uptime_cronjob"`
 	Mirror            MirrorConfig        `toml:"mirroring_cronjob"`
 	VotingCronjob     VotingConfig        `toml:"voting_cronjob"`
-	Epochs            config.EpochConfig  `toml:"epochs"`
 	ContractAddresses ContractAddresses   `toml:"contract_addresses"`
 }
 
@@ -42,10 +41,12 @@ type CronjobConfig struct {
 
 type MirrorConfig struct {
 	CronjobConfig
+	config.EpochConfig
 }
 
 type VotingConfig struct {
 	CronjobConfig
+	config.EpochConfig
 }
 
 type UptimeConfig struct {

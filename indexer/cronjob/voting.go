@@ -65,17 +65,12 @@ func NewVotingCronjob(ctx indexerctx.IndexerContext) (*votingCronjob, error) {
 		return nil, err
 	}
 
-	epochs := staking.NewEpochInfo(&cfg.Epochs, start, period)
+	epochs := staking.NewEpochInfo(&cfg.VotingCronjob.EpochConfig, start, period)
 
 	vc := &votingCronjob{
 		epochCronjob: newEpochCronjob(&cfg.VotingCronjob.CronjobConfig, epochs),
 		db:           db,
 		contract:     contract,
-	}
-
-	err = vc.verifyEpoch()
-	if err != nil {
-		return nil, err
 	}
 
 	err = vc.reset(ctx.Flags().ResetVotingCronjob)
@@ -176,16 +171,5 @@ func (c *votingCronjob) reset(firstEpoch int64) error {
 		return err
 	}
 	c.epochs.First = firstEpoch
-	return nil
-}
-
-func (c *votingCronjob) verifyEpoch() error {
-	start, period, err := c.contract.EpochConfig()
-	if err != nil {
-		return err
-	}
-	if c.epochs.Start != start || c.epochs.Period != period {
-		return ErrEpochConfig
-	}
 	return nil
 }

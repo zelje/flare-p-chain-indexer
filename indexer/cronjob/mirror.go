@@ -62,7 +62,7 @@ func NewMirrorCronjob(ctx indexerctx.IndexerContext) (Cronjob, error) {
 		return nil, err
 	}
 
-	epochs := staking.NewEpochInfo(&cfg.Epochs, start, period)
+	epochs := staking.NewEpochInfo(&cfg.Mirror.EpochConfig, start, period)
 
 	mc := &mirrorCronJob{
 		epochCronjob: newEpochCronjob(&cfg.Mirror.CronjobConfig, epochs),
