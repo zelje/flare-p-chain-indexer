@@ -60,8 +60,15 @@ func NewVotingCronjob(ctx indexerctx.IndexerContext) (*votingCronjob, error) {
 		return nil, err
 	}
 
+	start, period, err := contract.EpochConfig()
+	if err != nil {
+		return nil, err
+	}
+
+	epochs := staking.NewEpochInfo(&cfg.Epochs, start, period)
+
 	vc := &votingCronjob{
-		epochCronjob: newEpochCronjob(&cfg.VotingCronjob.CronjobConfig, &cfg.Epochs),
+		epochCronjob: newEpochCronjob(&cfg.VotingCronjob.CronjobConfig, epochs),
 		db:           db,
 		contract:     contract,
 	}
