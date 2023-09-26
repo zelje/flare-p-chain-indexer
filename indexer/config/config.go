@@ -57,8 +57,7 @@ type UptimeConfig struct {
 
 type ContractAddresses struct {
 	config.ContractAddresses
-	AddressBinder common.Address `toml:"address_binder" envconfig:"ADDRESS_BINDER_CONTRACT_ADDRESS"`
-	Mirroring     common.Address `toml:"mirroring" envconfig:"MIRRORING_CONTRACT_ADDRESS"`
+	Mirroring common.Address `toml:"mirroring" envconfig:"MIRRORING_CONTRACT_ADDRESS"`
 }
 
 func newConfig() *Config {
