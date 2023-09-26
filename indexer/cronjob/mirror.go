@@ -69,8 +69,10 @@ func NewMirrorCronjob(ctx indexerctx.IndexerContext) (Cronjob, error) {
 		db:           NewMirrorDBGorm(ctx.DB()),
 		contracts:    contracts,
 	}
-	mc.reset(ctx.Flags().ResetMirrorCronjob)
-	return mc, nil
+
+	err = mc.reset(ctx.Flags().ResetMirrorCronjob)
+
+	return mc, err
 }
 
 func (c *mirrorCronJob) Name() string {
