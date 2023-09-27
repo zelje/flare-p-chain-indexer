@@ -296,6 +296,11 @@ func (c *mirrorCronJob) mirrorTx(in *mirrorTxInput) error {
 			return nil
 		}
 
+		if strings.Contains(err.Error(), "staking data invalid") {
+			logger.Info("staking data invalid for tx %s", *in.tx.TxID)
+			return nil
+		}
+
 		if strings.Contains(err.Error(), "Max node ids exceeded") {
 			logger.Info("Max node ids exceeded for tx %s", *in.tx.TxID)
 			return nil
