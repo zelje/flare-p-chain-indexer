@@ -2,6 +2,7 @@ package routes
 
 import (
 	"errors"
+	globalConfig "flare-indexer/config"
 	"flare-indexer/database"
 	"flare-indexer/services/config"
 	"flare-indexer/services/context"
@@ -60,7 +61,7 @@ func newMirroringRouteHandlers(ctx context.ServicesContext) (*mirroringRouteHand
 
 	return &mirroringRouteHandlers{
 		db:     NewMirrorDBGorm(ctx.DB()),
-		epochs: staking.NewEpochInfo(&cfg.Epochs, start, period),
+		epochs: staking.NewEpochInfo(&globalConfig.EpochConfig{}, start, period),
 	}, nil
 }
 
