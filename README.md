@@ -98,12 +98,19 @@ timeout = "10s"       # check for new epochs every ... seconds
 contract_address = "0xE64Df6a7e4f4c277C5299f0FE12D7BbB8A207175"    # mirror contract address
 ```
 
+### Deployment configuration
+
+Configuration for flare deployment can be found in [docker/indexer/config_flare.toml](docker/indexer/config_flare.toml) (for mainnet) and [docker/indexer/config_costwo.toml](docker/indexer/config_flare.toml) (for coston2).
+
+```toml
+
 ### Running tests
 
 Tests for indexer expect a MySQL database running. Please run `docker-compose up` in the `indexer/resources/test` directory.
 
 Additionally, tests for voting, mirroring and uptime clients expect a Hardhat instance from <https://gitlab.com/flarenetwork/flare-smart-contracts/-/tree/staking-tests> running. You start it by running
 `yarn staking_test` (following `yarn` and `yarn c` commands).
+
 
 ## Attestation client services (possible future use)
 

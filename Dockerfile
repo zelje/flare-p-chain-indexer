@@ -18,7 +18,5 @@ FROM debian:latest AS execution
 
 WORKDIR /app
 COPY --from=builder /app/flare_indexer .
-COPY ./docker/indexer/config_flare.toml .
-COPY ./docker/indexer/config_costwo.toml .
 
-CMD ./flare_indexer --config /app/config_costwo.toml
+CMD ./flare_indexer --config /app/docker/indexer/config.toml

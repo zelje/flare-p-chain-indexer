@@ -14,12 +14,13 @@ console = false
 [metrics]
 # used for prometheus metrics of the indexer
 # currently, no specific data are included in the metrics in addition to the default ones
-# prometheus_address = "localhost:2112"
+prometheus_address = "localhost:2112"
 
 [chain]
 node_url = "https://coston2-api-tracer.flare.network"  # from env CHAIN_NODE_URL
 address_hrp = "costwo"
 chain_id = 114
+api_key = ""  # from env API_KEY
 eth_rpc_url = "https://coston2-api.flare.network/ext/C/rpc"  # from env ETH_RPC_URL
 private_key_file = "./private_key.txt"  # from env PRIVATE_KEY_FILE
 

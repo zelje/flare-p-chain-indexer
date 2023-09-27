@@ -12,15 +12,15 @@ file = "./logs/flare-indexer.log"
 console = false
 
 [metrics]
-# prometheus_address = "localhost:2112"
+prometheus_address = "localhost:2112"
 
 [chain]
-node_url = "indexing node address"   # env CHAIN_NODE_URL
+node_url = "indexing node address"  # env CHAIN_NODE_URL
 address_hrp = "flare"
 chain_id = 14
-eth_rpc_url = "https://flare-api.flare.network/ext/C/rpc"    # env ETH_RPC_URL
-api_key = ""
-private_key_file = "path/to/private_key_file"    # env PRIVATE_KEY_FILE
+eth_rpc_url = "https://flare-api.flare.network/ext/C/rpc"  # env ETH_RPC_URL
+api_key = ""  # from env API_KEY
+private_key_file = "path/to/private_key_file"  # env PRIVATE_KEY_FILE
 
 [x_chain_indexer]
 enabled = false
@@ -48,4 +48,4 @@ first = 211500
 delay = "10s"
 
 [contract_addresses]
-voting = "0x12b3079D5b65a17EFD1665d9731FB0Adb46F14e4"   # env VOTING_CONTRACT_ADDRESS
+voting = "0x12b3079D5b65a17EFD1665d9731FB0Adb46F14e4"  # env VOTING_CONTRACT_ADDRESS
