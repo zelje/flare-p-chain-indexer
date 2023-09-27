@@ -1,15 +1,13 @@
 package config
 
 import (
-	"flag"
-	"flare-indexer/utils"
 	"fmt"
 	"log"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/BurntSushi/toml"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/kelseyhightower/envconfig"
 )
 
@@ -70,9 +68,11 @@ func (cfg ChainConfig) GetPrivateKey() (string, error) {
 }
 
 type EpochConfig struct {
-	Period time.Duration   `toml:"period" envconfig:"EPOCH_PERIOD"`
-	Start  utils.Timestamp `toml:"start" envconfig:"EPOCH_TIME"`
-	First  int64           `toml:"first" envconfig:"EPOCH_FIRST"`
+	First int64 `toml:"first" envconfig:"EPOCH_FIRST"`
+}
+
+type ContractAddresses struct {
+	Voting common.Address `toml:"voting" envconfig:"VOTING_CONTRACT_ADDRESS"`
 }
 
 func ParseConfigFile(cfg interface{}, fileName string, allowMissing bool) error {
@@ -98,10 +98,4 @@ func ReadEnv(cfg interface{}) error {
 		return fmt.Errorf("error reading env config: %w", err)
 	}
 	return nil
-}
-
-func ConfigFileName() string {
-	cfgFlag := flag.String("config", CONFIG_FILE, "Configuration file (toml format)")
-	flag.Parse()
-	return *cfgFlag
 }

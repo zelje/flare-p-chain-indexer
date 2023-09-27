@@ -50,24 +50,20 @@ enable_voting = false
 start = "2021-08-01T00:00:00Z"
 period = "90s"
 uptime_threshold = 0.8
-
-[epochs]
-# start of the voting/mirroring epoch
-start = "2021-08-01T00:00:00Z"
-period = "180s"
-# first epoch to be voted for (do not leav this empty since the first epoch is well back in time
-first = 1111
+delete_old_uptimes_epoch_threshold = 5
 
 [voting_cronjob]
 enabled = false
 timeout = "10s"
-# voting contract address
-contract_address = "0x0000000"
+# first epoch to be voted for (do not leave this empty since the first epoch is well back in time)
+first = 1111
 
 [mirroring_cronjob]
 enabled = false
 timeout = "10s"
-# mirroring contract address
-contract_address = "0x0000000"
-# address binder contract address
-address_binder_contract_address = "0x0000000"
+# first epoch to be voted for (do not leave this empty since the first epoch is well back in time)
+first = 1111
+
+[contract_addresses]
+mirroring = "0x0000000"
+voting = "0x0000000"

@@ -192,23 +192,17 @@ func GetMerkleRoot(votingData []database.PChainTxData) (common.Hash, error) {
 	return tree.Root()
 }
 
-type idAddressPair struct {
-	TxID         string
-	InputAddress string
-}
-
-// Deduplicate txs by (txID, address) pairs. This is necessary because the same tx can have
-// multiple UTXO inputs.
+// Keep only transactions with unique address and input index 0
 func DedupeTxs(txs []database.PChainTxData) []database.PChainTxData {
-	txSet := make(map[idAddressPair]*database.PChainTxData, len(txs))
+	txSet := make(map[string]*database.PChainTxData, len(txs))
 
 	for i := range txs {
 		tx := &txs[i]
-		if tx.TxID == nil {
+		if tx.TxID == nil || tx.InputIndex != 0 {
 			continue
 		}
 
-		txSet[idAddressPair{*tx.TxID, tx.InputAddress}] = tx
+		txSet[*tx.TxID] = tx
 	}
 
 	dedupedTxs := make([]database.PChainTxData, 0, len(txSet))

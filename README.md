@@ -120,6 +120,8 @@ The configuration is read from `toml` file.
 The settings for `[db]`, `[logger]` are the same as for the indexer above.
 Specific settings are listed below.
 
+**Note:** We recommend that the user accessing the database is not the same as for the indexer. The user for the services should only have read permissions enabled!
+
 Config file can be specified using the command line parameter `--config`, e.g., `./services --config config.local.toml`. The default config file name is `config.toml`.
 
 ```toml

@@ -1,7 +1,6 @@
 package cronjob
 
 import (
-	globalConfig "flare-indexer/config"
 	"flare-indexer/database"
 	"flare-indexer/indexer/config"
 	"flare-indexer/logger"
@@ -58,11 +57,11 @@ type epochRange struct {
 	end   int64
 }
 
-func newEpochCronjob(cronjobCfg *config.CronjobConfig, epochCfg *globalConfig.EpochConfig) epochCronjob {
+func newEpochCronjob(cronjobCfg *config.CronjobConfig, epochs staking.EpochInfo) epochCronjob {
 	return epochCronjob{
 		enabled:   cronjobCfg.Enabled,
 		timeout:   cronjobCfg.Timeout,
-		epochs:    staking.NewEpochInfo(epochCfg),
+		epochs:    epochs,
 		batchSize: cronjobCfg.BatchSize,
 		delay:     cronjobCfg.Delay,
 	}
