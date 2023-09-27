@@ -100,9 +100,7 @@ contract_address = "0xE64Df6a7e4f4c277C5299f0FE12D7BbB8A207175"    # mirror cont
 
 ### Deployment configuration
 
-Configuration for flare deployment can be found in [docker/indexer/config_flare.toml](docker/indexer/config_flare.toml) (for mainnet) and [docker/indexer/config_costwo.toml](docker/indexer/config_flare.toml) (for coston2).
-
-```toml
+Configuration files for deployment can be found in [docker/indexer/config_flare.toml](docker/indexer/config_flare.toml) (for mainnet) and [docker/indexer/config_costwo.toml](docker/indexer/config_flare.toml) (for coston2). Note that database credentials and chain addresses are not included in the config files. You can use these files as a template of your own config files or use the corresponding environment variables to override the given values.
 
 ### Running tests
 
