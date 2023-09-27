@@ -152,7 +152,7 @@ func (c *uptimeVotingCronjob) Call() error {
 }
 
 func (c *uptimeVotingCronjob) aggregationRange(now time.Time) (*epochRange, error) {
-	currentAggregationEpoch := c.epochs.GetEpochIndex(now)
+	currentAggregationEpoch := c.epochs.GetEpochIndex(now.Add(-c.delay))
 	lastEpochToAggregate := currentAggregationEpoch - 1
 
 	// If we are sure that we have aggregated all the epochs up to lastEpochToAggregate, we can skip
