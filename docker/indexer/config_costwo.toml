@@ -7,7 +7,7 @@ password = ""                   # from env DB_PASSWORD
 log_queries = false
 
 [logger]
-level = "INFO"
+level = "DEBUG"
 file = "./logs/flare-indexer.log"
 console = false
 
@@ -23,9 +23,12 @@ chain_id = 114
 eth_rpc_url = "https://coston2-api.flare.network/ext/C/rpc"  # from env ETH_RPC_URL
 private_key_file = "./private_key.txt"  # from env PRIVATE_KEY_FILE
 
+[x_chain_indexer]
+enabled = false
+
 [p_chain_indexer]
 enabled = true
-timeout = "10s"
+timeout = "5s"
 start_index = 0
 batch_size = 100
 
@@ -33,19 +36,15 @@ batch_size = 100
 enabled = true
 timeout = "30s"
 enable_voting = true
-# start of the uptime voting epoch
-start = "2021-08-01T00:00:00Z"
-period = "90s"
+start = 1662580800
+period = "3600s"
 uptime_threshold = 0.8
-
-[epochs]
-# start of the voting/mirroring epoch
-start = "2021-08-01T00:00:00Z"
-period = "180s"
-# first epoch to be voted for
-first = 183585  # from env EPOCH_FIRST
+delete_old_uptimes_epoch_threshold = 5
 
 [voting_cronjob]
 enabled = true
 timeout = "10s"
-contract_address = "0x0000000000000000000000000000000000000000"  # from env VOTING_CONTRACT_ADDRESS
+first = 183585
+
+[contract_addresses]
+voting = "0x694905ca5f9F6c49f4748E8193B3e8053FA9E7E4"  # from env VOTING_CONTRACT_ADDRESS

@@ -1,31 +1,33 @@
 [db]
-host = "localhost"   # from env DB_HOST
-port = 3306          # from env DB_PORT
-database = "flare_indexer"      # from env DB_DATABASE
-username = "flareindexeruser"   # from env DB_USERNAME
-password = ""                   # from env DB_PASSWORD
+host = "localhost"   # env DB_HOST
+port = 3306          # env DB_PORT
+database = ""        # env DB_DATABASE
+username = ""        # env DB_USERNAME
+password = ""        # env DB_PASSWORD
 log_queries = false
 
 [logger]
-level = "INFO"
+level = "DEBUG"
 file = "./logs/flare-indexer.log"
 console = false
 
 [metrics]
-# used for prometheus metrics of the indexer
-# currently, no specific data are included in the metrics in addition to the default ones
 # prometheus_address = "localhost:2112"
 
 [chain]
-node_url = ""    # from env CHAIN_NODE_URL
+node_url = "indexing node address"   # env CHAIN_NODE_URL
 address_hrp = "flare"
 chain_id = 14
-eth_rpc_url = "https://flare-api.flare.network/ext/C/rpc"  # from env ETH_RPC_URL
-private_key_file = "./private_key.txt"  # from env PRIVATE_KEY_FILE
+eth_rpc_url = "https://flare-api.flare.network/ext/C/rpc"    # env ETH_RPC_URL
+api_key = ""
+private_key_file = "path/to/private_key_file"    # env PRIVATE_KEY_FILE
+
+[x_chain_indexer]
+enabled = false
 
 [p_chain_indexer]
 enabled = true
-timeout = "10s"
+timeout_millis = "1000ms"
 start_index = 0
 batch_size = 100
 
@@ -33,20 +35,17 @@ batch_size = 100
 enabled = true
 timeout = "30s"
 enable_voting = true
-# start of the uptime voting epoch
-start = "2021-08-01T00:00:00Z"
-period = "90s"
+start = 1658430000
+period = "302400s"
+first = 123
 uptime_threshold = 0.8
-
-[epochs]
-# start of the voting/mirroring epoch
-start = "2021-08-01T00:00:00Z"
-period = "180s"
-# first epoch to be voted for
-first = 186464  # from env EPOCH_FIRST
+delete_old_uptimes_epoch_threshold = 5
 
 [voting_cronjob]
 enabled = true
 timeout = "10s"
-contract_address = "0x0000000000000000000000000000000000000000"  # from env VOTING_CONTRACT_ADDRESS
+first = 211500
+delay = "10s"
 
+[contract_addresses]
+voting = "0x12b3079D5b65a17EFD1665d9731FB0Adb46F14e4"   # env VOTING_CONTRACT_ADDRESS
