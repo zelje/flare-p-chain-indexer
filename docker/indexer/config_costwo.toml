@@ -38,6 +38,7 @@ enabled = true
 timeout = "30s"
 enable_voting = true
 start = 1662580800
+delay = "10s"
 period = "3600s"
 uptime_threshold = 0.8
 delete_old_uptimes_epoch_threshold = 5
