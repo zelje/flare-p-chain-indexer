@@ -1,6 +1,7 @@
 package cronjob
 
 import (
+	globalConfig "flare-indexer/config"
 	"flare-indexer/database"
 	"flare-indexer/indexer/context"
 	"flare-indexer/logger"
@@ -73,7 +74,7 @@ func NewUptimeVotingCronjob(ctx context.IndexerContext) (*uptimeVotingCronjob, e
 		epochCronjob: epochCronjob{
 			enabled: config.EnableVoting,
 			timeout: config.Timeout,
-			epochs:  staking.NewEpochInfo(&config.EpochConfig, config.Start.Time, config.Period),
+			epochs:  staking.NewEpochInfo(&globalConfig.EpochConfig{First: config.First}, config.Start.Time, config.Period),
 		},
 		lastAggregatedEpoch:            -1,
 		deleteOldUptimesEpochThreshold: config.DeleteOldUptimesEpochThreshold,

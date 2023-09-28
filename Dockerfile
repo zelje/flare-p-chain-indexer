@@ -16,7 +16,12 @@ RUN go build -o /app/flare_indexer ./indexer/main/indexer.go
 
 FROM debian:latest AS execution
 
+ARG deployment=flare
+ARG type=voting
+
 WORKDIR /app
 COPY --from=builder /app/flare_indexer .
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+COPY ./docker/indexer/config_${deployment}_${type}.toml ./config.toml
 
-CMD ./flare_indexer --config /app/docker/indexer/config.toml
+CMD ["./flare_indexer", "--config", "/app/config.toml" ]

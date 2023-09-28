@@ -22,7 +22,7 @@ type Config struct {
 }
 
 type MetricsConfig struct {
-	PrometheusAddress string `toml:"prometheus_address"`
+	PrometheusAddress string `toml:"prometheus_address envconfig:"PROMETHEUS_ADDRESS"`
 }
 
 type IndexerConfig struct {
@@ -51,9 +51,9 @@ type VotingConfig struct {
 
 type UptimeConfig struct {
 	CronjobConfig
-	config.EpochConfig
 	Period                         time.Duration   `toml:"period" envconfig:"UPTIME_EPOCH_PERIOD"`
 	Start                          utils.Timestamp `toml:"start" envconfig:"UPTIME_EPOCH_START"`
+	First                          int64           `toml:"first" envconfig:"UPTIME_EPOCH_FIRST"`
 	EnableVoting                   bool            `toml:"enable_voting"`
 	UptimeThreshold                float64         `toml:"uptime_threshold"`
 	DeleteOldUptimesEpochThreshold int64           `toml:"delete_old_uptimes_epoch_threshold"`

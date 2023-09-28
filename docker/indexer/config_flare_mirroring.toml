@@ -12,41 +12,37 @@ file = "./logs/flare-indexer.log"
 console = false
 
 [metrics]
-prometheus_address = "localhost:2112"
+prometheus_address = "localhost:2113" # from env PROMETHEUS_ADDRESS
 
 [chain]
 node_url = "indexing node address"  # env CHAIN_NODE_URL
 address_hrp = "flare"
 chain_id = 14
-eth_rpc_url = "https://flare-api.flare.network/ext/C/rpc"  # env ETH_RPC_URL
+eth_rpc_url = "(indexing) node address/ext/C/rpc"  # env ETH_RPC_URL
 api_key = ""  # from env API_KEY
-private_key_file = "path/to/private_key_file"  # env PRIVATE_KEY_FILE
+private_key_file = "./private_key.txt"  # env PRIVATE_KEY_FILE
 
 [x_chain_indexer]
 enabled = false
 
 [p_chain_indexer]
-enabled = true
-timeout_millis = "1000ms"
-start_index = 0
-batch_size = 100
+enabled = false
 
 [uptime_cronjob]
-enabled = true
-timeout = "30s"
-enable_voting = true
-start = 1658430000
-period = "302400s"
-delay = "10s"
-first = 123
-uptime_threshold = 0.8
-delete_old_uptimes_epoch_threshold = 5
+enabled = false
+enable_voting = false
 
 [voting_cronjob]
+enabled = false
+
+[mirroring_cronjob]
 enabled = true
 timeout = "10s"
-first = 211500
 delay = "10s"
+batch_size = -1
+first = 211500
 
 [contract_addresses]
 voting = "0x12b3079D5b65a17EFD1665d9731FB0Adb46F14e4"  # env VOTING_CONTRACT_ADDRESS
+mirroring = "0x7b61F9F27153a4F2F57Dc30bF08A8eb0cCB96C22"  # env MIRRORING_CONTRACT_ADDRESS
+

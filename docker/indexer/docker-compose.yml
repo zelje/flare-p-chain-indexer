@@ -1,0 +1,21 @@
+version: "3.8"
+
+services:
+  flare-indexer:
+    build:
+      dockerfile: Dockerfile
+      target: execution
+      args:
+        deployment: "costwo"  # or "flare"
+        type: "voting"        # or "mirroring"
+    volumes:
+      - ../credentials/coston-voter-private-key.txt:/app/private_key.txt
+      - ./logs/:/app/logs/
+    environment:
+      DEPLOY: "costwo"
+      API_KEY: ""
+      DB_HOST: "host.docker.internal"
+      DB_PORT: "3306"
+      DB_DATABASE: "flare_indexer_costwo"
+      DB_USERNAME: "indexeruser"
+      DB_PASSWORD: ""
