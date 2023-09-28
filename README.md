@@ -80,22 +80,25 @@ timeout = "10s"         # call uptime service on every ...
 enable_voting = true    # enable voting for connected validators
 start = "2021-08-01T00:00:00Z"  # start of the uptime voting epoch, supports also unix timestamp as a number
 period = "90s"          # length of the epoch
+delay = "10"            # min delay in seconds to send the vote after the epoch ends
 uptime_threshold = 0.8  # minimum uptime ratio in the epoch for a validator to be considered connected
-
-# epochs for mirroring and voting clients
-[epochs]
-start = "2021-08-01T00:00:00Z"  # start of the voting epochs, supports also unix timestamp as a number
-period = "90s"          # length of the epoch
+delete_old_uptimes_epoch_threshold = 5  # delete uptimes older than this epoch
 
 [voting_cronjob]
 enabled = false          # enable voting client
 timeout = "10s"          # check for new epochs every ...
-contract_address = "0xf956df3800379fdFA31D0A45FDD5001D02F4109c"    # voting contract address
+first = 12345            # first epoch to vote for
+delay = "10s"            # min delay in seconds to send the vote after the epoch ends
 
 [mirroring_cronjob]
 enabled = false       # enable mirroring client
 timeout = "10s"       # check for new epochs every ... seconds
-contract_address = "0xE64Df6a7e4f4c277C5299f0FE12D7BbB8A207175"    # mirror contract address
+first = 12345         # first epoch to mirror
+delay = "10s"         # min delay in seconds to send the vote after the epoch ends
+
+[contract_addresses]
+voting = "0xf956df3800379fdFA31D0A45FDD5001D02F4109c"       # voting contract address
+mirroring = "0xE64Df6a7e4f4c277C5299f0FE12D7BbB8A207175"    # mirror contract address
 ```
 
 ### Deployment configuration
@@ -108,7 +111,6 @@ Tests for indexer expect a MySQL database running. Please run `docker-compose up
 
 Additionally, tests for voting, mirroring and uptime clients expect a Hardhat instance from <https://gitlab.com/flarenetwork/flare-smart-contracts/-/tree/staking-tests> running. You start it by running
 `yarn staking_test` (following `yarn` and `yarn c` commands).
-
 
 ## Attestation client services (possible future use)
 
