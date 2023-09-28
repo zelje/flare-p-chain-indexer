@@ -15,10 +15,13 @@ console = false
 prometheus_address = "localhost:2112"
 
 [chain]
-node_url = "indexing node address"  # env CHAIN_NODE_URL
+# address of indexing node, e.g., http://xxx.xx.xxx.xxx:xxxx; env CHAIN_NODE_URL
+node_url = "indexing node address"
 address_hrp = "flare"
 chain_id = 14
-eth_rpc_url = "(indexing) node address/ext/C/rpc"  # env ETH_RPC_URL
+# rpc url, can be the same as node_url, but with /ext/C/rpc extension, e.g.,
+# http://xxx.xx.xxx.xxx:xxxx/ext/C/rpc; env ETH_RPC_URL;
+eth_rpc_url = "node rpc address"
 api_key = ""  # from env API_KEY
 private_key_file = "./private_key.txt"  # env PRIVATE_KEY_FILE
 
