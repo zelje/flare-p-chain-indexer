@@ -2,21 +2,35 @@ version: "3.8"
 
 services:
   flare-indexer:
-    build:
-      dockerfile: Dockerfile
-      target: execution
-      args:
-        deployment: "costwo"  # or "flare"
-        type: "voting"        # or "mirroring"
+    image: flare-p-chain-indexer
+    container_name: flare-indexer
+    restart: unless-stopped
     volumes:
-      - ../credentials/coston-voter-private-key.txt:/app/private_key.txt
+      - ./credentials/private_key.txt:/app/private_key.txt
       - ./logs/:/app/logs/
+      - ./config_flare_voting.toml:/app/config.toml
     environment:
-      DB_HOST: "host.docker.internal"
+      DB_HOST: "flare-indexer-db"
       DB_PORT: "3306"
-      DB_DATABASE: "flare_indexer_costwo"
-      DB_USERNAME: "indexeruser"
-      DB_PASSWORD: ""
+      DB_DATABASE: "flareindexerdb"
+      DB_USERNAME: "flareindexer"
+      DB_PASSWORD: "flareindexerpass"
       CHAIN_NODE_URL: "http://address:port"
       ETH_RPC_URL: "http://address:port/ext/C/rpc"
       API_KEY: ""
+
+  flare-indexer-db:
+    image: mysql:8-debian
+    container_name: flare-indexer-db
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: "mysql_root_password"
+    cap_add:
+      - SYS_NICE
+    volumes:
+      - ./mysql-conf.d/:/etc/mysql/conf.d
+      - ./mysql-initdb/:/docker-entrypoint-initdb.d
+      - ./mysql-data/:/var/lib/mysql
+
